@@ -79,13 +79,13 @@
   - [x] 3.11 Store rate limit data in localStorage with timestamp (simple client-side implementation for now)
   - [x] 3.12 Add account lockout logic: after 5 failed attempts, show "Too many attempts. Try again in 15 minutes" message
 
-- [ ] 4.0 Password Recovery (Email + Owner Override)
-  - [ ] 4.1 Create `src/components/auth/ForgotPasswordForm.jsx` - form with email/username field, submit button, back to login link
-  - [ ] 4.2 Add form validation: check if field is not empty
-  - [ ] 4.3 Implement forgot password handler: find user by email or username, generate reset token, insert into password_reset_tokens with 1-hour expiration
-  - [ ] 4.4 Call email utility to send password reset email (will implement in task 8.0)
-  - [ ] 4.5 Show success message: "If an account exists, a password reset email has been sent" (don't reveal if user exists)
-  - [ ] 4.6 Log password_reset_requested to audit_logs
+- [x] 4.0 Password Recovery (Email + Owner Override)
+  - [x] 4.1 Create `src/components/auth/ForgotPasswordForm.jsx` - form with email/username field, submit button, back to login link
+  - [x] 4.2 Add form validation: check if field is not empty
+  - [x] 4.3 Implement forgot password handler: find user by email or username, generate reset token, insert into password_reset_tokens with 1-hour expiration
+  - [x] 4.4 Call email utility to send password reset email (will implement in task 8.0)
+  - [x] 4.5 Show success message: "If an account exists, a password reset email has been sent" (don't reveal if user exists)
+  - [x] 4.6 Log password_reset_requested to audit_logs
   - [ ] 4.7 Create `src/components/auth/ResetPasswordForm.jsx` - form with new password, confirm password, submit button
   - [ ] 4.8 Add URL token extraction: get token from query parameter (?token=...)
   - [ ] 4.9 Implement token validation: query password_reset_tokens, check expires_at > now, check used_at is null
