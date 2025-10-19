@@ -1,16 +1,19 @@
 /**
  * Email Utility
  * 
- * IMPORTANT: This utility is designed for SERVER-SIDE use only.
- * Email sending cannot happen directly from the browser for security reasons.
+ * This utility handles email sending via Netlify Functions (serverless backend).
  * 
- * Deployment Options:
- * 1. Supabase Edge Functions (recommended)
- * 2. Express.js server endpoint
- * 3. Netlify/Vercel serverless functions
+ * Development Mode (VITE_EMAIL_ENABLED=false):
+ * - Emails are logged to console
+ * - No actual emails are sent
+ * - Perfect for testing
  * 
- * For now, this file provides the email templates and a client-side
- * function to call your backend email API.
+ * Production Mode (VITE_EMAIL_ENABLED=true):
+ * - Calls Netlify Function at /.netlify/functions/send-email
+ * - Function runs on server-side and sends real emails via nodemailer
+ * - Gmail SMTP credentials configured in Netlify environment variables
+ * 
+ * See: netlify/functions/send-email.js for the serverless function
  */
 
 /**
@@ -55,18 +58,28 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
       return true;
     }
 
-    // Production: Call Supabase Edge Function
-    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
+    // Production: Call Netlify Function
+    const resetUrl = `${window.location.origin}/reset-password?token=${resetToken}`;
+    const response = await fetch('/.netlify/functions/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
-        type: 'password_reset',
-        email, 
-        resetToken, 
-        userName 
+        to: email,
+        subject: 'Reset Your Password - Ayubo Cafe',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Reset Your Password</h2>
+            <p>Hi ${userName},</p>
+            <p>You requested to reset your password. Click the button below:</p>
+            <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
+            <p>Or copy this link: ${resetUrl}</p>
+            <p>This link expires in 1 hour.</p>
+            <p>If you didn't request this, ignore this email.</p>
+          </div>
+        `,
+        type: 'password_reset'
       }),
     });
 
@@ -118,19 +131,29 @@ export const sendWelcomeEmail = async (email, userName, username, tempPassword) 
       return true;
     }
 
-    // Production: Call Supabase Edge Function
-    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
+    // Production: Call Netlify Function
+    const response = await fetch('/.netlify/functions/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
-        type: 'welcome',
-        email, 
-        userName, 
-        username, 
-        tempPassword 
+        to: email,
+        subject: 'Welcome to Ayubo Cafe - Your Account Details',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Welcome to Ayubo Cafe!</h2>
+            <p>Hi ${userName},</p>
+            <p>Your account has been created. Here are your credentials:</p>
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>Username:</strong> ${username}</p>
+              <p><strong>Temporary Password:</strong> ${tempPassword}</p>
+            </div>
+            <p>Please change your password after your first login.</p>
+            <p>Login at: ${window.location.origin}</p>
+          </div>
+        `,
+        type: 'welcome'
       }),
     });
 
@@ -172,18 +195,27 @@ export const sendPasswordChangedEmail = async (email, userName, changedBy = 'sel
       return true;
     }
 
-    // Production: Call Supabase Edge Function
-    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
+    // Production: Call Netlify Function
+    const response = await fetch('/.netlify/functions/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
-        type: 'password_changed',
-        email, 
-        userName, 
-        changedBy 
+        to: email,
+        subject: 'Your Password Has Been Changed - Ayubo Cafe',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>🔒 Security Notification</h2>
+            <p>Hi ${userName},</p>
+            <p>Your password has been ${changedBy === 'self' ? 'changed' : 'reset by an administrator'}.</p>
+            <div style="background-color: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>⚠️ Important:</strong> All your active sessions have been logged out for security.</p>
+            </div>
+            <p>If you didn't make this change, contact your administrator immediately.</p>
+          </div>
+        `,
+        type: 'password_changed'
       }),
     });
 
@@ -238,18 +270,27 @@ export const sendVerificationEmail = async (email, verificationToken, userName) 
       return true;
     }
 
-    // Production: Call Supabase Edge Function
-    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
+    // Production: Call Netlify Function
+    const verificationUrl = `${window.location.origin}/verify-email?token=${verificationToken}`;
+    const response = await fetch('/.netlify/functions/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
-        type: 'email_verification',
-        email, 
-        verificationToken, 
-        userName 
+        to: email,
+        subject: 'Verify Your Email - Ayubo Cafe',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Verify Your Email</h2>
+            <p>Hi ${userName},</p>
+            <p>Please verify your email address by clicking the button below:</p>
+            <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
+            <p>Or copy this link: ${verificationUrl}</p>
+            <p>This link expires in 24 hours.</p>
+          </div>
+        `,
+        type: 'email_verification'
       }),
     });
 

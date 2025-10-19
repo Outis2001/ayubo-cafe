@@ -2,6 +2,22 @@
 
 A modern React-based billing system for Ayubo Cafe with product management, cart functionality, sales reporting, inventory management, and dynamic product sorting.
 
+## 🚀 READY TO DEPLOY?
+
+**Your app is configured and ready for Netlify deployment!**
+
+📚 **Start Here:** [DEPLOYMENT_SUMMARY.md](DEPLOYMENT_SUMMARY.md) - Complete deployment guide
+
+Everything is set up:
+- ✅ Netlify configuration ready
+- ✅ Email functionality via serverless functions
+- ✅ Step-by-step guides included
+- ✅ FREE hosting for your traffic level
+
+**Deploy in 30 minutes!** See guides above.
+
+---
+
 ## ⚠️ IMPORTANT: Database Migrations Required
 
 **If you're setting up or updating this project, you MUST run database migrations first!**
@@ -378,16 +394,37 @@ ayubo_cafe/
 
 ## Deployment
 
-### Deploy to Vercel
+### Deploy to Netlify (Recommended)
+
+This project is optimized for Netlify deployment with automatic build configuration.
+
+📚 **Complete Guide**: See [NETLIFY_DEPLOYMENT_GUIDE.md](NETLIFY_DEPLOYMENT_GUIDE.md) for step-by-step instructions.
+
+**Quick Start:**
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Connect repository to Netlify
+3. Set environment variables in Netlify dashboard:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_APP_URL`
+4. Deploy!
+
+⚠️ **Important**: Email functionality (nodemailer) will not work on Netlify's static hosting. See deployment guide for alternatives.
+
+### Other Platforms
+
+**Vercel:**
 ```bash
 npm run build
 # Deploy the 'dist' folder to Vercel
+# Set environment variables in Vercel dashboard
 ```
 
-### Deploy to Netlify
+**Self-Hosted:**
 ```bash
 npm run build
-# Deploy the 'dist' folder to Netlify
+# Serve the 'dist' folder with any static file server
+# Ensure SPA redirects are configured (/* → /index.html)
 ```
 
 ## Troubleshooting
