@@ -26,6 +26,8 @@ import ResetPasswordForm from './components/auth/ResetPasswordForm';
 import ChangePasswordForm from './components/auth/ChangePasswordForm';
 import UserManagement from './components/UserManagement';
 import AuditLogs from './components/AuditLogs';
+import ProductsPage from './components/ProductsPage';
+import SalesPage from './components/SalesPage';
 import {
   validateStock,
   calculateStockDeductions,
@@ -44,7 +46,7 @@ const AyuboCafe = () => {
   useSession(); // Initialize session management (auto-refresh, inactivity detection)
 
   // Navigation state
-  const [currentView, setCurrentView] = useState('billing'); // 'billing', 'users', 'audit-logs'
+  const [currentView, setCurrentView] = useState('billing'); // 'billing', 'products', 'sales', 'users', 'audit-logs'
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -54,8 +56,6 @@ const AyuboCafe = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [bills, setBills] = useState([]);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showSales, setShowSales] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: '', price: '', isWeightBased: false, stockQuantity: 0, lowStockThreshold: 5 });
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,9 +96,9 @@ const AyuboCafe = () => {
 
   useEffect(() => {
     if (isAuthenticated && currentView === 'billing') {
-      loadProducts();
-      loadBills();
-      loadSalesData();
+    loadProducts();
+    loadBills();
+    loadSalesData();
     }
   }, [isAuthenticated, sortN, currentView]);
 
@@ -219,8 +219,6 @@ const AyuboCafe = () => {
       await logout();
       setCurrentView('billing');
       setCart([]);
-      setShowSettings(false);
-      setShowSales(false);
     }
   };
 
@@ -384,7 +382,7 @@ const AyuboCafe = () => {
         console.error('Stock update errors:', stockErrors);
         throw new Error('Failed to update stock quantities');
       }
-
+      
       invalidateSalesCache();
       await loadProducts();
       await loadBills();
@@ -573,7 +571,7 @@ const AyuboCafe = () => {
   if (!isAuthenticated) {
     // Show reset password form if token is present
     if (resetToken) {
-      return (
+    return (
         <ResetPasswordForm
           token={resetToken}
           onClose={() => {
@@ -772,9 +770,27 @@ const AyuboCafe = () => {
                 </button>
               )}
 
+              {/* Products button (cashier and owner) */}
+              {(currentUser?.role === 'cashier' || currentUser?.role === 'owner') && (
+                <button
+                  onClick={() => setCurrentView('products')}
+                  className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                >
+                  <Settings size={18} />
+                  <span className="hidden sm:inline">Products</span>
+                </button>
+              )}
+
               {/* Owner-only navigation */}
               {currentUser?.role === 'owner' && (
                 <>
+              <button
+                    onClick={() => setCurrentView('sales')}
+                    className="flex items-center gap-2 bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+                  >
+                    <TrendingUp size={18} />
+                    <span className="hidden sm:inline">Sales</span>
+                  </button>
                   <button
                     onClick={() => setCurrentView('users')}
                     className="flex items-center gap-2 bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
@@ -789,25 +805,7 @@ const AyuboCafe = () => {
                     📋
                     <span className="hidden sm:inline">Audit</span>
                   </button>
-                  <button
-                    onClick={() => setShowSales(!showSales)}
-                    className="flex items-center gap-2 bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
-                  >
-                    <TrendingUp size={18} />
-                    <span className="hidden sm:inline">Sales</span>
-                  </button>
                 </>
-              )}
-
-              {/* Settings button (cashier and owner) */}
-              {(currentUser?.role === 'cashier' || currentUser?.role === 'owner') && currentView === 'billing' && (
-                <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-                >
-                  <Settings size={18} />
-                  <span className="hidden sm:inline">Products</span>
-                </button>
               )}
 
               {/* User menu dropdown */}
@@ -840,7 +838,7 @@ const AyuboCafe = () => {
                     >
                       <LogOut size={16} />
                       Logout
-                    </button>
+              </button>
                   </div>
                 )}
               </div>
@@ -849,6 +847,16 @@ const AyuboCafe = () => {
 
           {/* Content Area - Switch based on currentView */}
           
+          {/* Products Management View */}
+          {currentView === 'products' && (
+            <ProductsPage />
+          )}
+
+          {/* Sales Reports View */}
+          {currentView === 'sales' && (
+            <SalesPage />
+          )}
+
           {/* User Management View */}
           {currentView === 'users' && (
             <UserManagement />
@@ -862,14 +870,7 @@ const AyuboCafe = () => {
           {/* Billing View */}
           {currentView === 'billing' && (
             <>
-              {showSettings && (
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg sm:text-xl font-bold text-blue-800">Manage Products</h2>
-                <button onClick={() => setShowSettings(false)} className="text-blue-800 hover:text-blue-900">
-                  <X size={24} />
-                </button>
-              </div>
+              {/* Products and Sales are now separate pages */}
               
               {currentUser.role === 'owner' && (
                 <SortConfigPanel
@@ -1173,7 +1174,7 @@ const AyuboCafe = () => {
                               )}
                             </div>
                             <div className="flex items-center">
-                              <StockBadge product={product} showFullText={false} />
+                                <StockBadge product={product} showFullText={false} />
                             </div>
                           </div>
                         </div>
