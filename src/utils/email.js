@@ -60,6 +60,7 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
         type: 'password_reset',
@@ -122,6 +123,7 @@ export const sendWelcomeEmail = async (email, userName, username, tempPassword) 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
         type: 'welcome',
@@ -175,6 +177,7 @@ export const sendPasswordChangedEmail = async (email, userName, changedBy = 'sel
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ 
         type: 'password_changed',
