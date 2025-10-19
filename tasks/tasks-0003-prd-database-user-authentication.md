@@ -86,13 +86,13 @@
   - [x] 4.4 Call email utility to send password reset email (will implement in task 8.0)
   - [x] 4.5 Show success message: "If an account exists, a password reset email has been sent" (don't reveal if user exists)
   - [x] 4.6 Log password_reset_requested to audit_logs
-  - [ ] 4.7 Create `src/components/auth/ResetPasswordForm.jsx` - form with new password, confirm password, submit button
-  - [ ] 4.8 Add URL token extraction: get token from query parameter (?token=...)
-  - [ ] 4.9 Implement token validation: query password_reset_tokens, check expires_at > now, check used_at is null
-  - [ ] 4.10 If token invalid/expired/used, show error message with link to request new reset
-  - [ ] 4.11 Implement password reset submission: validate password strength, update password_hash in users table, mark token as used, invalidate all user sessions
-  - [ ] 4.12 Log password_reset_completed to audit_logs
-  - [ ] 4.13 Redirect to login with success message: "Password reset successful. Please login."
+  - [x] 4.7 Create `src/components/auth/ResetPasswordForm.jsx` - form with new password, confirm password, submit button
+  - [x] 4.8 Add URL token extraction: get token from query parameter (?token=...)
+  - [x] 4.9 Implement token validation: query password_reset_tokens, check expires_at > now, check used_at is null
+  - [x] 4.10 If token invalid/expired/used, show error message with link to request new reset
+  - [x] 4.11 Implement password reset submission: validate password strength, update password_hash in users table, mark token as used, invalidate all user sessions
+  - [x] 4.12 Log password_reset_completed to audit_logs
+  - [x] 4.13 Redirect to login with success message: "Password reset successful. Please login."
   - [ ] 4.14 Add owner override reset password in UserManagement component: owner can generate new password or enter manual password
   - [ ] 4.15 Implement owner reset: update password_hash, invalidate sessions, log action with owner_id in details, optionally send notification email
 
