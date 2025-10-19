@@ -64,20 +64,20 @@
   - [x] 2.16 Implement checkSession function: verify session token on app load/refresh
   - [x] 2.17 Wrap App component with AuthProvider in `src/main.jsx`
 
-- [ ] 3.0 Session Management & Security
-  - [ ] 3.1 Create `src/utils/session.js` with functions: createSession(userId, rememberMe), validateSession(sessionToken), invalidateSession(sessionToken), invalidateUserSessions(userId), refreshSession(sessionToken)
-  - [ ] 3.2 Implement createSession: insert into user_sessions, set expires_at to 8 hours (short) or 7 days (long), return session_token
-  - [ ] 3.3 Implement validateSession: query user_sessions, check expires_at, check last_activity_at for inactivity timeout (30 min for short sessions only)
-  - [ ] 3.4 Add inactivity logic: if short session (!remember_me) and (now - last_activity_at) > 30 minutes, mark as expired and log to audit_logs with action='session_expired' and details.expiration_reason='inactivity'
-  - [ ] 3.5 Implement refreshSession: update last_activity_at on each valid request
-  - [ ] 3.6 Implement invalidateSession: delete session by session_token
-  - [ ] 3.7 Implement invalidateUserSessions: delete all sessions for a user_id (used on password change/reset)
-  - [ ] 3.8 Create `src/hooks/useSession.js` hook for automatic session refresh every 5 minutes
-  - [ ] 3.9 Add session expiration redirect: if session invalid, redirect to login and show message
-  - [ ] 3.9a Log session expiration to audit_logs: when session expires (timeout), log with action='session_expired' and details.expiration_reason='timeout' (for absolute time expiration) or 'inactivity' (for 30-min inactivity)
-  - [ ] 3.10 Implement rate limiting utility in `src/utils/rateLimiter.js`: track failed login attempts by IP, max 5 attempts per 15 minutes
-  - [ ] 3.11 Store rate limit data in localStorage with timestamp (simple client-side implementation for now)
-  - [ ] 3.12 Add account lockout logic: after 5 failed attempts, show "Too many attempts. Try again in 15 minutes" message
+- [x] 3.0 Session Management & Security
+  - [x] 3.1 Create `src/utils/session.js` with functions: createSession(userId, rememberMe), validateSession(sessionToken), invalidateSession(sessionToken), invalidateUserSessions(userId), refreshSession(sessionToken)
+  - [x] 3.2 Implement createSession: insert into user_sessions, set expires_at to 8 hours (short) or 7 days (long), return session_token
+  - [x] 3.3 Implement validateSession: query user_sessions, check expires_at, check last_activity_at for inactivity timeout (30 min for short sessions only)
+  - [x] 3.4 Add inactivity logic: if short session (!remember_me) and (now - last_activity_at) > 30 minutes, mark as expired and log to audit_logs with action='session_expired' and details.expiration_reason='inactivity'
+  - [x] 3.5 Implement refreshSession: update last_activity_at on each valid request
+  - [x] 3.6 Implement invalidateSession: delete session by session_token
+  - [x] 3.7 Implement invalidateUserSessions: delete all sessions for a user_id (used on password change/reset)
+  - [x] 3.8 Create `src/hooks/useSession.js` hook for automatic session refresh every 5 minutes
+  - [x] 3.9 Add session expiration redirect: if session invalid, redirect to login and show message
+  - [x] 3.9a Log session expiration to audit_logs: when session expires (timeout), log with action='session_expired' and details.expiration_reason='timeout' (for absolute time expiration) or 'inactivity' (for 30-min inactivity)
+  - [x] 3.10 Implement rate limiting utility in `src/utils/rateLimiter.js`: track failed login attempts by IP, max 5 attempts per 15 minutes
+  - [x] 3.11 Store rate limit data in localStorage with timestamp (simple client-side implementation for now)
+  - [x] 3.12 Add account lockout logic: after 5 failed attempts, show "Too many attempts. Try again in 15 minutes" message
 
 - [ ] 4.0 Password Recovery (Email + Owner Override)
   - [ ] 4.1 Create `src/components/auth/ForgotPasswordForm.jsx` - form with email/username field, submit button, back to login link
@@ -254,13 +254,13 @@
 **Utilities:**
 - `src/utils/auth.js` - ✅ **CREATED** - Authentication utility functions (password hashing with bcrypt, token generation, password strength validation)
 - `src/utils/validation.js` - ✅ **CREATED** - Input validation utilities (email, password, username, names, phone) with comprehensive error messages
-- `src/utils/session.js` - Session management utilities (create, validate, refresh, invalidate)
+- `src/utils/session.js` - ✅ **CREATED** - Session management utilities (create, validate, refresh, invalidate single/batch, cleanup expired sessions)
+- `src/utils/rateLimiter.js` - ✅ **CREATED** - Client-side rate limiting (5 attempts per 15 minutes, browser fingerprinting, localStorage-based)
 - `src/utils/email.js` - Email sending utilities using Nodemailer with Gmail SMTP
 - `src/utils/auditLog.js` - Audit logging utility functions
 
 **Hooks:**
-- `src/hooks/useAuth.js` - Authentication context and hook for managing user state globally
-- `src/hooks/useSession.js` - Session management hook (auto-refresh, expiration handling)
+- `src/hooks/useSession.js` - ✅ **CREATED** - Session management hook (auto-refresh every 5 minutes, expiration detection, activity tracking, audit logging)
 
 **Components:**
 - `src/components/auth/LoginForm.jsx` - New database-driven login form component
