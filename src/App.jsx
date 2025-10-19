@@ -22,6 +22,7 @@ import SalesBadge from './components/SalesBadge';
 import SortConfigPanel from './components/SortConfigPanel';
 import LoginForm from './components/auth/LoginForm';
 import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
+import ResetPasswordForm from './components/auth/ResetPasswordForm';
 import ChangePasswordForm from './components/auth/ChangePasswordForm';
 import UserManagement from './components/UserManagement';
 import AuditLogs from './components/AuditLogs';
@@ -47,6 +48,7 @@ const AyuboCafe = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [resetToken, setResetToken] = useState(null);
 
   // Product & billing state
   const [products, setProducts] = useState([]);
@@ -80,6 +82,17 @@ const AyuboCafe = () => {
     updateSortN,
     loading: loadingSortConfig
   } = useSortConfig();
+
+  // Check URL for reset token on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+      setResetToken(token);
+      // Clear the URL without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && currentView === 'billing') {
@@ -558,6 +571,22 @@ const AyuboCafe = () => {
 
   // Login screen
   if (!isAuthenticated) {
+    // Show reset password form if token is present
+    if (resetToken) {
+      return (
+        <ResetPasswordForm
+          token={resetToken}
+          onClose={() => {
+            setResetToken(null);
+          }}
+          onSuccess={() => {
+            setResetToken(null);
+            // Redirect handled by component
+          }}
+        />
+      );
+    }
+
     if (showForgotPassword) {
       return (
         <ForgotPasswordForm
