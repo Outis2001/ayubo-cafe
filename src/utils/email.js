@@ -51,14 +51,18 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
       return true;
     }
 
-    // Production: Call your backend API endpoint
-    // TODO: Replace with your actual backend endpoint
-    const response = await fetch('/api/send-password-reset-email', {
+    // Production: Call Supabase Edge Function
+    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, resetToken, userName }),
+      body: JSON.stringify({ 
+        type: 'password_reset',
+        email, 
+        resetToken, 
+        userName 
+      }),
     });
 
     if (!response.ok) {
@@ -106,13 +110,19 @@ export const sendWelcomeEmail = async (email, userName, username, tempPassword) 
       return true;
     }
 
-    // Production: Call your backend API endpoint
-    const response = await fetch('/api/send-welcome-email', {
+    // Production: Call Supabase Edge Function
+    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, userName, username, tempPassword }),
+      body: JSON.stringify({ 
+        type: 'welcome',
+        email, 
+        userName, 
+        username, 
+        tempPassword 
+      }),
     });
 
     if (!response.ok) {
@@ -149,13 +159,18 @@ export const sendPasswordChangedEmail = async (email, userName, changedBy = 'sel
       return true;
     }
 
-    // Production: Call your backend API endpoint
-    const response = await fetch('/api/send-password-changed-email', {
+    // Production: Call Supabase Edge Function
+    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, userName, changedBy }),
+      body: JSON.stringify({ 
+        type: 'password_changed',
+        email, 
+        userName, 
+        changedBy 
+      }),
     });
 
     if (!response.ok) {
