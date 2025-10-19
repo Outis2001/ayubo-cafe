@@ -180,6 +180,7 @@ export const checkRateLimit = () => {
   if (!data[identifier]) {
     return {
       isLocked: false,
+      timeLeft: 0,
       attemptsRemaining: MAX_ATTEMPTS,
       attemptsMade: 0
     };
@@ -189,12 +190,14 @@ export const checkRateLimit = () => {
 
   // Check if locked
   if (entry.lockedUntil && now < entry.lockedUntil) {
-    const minutesRemaining = Math.ceil((entry.lockedUntil - now) / (60 * 1000));
-    const secondsRemaining = Math.ceil((entry.lockedUntil - now) / 1000);
+    const timeLeft = entry.lockedUntil - now;
+    const minutesRemaining = Math.ceil(timeLeft / (60 * 1000));
+    const secondsRemaining = Math.ceil(timeLeft / 1000);
     
     return {
       isLocked: true,
       attemptsRemaining: 0,
+      timeLeft, // Add timeLeft in milliseconds
       minutesRemaining,
       secondsRemaining,
       lockedUntil: new Date(entry.lockedUntil).toISOString()
@@ -211,6 +214,7 @@ export const checkRateLimit = () => {
 
   return {
     isLocked: false,
+    timeLeft: 0,
     attemptsRemaining: MAX_ATTEMPTS - entry.attempts.length,
     attemptsMade: entry.attempts.length,
     maxAttempts: MAX_ATTEMPTS
