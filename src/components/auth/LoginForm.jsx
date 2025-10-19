@@ -20,13 +20,14 @@ import { Loader } from '../icons';
  * @param {Function} props.onLoginSuccess - Callback when login is successful
  */
 const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
-  const { login, loading, authError, setAuthError } = useAuth();
+  const { login, loading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTimeLeft, setLockoutTimeLeft] = useState(0);
+  const [error, setError] = useState('');
 
   /**
    * Check lockout status on component mount and set up interval
@@ -66,7 +67,7 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
     e.preventDefault();
     
     // Clear any previous errors
-    setAuthError('');
+    setError('');
 
     // Check if locked out
     const lockoutStatus = checkLockoutStatus();
@@ -78,14 +79,14 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
 
     // Validate inputs
     if (!username || !password) {
-      setAuthError('Please enter both username and password.');
+      setError('Please enter both username and password.');
       return;
     }
 
     // Attempt login
-    const success = await login(username, password, rememberMe);
+    const result = await login(username, password, rememberMe);
 
-    if (success) {
+    if (result.success) {
       // Login successful - reset failed attempts
       resetFailedLoginAttempts();
       
@@ -94,7 +95,10 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
         onLoginSuccess();
       }
     } else {
-      // Login failed - track attempt
+      // Login failed - show error
+      setError(result.error || 'Login failed. Please try again.');
+      
+      // Track attempt
       const lockoutResult = trackFailedLoginAttempt();
       
       if (lockoutResult.isLocked) {
@@ -136,9 +140,9 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
         )}
 
         {/* Error Message */}
-        {authError && !isLocked && (
+        {error && !isLocked && (
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
-            <p className="text-red-700 text-sm">{authError}</p>
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
