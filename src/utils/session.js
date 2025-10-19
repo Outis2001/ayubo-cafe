@@ -429,3 +429,108 @@ export const cleanupExpiredSessions = async () => {
   }
 };
 
+/**
+ * Enforce role-based session limits
+ * 
+ * Implements different session policies based on user role:
+ * - Owner: Maximum 1 active session (new login invalidates all others)
+ * - Cashier: Maximum 3 active sessions (oldest sessions removed when limit exceeded)
+ * 
+ * @param {string} userId - User ID to enforce limits for
+ * @param {string} role - User role ('owner' or 'cashier')
+ * @param {string} currentSessionToken - Token of current/new session to keep
+ * @returns {Promise<Object>} Result with success boolean and count of invalidated sessions
+ * 
+ * @example
+ * // Before creating new session
+ * await enforceSessionLimits(userId, userRole, newSessionToken);
+ */
+export const enforceSessionLimits = async (userId, role, currentSessionToken = null) => {
+  try {
+    if (!userId || !role) {
+      return {
+        success: false,
+        error: 'User ID and role are required'
+      };
+    }
+
+    // Get all active sessions for this user, ordered by creation time
+    const { data: sessions, error: fetchError } = await supabaseClient
+      .from('user_sessions')
+      .select('session_token, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false }); // Newest first
+
+    if (fetchError) {
+      console.error('Error fetching user sessions:', fetchError);
+      return {
+        success: false,
+        error: 'Failed to fetch user sessions'
+      };
+    }
+
+    if (!sessions || sessions.length === 0) {
+      return {
+        success: true,
+        invalidatedCount: 0,
+        message: 'No existing sessions to manage'
+      };
+    }
+
+    let sessionsToInvalidate = [];
+
+    if (role === 'owner') {
+      // Owner: Only 1 session allowed - invalidate ALL other sessions
+      sessionsToInvalidate = sessions
+        .filter(session => session.session_token !== currentSessionToken)
+        .map(session => session.session_token);
+
+    } else if (role === 'cashier') {
+      // Cashier: Maximum 3 sessions allowed
+      const MAX_CASHIER_SESSIONS = 3;
+      
+      // If we have more than max sessions, remove oldest ones
+      if (sessions.length >= MAX_CASHIER_SESSIONS) {
+        // Keep the newest (MAX_CASHIER_SESSIONS - 1) sessions + current session
+        // This means when adding the new session, we'll have exactly MAX_CASHIER_SESSIONS
+        const sessionsToKeep = sessions.slice(0, MAX_CASHIER_SESSIONS - 1);
+        const sessionsToRemove = sessions.slice(MAX_CASHIER_SESSIONS - 1);
+        
+        sessionsToInvalidate = sessionsToRemove
+          .filter(session => session.session_token !== currentSessionToken)
+          .map(session => session.session_token);
+      }
+    }
+
+    // Invalidate the selected sessions
+    if (sessionsToInvalidate.length > 0) {
+      const { error: deleteError } = await supabaseClient
+        .from('user_sessions')
+        .delete()
+        .in('session_token', sessionsToInvalidate);
+
+      if (deleteError) {
+        console.error('Error invalidating sessions:', deleteError);
+        return {
+          success: false,
+          error: 'Failed to invalidate sessions'
+        };
+      }
+    }
+
+    return {
+      success: true,
+      invalidatedCount: sessionsToInvalidate.length,
+      message: `Invalidated ${sessionsToInvalidate.length} session(s) based on ${role} policy`,
+      policy: role === 'owner' ? 'Single session only' : `Maximum ${3} sessions`
+    };
+
+  } catch (error) {
+    console.error('Unexpected error enforcing session limits:', error);
+    return {
+      success: false,
+      error: 'An unexpected error occurred'
+    };
+  }
+};
+

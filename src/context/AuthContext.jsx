@@ -11,6 +11,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { supabaseClient } from '../config/supabase';
 import { comparePassword } from '../utils/auth';
 import { generateSessionToken } from '../utils/auth';
+import { enforceSessionLimits } from '../utils/session';
 
 // Create the authentication context
 const AuthContext = createContext(null);
@@ -257,6 +258,20 @@ export const AuthProvider = ({ children }) => {
           success: false,
           error: 'Failed to create session. Please try again.'
         };
+      }
+
+      // Enforce role-based session limits
+      // Owner: Max 1 session, Cashier: Max 3 sessions
+      const sessionLimitResult = await enforceSessionLimits(
+        user.user_id,
+        user.role,
+        sessionToken
+      );
+
+      if (sessionLimitResult.invalidatedCount > 0) {
+        console.log(
+          `Session limit enforced: ${sessionLimitResult.message}`
+        );
       }
 
       // Update last login timestamp
