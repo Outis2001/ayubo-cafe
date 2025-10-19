@@ -133,24 +133,24 @@
   - [x] 7.2 Implement logAuditEvent: insert into audit_logs table with all parameters
   - [x] 7.3 Add IP address capture utility: use browser API or request headers (for client-side, use placeholder or server endpoint)
   - [x] 7.4 Add user agent capture: navigator.userAgent
-  - [ ] 7.5 Integrate audit logging into login success: log 'login' action with status 'success'
-  - [ ] 7.6 Integrate audit logging into login failure: log 'failed_login' action with username_attempted and status 'failure'
-  - [ ] 7.7 Integrate audit logging into logout: log 'logout' action
-  - [ ] 7.8 Integrate audit logging into password change: log 'password_change' action
-  - [ ] 7.9 Integrate audit logging into password reset: log 'password_reset' action
-  - [ ] 7.10 Integrate audit logging into user created: log 'user_created' action with new user details
-  - [ ] 7.11 Integrate audit logging into user updated: log 'user_updated' action with changed fields
-  - [ ] 7.12 Integrate audit logging into user deactivated: log 'user_deactivated' action
-  - [ ] 7.12a Integrate audit logging into session expiration: log 'session_expired' action with expiration_reason in details ('inactivity', 'timeout', or 'manual')
-  - [ ] 7.13 Create `src/components/AuditLogs.jsx` - audit log viewer component (owner only)
-  - [ ] 7.14 Fetch audit_logs from database ordered by timestamp DESC
-  - [ ] 7.15 Display in table: timestamp, username, action, status (color-coded: green for success, red for failure), IP address, details
-  - [ ] 7.16 Implement pagination: 50 logs per page with prev/next buttons
-  - [ ] 7.17 Add filter options: date range picker, user dropdown, action type dropdown, status dropdown
-  - [ ] 7.18 Implement filter logic: apply filters to database query
-  - [ ] 7.19 Add expandable rows for detailed information (user_agent, full details JSON)
-  - [ ] 7.20 Add export to CSV functionality (optional, nice-to-have)
-  - [ ] 7.21 Style component using TailwindCSS
+  - [x] 7.5 Integrate audit logging into login success: log 'login' action with status 'success'
+  - [x] 7.6 Integrate audit logging into login failure: log 'failed_login' action with username_attempted and status 'failure'
+  - [x] 7.7 Integrate audit logging into logout: log 'logout' action
+  - [x] 7.8 Integrate audit logging into password change: log 'password_change' action
+  - [x] 7.9 Integrate audit logging into password reset: log 'password_reset' action
+  - [x] 7.10 Integrate audit logging into user created: log 'user_created' action with new user details
+  - [x] 7.11 Integrate audit logging into user updated: log 'user_updated' action with changed fields
+  - [x] 7.12 Integrate audit logging into user deactivated: log 'user_deactivated' action
+  - [x] 7.12a Integrate audit logging into session expiration: log 'session_expired' action with expiration_reason in details ('inactivity', 'timeout', or 'manual')
+  - [x] 7.13 Create `src/components/AuditLogs.jsx` - audit log viewer component (owner only)
+  - [x] 7.14 Fetch audit_logs from database ordered by timestamp DESC
+  - [x] 7.15 Display in table: timestamp, username, action, status (color-coded: green for success, red for failure), IP address, details
+  - [x] 7.16 Implement pagination: 50 logs per page with prev/next buttons
+  - [x] 7.17 Add filter options: date range picker, user dropdown, action type dropdown, status dropdown
+  - [x] 7.18 Implement filter logic: apply filters to database query
+  - [x] 7.19 Add expandable rows for detailed information (user_agent, full details JSON)
+  - [x] 7.20 Add export to CSV functionality (optional, nice-to-have)
+  - [x] 7.21 Style component using TailwindCSS
 
 - [ ] 8.0 Email Service Integration (Gmail SMTP)
   - [ ] 8.1 Install nodemailer: `npm install nodemailer`
