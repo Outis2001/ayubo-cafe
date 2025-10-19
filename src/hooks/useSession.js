@@ -277,5 +277,6 @@ const useSession = (options = {}) => {
   };
 };
 
+export { useSession };
 export default useSession;
 

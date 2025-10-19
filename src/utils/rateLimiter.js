@@ -324,3 +324,8 @@ export const getRateLimitInfo = () => {
 // Initialize: Clean up old data on module load
 cleanupRateLimitData();
 
+// Alias exports for compatibility with LoginForm
+export const checkLockoutStatus = checkRateLimit;
+export const resetFailedLoginAttempts = resetRateLimit;
+export const trackFailedLoginAttempt = recordFailedAttempt;
+
