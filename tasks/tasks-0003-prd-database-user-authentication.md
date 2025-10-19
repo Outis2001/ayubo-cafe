@@ -93,28 +93,28 @@
   - [x] 4.11 Implement password reset submission: validate password strength, update password_hash in users table, mark token as used, invalidate all user sessions
   - [x] 4.12 Log password_reset_completed to audit_logs
   - [x] 4.13 Redirect to login with success message: "Password reset successful. Please login."
-  - [ ] 4.14 Add owner override reset password in UserManagement component: owner can generate new password or enter manual password
-  - [ ] 4.15 Implement owner reset: update password_hash, invalidate sessions, log action with owner_id in details, optionally send notification email
+  - [x] 4.14 Add owner override reset password in UserManagement component: owner can generate new password or enter manual password
+  - [x] 4.15 Implement owner reset: update password_hash, invalidate sessions, log action with owner_id in details, optionally send notification email
 
-- [ ] 5.0 User Management Interface (Owner Only)
-  - [ ] 5.1 Create `src/components/UserManagement.jsx` - full user management panel component
-  - [ ] 5.2 Add permission check: only render if currentUser.role === 'owner'
-  - [ ] 5.3 Fetch and display all users from users table in a table view (first_name, last_name, username, email, role, is_active, last_login_at)
-  - [ ] 5.4 Add action buttons for each user: Edit, Deactivate/Activate, Reset Password
-  - [ ] 5.5 Create "Create New User" button that opens modal/form
-  - [ ] 5.6 Implement Create User form: fields for first_name, last_name, username, email, phone, role dropdown, auto-generate password option, send credentials via email checkbox
-  - [ ] 5.7 Add form validation: check username uniqueness, email uniqueness and format, password strength
-  - [ ] 5.8 Implement user creation: hash password, insert into users table, log user_created to audit_logs
-  - [ ] 5.9 If "send credentials" checked, call email utility to send welcome email with temporary password
-  - [ ] 5.10 Implement Edit User form: allow updating first_name, last_name, email, phone, role, is_active
-  - [ ] 5.11 Add email uniqueness validation on edit (excluding current user)
-  - [ ] 5.12 Implement user update: update users table, log user_updated to audit_logs
-  - [ ] 5.13 Implement Deactivate User: set is_active=false, invalidate all sessions, log user_deactivated to audit_logs
-  - [ ] 5.14 Add confirmation dialog for deactivate action
-  - [ ] 5.15 Implement Activate User: set is_active=true, log user_activated to audit_logs
-  - [ ] 5.16 Add search/filter functionality for user list (by name, username, email, role)
-  - [ ] 5.17 Add sorting functionality (by name, last login, created date)
-  - [ ] 5.18 Style component using TailwindCSS following existing app patterns
+- [x] 5.0 User Management Interface (Owner Only)
+  - [x] 5.1 Create `src/components/UserManagement.jsx` - full user management panel component
+  - [x] 5.2 Add permission check: only render if currentUser.role === 'owner'
+  - [x] 5.3 Fetch and display all users from users table in a table view (first_name, last_name, username, email, role, is_active, last_login_at)
+  - [x] 5.4 Add action buttons for each user: Edit, Deactivate/Activate, Reset Password
+  - [x] 5.5 Create "Create New User" button that opens modal/form
+  - [x] 5.6 Implement Create User form: fields for first_name, last_name, username, email, phone, role dropdown, auto-generate password option, send credentials via email checkbox
+  - [x] 5.7 Add form validation: check username uniqueness, email uniqueness and format, password strength
+  - [x] 5.8 Implement user creation: hash password, insert into users table, log user_created to audit_logs
+  - [x] 5.9 If "send credentials" checked, call email utility to send welcome email with temporary password
+  - [x] 5.10 Implement Edit User form: allow updating first_name, last_name, email, phone, role, is_active
+  - [x] 5.11 Add email uniqueness validation on edit (excluding current user)
+  - [x] 5.12 Implement user update: update users table, log user_updated to audit_logs
+  - [x] 5.13 Implement Deactivate User: set is_active=false, invalidate all sessions, log user_deactivated to audit_logs
+  - [x] 5.14 Add confirmation dialog for deactivate action
+  - [x] 5.15 Implement Activate User: set is_active=true, log user_activated to audit_logs
+  - [x] 5.16 Add search/filter functionality for user list (by name, username, email, role)
+  - [x] 5.17 Add sorting functionality (by name, last login, created date)
+  - [x] 5.18 Style component using TailwindCSS following existing app patterns
 
 - [ ] 6.0 Self-Service Password Change
   - [ ] 6.1 Create `src/components/auth/ChangePasswordForm.jsx` - modal/panel component
