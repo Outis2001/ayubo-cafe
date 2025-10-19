@@ -831,13 +831,13 @@ const AyuboCafe = () => {
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-50">
+                  <div className="absolute right-0 mt-2 w-48 sm:w-52 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-50 origin-top-right">
                     <button
                       onClick={() => {
                         setShowChangePassword(true);
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg text-sm"
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-t-lg text-sm sm:text-base font-medium"
                     >
                       🔑 Change Password
                     </button>
@@ -846,7 +846,7 @@ const AyuboCafe = () => {
                         handleLogout();
                         setShowUserMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-lg text-sm flex items-center gap-2"
+                      className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 rounded-b-lg text-sm sm:text-base flex items-center gap-2 font-medium"
                     >
                       <LogOut size={16} />
                       Logout
