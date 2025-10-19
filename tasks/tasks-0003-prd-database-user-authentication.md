@@ -128,11 +128,11 @@
   - [ ] 6.9 Show success message: "Password changed successfully"
   - [ ] 6.10 Add error handling for incorrect current password
 
-- [ ] 7.0 Audit Logging System
-  - [ ] 7.1 Create `src/utils/auditLog.js` with function: logAuditEvent(action, userId, usernameAttempted, status, details, ipAddress, userAgent)
-  - [ ] 7.2 Implement logAuditEvent: insert into audit_logs table with all parameters
-  - [ ] 7.3 Add IP address capture utility: use browser API or request headers (for client-side, use placeholder or server endpoint)
-  - [ ] 7.4 Add user agent capture: navigator.userAgent
+- [x] 7.0 Audit Logging System
+  - [x] 7.1 Create `src/utils/auditLog.js` with function: logAuditEvent(action, userId, usernameAttempted, status, details, ipAddress, userAgent)
+  - [x] 7.2 Implement logAuditEvent: insert into audit_logs table with all parameters
+  - [x] 7.3 Add IP address capture utility: use browser API or request headers (for client-side, use placeholder or server endpoint)
+  - [x] 7.4 Add user agent capture: navigator.userAgent
   - [ ] 7.5 Integrate audit logging into login success: log 'login' action with status 'success'
   - [ ] 7.6 Integrate audit logging into login failure: log 'failed_login' action with username_attempted and status 'failure'
   - [ ] 7.7 Integrate audit logging into logout: log 'logout' action
