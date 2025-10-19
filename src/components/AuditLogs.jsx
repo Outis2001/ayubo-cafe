@@ -236,15 +236,15 @@ const AuditLogs = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-blue-700">Audit Logs</h1>
-              <p className="text-gray-600 mt-1">Security and compliance event tracking</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-blue-700">Audit Logs</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Security and compliance event tracking</p>
             </div>
             <button
               onClick={handleExportCSV}
-              className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition"
+              className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition text-sm sm:text-base disabled:opacity-50"
               disabled={logs.length === 0}
             >
               Export CSV
@@ -252,7 +252,7 @@ const AuditLogs = () => {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mt-4">
             <div>
               <label className="block text-xs font-semibold mb-1 text-gray-700">Date From</label>
               <input
@@ -312,10 +312,10 @@ const AuditLogs = () => {
             </div>
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-stretch sm:justify-end">
             <button
               onClick={handleResetFilters}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition text-sm"
+              className="w-full sm:w-auto px-4 py-2 border-2 border-gray-300 rounded-lg font-bold hover:bg-gray-50 transition text-sm"
             >
               Reset Filters
             </button>
@@ -330,16 +330,16 @@ const AuditLogs = () => {
         )}
 
         {/* Logs Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <tr>
-                <th className="px-4 py-3 text-left text-sm">Timestamp</th>
-                <th className="px-4 py-3 text-left text-sm">Username</th>
-                <th className="px-4 py-3 text-left text-sm">Action</th>
-                <th className="px-4 py-3 text-left text-sm">Status</th>
-                <th className="px-4 py-3 text-left text-sm">IP Address</th>
-                <th className="px-4 py-3 text-center text-sm">Details</th>
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm">Timestamp</th>
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm">Username</th>
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm">Action</th>
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm">Status</th>
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm hidden md:table-cell">IP Address</th>
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm">Details</th>
               </tr>
             </thead>
             <tbody>
@@ -353,29 +353,29 @@ const AuditLogs = () => {
                 logs.map((log) => (
                   <>
                     <tr key={log.audit_id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-700">
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium">
+                      <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm font-medium">
                         {log.username_attempted || <span className="text-gray-400">N/A</span>}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${getActionColor(log.action)}`}>
+                      <td className="px-2 sm:px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold whitespace-nowrap ${getActionColor(log.action)}`}>
                           {ACTION_LABELS[log.action] || log.action}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold border-2 ${getStatusColor(log.status)}`}>
+                      <td className="px-2 sm:px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold border-2 whitespace-nowrap ${getStatusColor(log.status)}`}>
                           {log.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-700 hidden md:table-cell">
                         {log.ip_address || <span className="text-gray-400">N/A</span>}
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-2 sm:px-4 py-3 text-center">
                         <button
                           onClick={() => toggleLogDetails(log.audit_id)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium"
                         >
                           {expandedLog === log.audit_id ? 'Hide' : 'Show'}
                         </button>
@@ -383,17 +383,17 @@ const AuditLogs = () => {
                     </tr>
                     {expandedLog === log.audit_id && (
                       <tr className="bg-gray-50 border-t">
-                        <td colSpan="6" className="px-4 py-4">
-                          <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
+                        <td colSpan="6" className="px-2 sm:px-4 py-4">
+                          <div className="bg-white rounded-lg p-3 sm:p-4 border-2 border-blue-200">
                             <h3 className="text-sm font-bold text-blue-700 mb-2">Detailed Information</h3>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                               <div>
                                 <p className="font-semibold text-gray-700">Audit ID:</p>
-                                <p className="text-gray-600 font-mono text-xs">{log.audit_id}</p>
+                                <p className="text-gray-600 font-mono text-xs break-all">{log.audit_id}</p>
                               </div>
                               <div>
                                 <p className="font-semibold text-gray-700">User ID:</p>
-                                <p className="text-gray-600 font-mono text-xs">{log.user_id || 'N/A'}</p>
+                                <p className="text-gray-600 font-mono text-xs break-all">{log.user_id || 'N/A'}</p>
                               </div>
                               <div>
                                 <p className="font-semibold text-gray-700">User Agent:</p>
@@ -419,25 +419,25 @@ const AuditLogs = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-6 flex justify-between items-center">
-            <div className="text-gray-600 text-sm">
+          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-gray-600 text-xs sm:text-sm text-center sm:text-left">
               Showing {((currentPage - 1) * LOGS_PER_PAGE) + 1} to {Math.min(currentPage * LOGS_PER_PAGE, totalLogs)} of {totalLogs} logs
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center flex-wrap justify-center">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-4 py-2 border-2 border-blue-300 rounded-lg font-bold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 sm:px-4 py-2 border-2 border-blue-300 rounded-lg font-bold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
               >
                 Previous
               </button>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
                 Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
               </div>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 border-2 border-blue-300 rounded-lg font-bold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 sm:px-4 py-2 border-2 border-blue-300 rounded-lg font-bold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
               >
                 Next
               </button>

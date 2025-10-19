@@ -592,14 +592,14 @@ const UserManagement = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-blue-700 flex items-center gap-2">
-                <User size={32} />
+              <h1 className="text-2xl sm:text-3xl font-bold text-blue-700 flex items-center gap-2">
+                <User size={28} className="sm:w-8 sm:h-8" />
                 User Management
               </h1>
-              <p className="text-gray-600 mt-1">Manage all user accounts</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Manage all user accounts</p>
             </div>
             <button
               onClick={() => {
@@ -616,7 +616,7 @@ const UserManagement = () => {
                 setFormErrors({});
                 setError('');
               }}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition text-sm sm:text-base"
             >
               + Create User
             </button>
@@ -631,17 +631,17 @@ const UserManagement = () => {
         )}
 
         {/* User List */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <tr>
-                <th className="px-6 py-4 text-left">Username</th>
-                <th className="px-6 py-4 text-left">Name</th>
-                <th className="px-6 py-4 text-left">Email</th>
-                <th className="px-6 py-4 text-left">Role</th>
-                <th className="px-6 py-4 text-left">Status</th>
-                <th className="px-6 py-4 text-left">Last Login</th>
-                <th className="px-6 py-4 text-center">Actions</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm">Username</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm">Name</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm hidden md:table-cell">Email</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm">Role</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm">Status</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm hidden lg:table-cell">Last Login</th>
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -654,38 +654,38 @@ const UserManagement = () => {
               ) : (
                 users.map((user) => (
                   <tr key={user.user_id} className="border-t hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium">{user.username}</td>
-                    <td className="px-6 py-4">{`${user.first_name} ${user.last_name}`}</td>
-                    <td className="px-6 py-4">{user.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-sm">{user.username}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm">{`${user.first_name} ${user.last_name}`}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm hidden md:table-cell">{user.email}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                         user.role === 'owner' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                       }`}>
                         {user.role.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                         user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {user.is_active ? 'ACTIVE' : 'INACTIVE'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 hidden lg:table-cell">
                       {user.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'Never'}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center gap-2">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <div className="flex justify-center gap-1 sm:gap-2">
                         <button
                           onClick={() => handleOpenEditForm(user)}
-                          className="text-blue-600 hover:text-blue-800 p-2"
+                          className="text-blue-600 hover:text-blue-800 p-1 sm:p-2"
                           title="Edit User"
                         >
-                          <Settings size={20} />
+                          <Settings size={18} />
                         </button>
                         <button
                           onClick={() => handleOpenPasswordResetForm(user)}
-                          className="text-yellow-600 hover:text-yellow-800 p-2"
+                          className="text-yellow-600 hover:text-yellow-800 p-1 sm:p-2 text-sm"
                           title="Reset Password"
                           disabled={user.user_id === currentUser.user_id}
                         >
@@ -693,11 +693,11 @@ const UserManagement = () => {
                         </button>
                         <button
                           onClick={() => handleToggleUserStatus(user)}
-                          className={`p-2 ${user.is_active ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'}`}
+                          className={`p-1 sm:p-2 ${user.is_active ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'}`}
                           title={user.is_active ? 'Deactivate' : 'Activate'}
                           disabled={user.user_id === currentUser.user_id}
                         >
-                          {user.is_active ? <Trash2 size={20} /> : '✓'}
+                          {user.is_active ? <Trash2 size={18} /> : '✓'}
                         </button>
                       </div>
                     </td>
