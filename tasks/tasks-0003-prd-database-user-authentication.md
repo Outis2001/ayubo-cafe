@@ -193,11 +193,11 @@
   - [x] 9.18 Integrate UserManagement component into Settings panel (owner only)
   - [x] 9.19 Integrate AuditLogs component into Settings or separate panel (owner only)
   - [x] 9.20 Integrate ChangePasswordForm into user menu/settings dropdown
-  - [ ] 9.21 Add loading states for all async operations (login, password reset, user creation, etc.)
-  - [ ] 9.22 Add success/error toast notifications or alerts for better UX
-  - [ ] 9.23 Test all forms on mobile devices for responsive design
-  - [ ] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify (if email verification enabled in PRD)
-  - [ ] 9.25 Create email verification page/component (if implementing email verification)
+  - [x] 9.21 Add loading states for all async operations (login, password reset, user creation, etc.)
+  - [x] 9.22 Add success/error toast notifications or alerts for better UX
+  - [ ] 9.23 Test all forms on mobile devices for responsive design (manual testing required)
+  - [ ] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify (OPTIONAL - not required per PRD)
+  - [ ] 9.25 Create email verification page/component (OPTIONAL - not required per PRD)
 
 - [ ] 10.0 Testing, Security Hardening & Documentation
   - [ ] 10.1 Test complete authentication flow: login with valid credentials → use app → logout
