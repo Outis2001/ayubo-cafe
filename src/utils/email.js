@@ -24,10 +24,14 @@
  */
 export const sendPasswordResetEmail = async (email, resetToken, userName) => {
   try {
+    // Check if email sending is enabled
+    // If EMAIL_ENABLED is false or not set, log to console instead of sending
+    const emailEnabled = import.meta.env.VITE_EMAIL_ENABLED === 'true';
+    
     // For development: Log the reset link instead of sending email
     // ⚠️ WARNING: This logs sensitive reset tokens - DEVELOPMENT MODE ONLY
-    // These logs are automatically disabled in production builds
-    if (import.meta.env.DEV || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
+    // Set VITE_EMAIL_ENABLED=true in .env to send real emails
+    if (!emailEnabled || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
       const resetUrl = `${window.location.origin}/reset-password?token=${resetToken}`;
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('📧 PASSWORD RESET EMAIL (Development Mode)');
@@ -87,10 +91,13 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
  */
 export const sendWelcomeEmail = async (email, userName, username, tempPassword) => {
   try {
+    // Check if email sending is enabled
+    const emailEnabled = import.meta.env.VITE_EMAIL_ENABLED === 'true';
+    
     // For development: Log the credentials instead of sending email
     // ⚠️ WARNING: This logs sensitive passwords - DEVELOPMENT MODE ONLY
-    // These logs are automatically disabled in production builds
-    if (import.meta.env.DEV || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
+    // Set VITE_EMAIL_ENABLED=true in .env to send real emails
+    if (!emailEnabled || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('📧 WELCOME EMAIL (Development Mode)');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -146,8 +153,12 @@ export const sendWelcomeEmail = async (email, userName, username, tempPassword) 
  */
 export const sendPasswordChangedEmail = async (email, userName, changedBy = 'self') => {
   try {
+    // Check if email sending is enabled
+    const emailEnabled = import.meta.env.VITE_EMAIL_ENABLED === 'true';
+    
     // For development: Log the notification
-    if (import.meta.env.DEV || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
+    // Set VITE_EMAIL_ENABLED=true in .env to send real emails
+    if (!emailEnabled || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('📧 PASSWORD CHANGED NOTIFICATION (Development Mode)');
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
