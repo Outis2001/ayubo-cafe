@@ -32,14 +32,19 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log(`To: ${email}`);
       console.log(`Name: ${userName}`);
-      console.log(`Reset Link: ${resetUrl}`);
+      console.log('');
+      console.log('🔗 RESET LINK (copy from console, not alert):');
+      console.log(resetUrl);
+      console.log('');
+      console.log('Token:', resetToken);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('');
-      console.log('⚠️  Copy the reset link above to test password reset');
+      console.log('⚠️  On mobile: Copy the URL from the console above');
+      console.log('    Do NOT copy from the alert (it may add line breaks)');
       console.log('');
       
-      // Show alert with the link for easy copying
-      alert(`Password Reset Link (Development Mode):\n\n${resetUrl}\n\nLink also logged to console.`);
+      // Show simple alert - user should copy from console
+      alert(`Password reset link sent!\n\nTo: ${email}\n\n⚠️ IMPORTANT:\nOpen your browser console to copy the reset link.\nDo NOT copy from this alert as it may wrap the URL incorrectly.`);
       
       return true;
     }

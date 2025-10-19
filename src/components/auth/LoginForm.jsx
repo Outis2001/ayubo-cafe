@@ -192,7 +192,7 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
           </div>
 
           {/* Remember Me & Forgot Password */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 sm:justify-between">
             <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
               <input
                 type="checkbox"
@@ -206,7 +206,7 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
             <button
               type="button"
               onClick={handleForgotPassword}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-base sm:text-sm text-blue-600 hover:text-blue-800 font-semibold underline py-2"
               disabled={loading || isLocked}
             >
               Forgot password?
