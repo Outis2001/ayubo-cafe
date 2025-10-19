@@ -93,16 +93,31 @@ When you're ready to send actual emails in production, choose one of these optio
 
 2. Edit `.env` and update these values:
    ```env
+   # Email Configuration
    EMAIL_HOST=smtp.gmail.com
    EMAIL_PORT=587
    EMAIL_SECURE=false
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASSWORD=your-16-char-app-password
-   EMAIL_FROM=your-email@gmail.com
-   EMAIL_ENABLED=true
+   EMAIL_FROM="Ayubo Cafe <your-email@gmail.com>"
    EMAIL_DEBUG=false
+   EMAIL_ENABLED=true
+   
+   # Application URL (for generating password reset links)
+   # Development: http://localhost:3000
+   # Production: https://yourdomain.com
    APP_URL=https://yourdomain.com
    ```
+
+**Understanding the Variables:**
+- `EMAIL_ENABLED`: Set to `true` to send real emails, `false` for console logging only
+- `EMAIL_DEBUG`: Set to `true` to see full email content in console (even when EMAIL_ENABLED=true)
+- `APP_URL`: Your application's public URL, used to generate clickable password reset links
+  - **Development**: `http://localhost:3000` (or whatever port Vite assigns)
+  - **Production**: Your actual domain like:
+    - `https://ayubocafe.com`
+    - `https://your-app.netlify.app`
+    - `https://your-app.vercel.app`
 
 **Step 4: Create a Backend API**
 
