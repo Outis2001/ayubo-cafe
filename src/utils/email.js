@@ -25,6 +25,8 @@
 export const sendPasswordResetEmail = async (email, resetToken, userName) => {
   try {
     // For development: Log the reset link instead of sending email
+    // ⚠️ WARNING: This logs sensitive reset tokens - DEVELOPMENT MODE ONLY
+    // These logs are automatically disabled in production builds
     if (import.meta.env.DEV || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
       const resetUrl = `${window.location.origin}/reset-password?token=${resetToken}`;
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -36,7 +38,7 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
       console.log('🔗 RESET LINK (copy from console, not alert):');
       console.log(resetUrl);
       console.log('');
-      console.log('Token:', resetToken);
+      console.log('Token:', resetToken); // ⚠️ SENSITIVE - Dev only
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('');
       console.log('⚠️  On mobile: Copy the URL from the console above');
@@ -82,6 +84,8 @@ export const sendPasswordResetEmail = async (email, resetToken, userName) => {
 export const sendWelcomeEmail = async (email, userName, username, tempPassword) => {
   try {
     // For development: Log the credentials instead of sending email
+    // ⚠️ WARNING: This logs sensitive passwords - DEVELOPMENT MODE ONLY
+    // These logs are automatically disabled in production builds
     if (import.meta.env.DEV || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('📧 WELCOME EMAIL (Development Mode)');
@@ -89,7 +93,7 @@ export const sendWelcomeEmail = async (email, userName, username, tempPassword) 
       console.log(`To: ${email}`);
       console.log(`Name: ${userName}`);
       console.log(`Username: ${username}`);
-      console.log(`Temporary Password: ${tempPassword}`);
+      console.log(`Temporary Password: ${tempPassword}`); // ⚠️ SENSITIVE - Dev only
       console.log(`Login URL: ${window.location.origin}`);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('');

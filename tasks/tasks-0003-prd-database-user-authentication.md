@@ -195,39 +195,39 @@
   - [x] 9.20 Integrate ChangePasswordForm into user menu/settings dropdown
   - [x] 9.21 Add loading states for all async operations (login, password reset, user creation, etc.)
   - [x] 9.22 Add success/error toast notifications or alerts for better UX
-  - [ ] 9.23 Test all forms on mobile devices for responsive design (manual testing required)
-  - [ ] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify (OPTIONAL - not required per PRD)
-  - [ ] 9.25 Create email verification page/component (OPTIONAL - not required per PRD)
+  - [x] 9.23 Test all forms on mobile devices for responsive design (manual testing required)
+  - [ ] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify (SKIPPED - user decision)
+  - [ ] 9.25 Create email verification page/component (SKIPPED - user decision)
 
 - [ ] 10.0 Testing, Security Hardening & Documentation
-  - [ ] 10.1 Test complete authentication flow: login with valid credentials → use app → logout
-  - [ ] 10.2 Test failed login with invalid password (should log to audit_logs)
-  - [ ] 10.3 Test failed login with non-existent username (should not reveal user doesn't exist)
-  - [ ] 10.4 Test rate limiting: 5 failed attempts → account lockout for 15 minutes
+  - [x] 10.1 Test complete authentication flow: login with valid credentials → use app → logout
+  - [x] 10.2 Test failed login with invalid password (should log to audit_logs)
+  - [x] 10.3 Test failed login with non-existent username (should not reveal user doesn't exist)
+  - [x] 10.4 Test rate limiting: 5 failed attempts → account lockout for 15 minutes
   - [ ] 10.5 Test short session expiration: login without remember me → wait 8 hours → session should expire
   - [ ] 10.6 Test long session expiration: login with remember me → wait 7 days → session should expire
   - [ ] 10.7 Test inactivity timeout: login without remember me → 30 minutes inactive → session should expire and be logged to audit_logs with expiration_reason='inactivity'
-  - [ ] 10.8 Test forgot password flow: request reset → receive email → click link → reset password → login
+  - [x] 10.8 Test forgot password flow: request reset → receive email → click link → reset password → login
   - [ ] 10.9 Test password reset token expiration: request reset → wait 1 hour → token should be invalid
-  - [ ] 10.10 Test password reset token single-use: use token once → try again → should fail
+  - [x] 10.10 Test password reset token single-use: use token once → try again → should fail
   - [ ] 10.11 Test owner creates new user → user receives email → user logs in with temporary password
-  - [ ] 10.12 Test owner resets user password → all user sessions invalidated → user must login again
-  - [ ] 10.13 Test user changes own password → other sessions invalidated → current session remains active
-  - [ ] 10.14 Test owner deactivates user → user cannot login → existing sessions invalidated
-  - [ ] 10.15 Test owner activates deactivated user → user can login again
+  - [x] 10.12 Test owner resets user password → all user sessions invalidated → user must login again
+  - [x] 10.13 Test user changes own password → other sessions invalidated → current session remains active
+  - [x] 10.14 Test owner deactivates user → user cannot login → existing sessions invalidated
+  - [x] 10.15 Test owner activates deactivated user → user can login again
   - [ ] 10.16 Test audit logs capture all events correctly (login, logout, password changes, user management, session expiration with expiration_reason)
-  - [ ] 10.17 Test audit log filters and pagination work correctly
-  - [ ] 10.18 Test password strength validation rejects weak passwords
-  - [ ] 10.19 Test email uniqueness validation prevents duplicate emails
-  - [ ] 10.20 Test username uniqueness validation prevents duplicate usernames
-  - [ ] 10.21 Security: verify all passwords are hashed (never plain text in database)
-  - [ ] 10.22 Security: verify session tokens are cryptographically random (check length and randomness)
-  - [ ] 10.23 Security: verify password reset tokens are single-use only
-  - [ ] 10.24 Security: test SQL injection prevention (Supabase client handles this, but verify)
+  - [x] 10.17 Test audit log filters and pagination work correctly
+  - [x] 10.18 Test password strength validation rejects weak passwords
+  - [x] 10.19 Test email uniqueness validation prevents duplicate emails
+  - [x] 10.20 Test username uniqueness validation prevents duplicate usernames
+  - [x] 10.21 Security: verify all passwords are hashed (never plain text in database)
+  - [x] 10.22 Security: verify session tokens are cryptographically random (check length and randomness)
+  - [x] 10.23 Security: verify password reset tokens are single-use only
+  - [x] 10.24 Security: test SQL injection prevention (Supabase client handles this, but verify)
   - [ ] 10.25 Security: verify no sensitive data in browser console.log (remove debug logs)
   - [ ] 10.26 Security: verify session tokens cleared from storage on logout
-  - [ ] 10.27 Performance: test login response time (should be < 2 seconds)
-  - [ ] 10.28 Performance: test audit log query with 1000+ records (pagination should work smoothly)
+  - [x] 10.27 Performance: test login response time (should be < 2 seconds)
+  - [x] 10.28 Performance: test audit log query with 1000+ records (pagination should work smoothly)
   - [ ] 10.29 Create migration rollback script (if needed to undo changes)
   - [ ] 10.30 Update README.md with authentication setup instructions
   - [ ] 10.31 Document Gmail SMTP setup process (Step 1: Enable 2FA, Step 2: Generate App Password, Step 3: Configure .env)
