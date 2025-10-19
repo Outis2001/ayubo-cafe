@@ -7,7 +7,7 @@
  * @component
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { supabaseClient } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader, X } from './icons';
@@ -351,8 +351,8 @@ const AuditLogs = () => {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <>
-                    <tr key={log.audit_id} className="border-t hover:bg-gray-50">
+                  <Fragment key={log.audit_id}>
+                    <tr className="border-t hover:bg-gray-50">
                       <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-700">
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
@@ -410,7 +410,7 @@ const AuditLogs = () => {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))
               )}
             </tbody>
