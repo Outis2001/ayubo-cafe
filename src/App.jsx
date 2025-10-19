@@ -604,16 +604,6 @@ const AyuboCafe = () => {
     );
   }
 
-  // User Management view (owner only)
-  if (currentView === 'users') {
-    return <UserManagement />;
-  }
-
-  // Audit Logs view (owner only)
-  if (currentView === 'audit-logs') {
-    return <AuditLogs />;
-  }
-
   // Change Password modal
   if (showChangePassword) {
     return (
@@ -857,10 +847,22 @@ const AyuboCafe = () => {
             </div>
           </div>
 
-          {/* Rest of the billing interface continues as before... */}
-          {/* [Include all existing product management, cart, sales reports, etc.] */}
+          {/* Content Area - Switch based on currentView */}
+          
+          {/* User Management View */}
+          {currentView === 'users' && (
+            <UserManagement />
+          )}
 
-{showSettings && (
+          {/* Audit Logs View */}
+          {currentView === 'audit-logs' && (
+            <AuditLogs />
+          )}
+
+          {/* Billing View */}
+          {currentView === 'billing' && (
+            <>
+              {showSettings && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-blue-800">Manage Products</h2>
@@ -1259,6 +1261,8 @@ const AyuboCafe = () => {
               </div>
             </div>
           </div>
+            </>
+          )}
         </div>
 
         {/* Daily Stock Check-In Modal */}
