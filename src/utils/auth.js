@@ -142,6 +142,38 @@ export const generateResetToken = () => {
 };
 
 /**
+ * Generate a cryptographically secure email verification token
+ * 
+ * Creates a random 64-character hexadecimal string suitable for email verification links.
+ * Uses Web Crypto API for browser-compatible cryptographic randomness.
+ * Tokens expire after 24 hours by default.
+ * 
+ * @returns {string} 64-character hexadecimal verification token
+ * @throws {Error} If token generation fails
+ * 
+ * @example
+ * const verificationToken = generateVerificationToken();
+ * // Returns: "c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7"
+ */
+export const generateVerificationToken = () => {
+  try {
+    // Generate 32 random bytes using Web Crypto API
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    
+    // Convert to hexadecimal string (64 characters)
+    const token = Array.from(array)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('');
+    
+    return token;
+  } catch (error) {
+    console.error('Error generating verification token:', error);
+    throw new Error('Failed to generate verification token');
+  }
+};
+
+/**
  * Validate password strength
  * 
  * Checks if password meets security requirements:

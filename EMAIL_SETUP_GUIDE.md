@@ -123,44 +123,274 @@ When you're ready to send actual emails in production, choose one of these optio
 
 Since this is a client-side React app, you need a backend to send emails. Here are your options:
 
-#### A) Supabase Edge Functions (Recommended)
+#### A) Supabase Edge Functions (Recommended) ✅ ACTIVE
 
-Create a Supabase Edge Function:
+**Step 1: Set Supabase Secrets**
 
-```typescript
-// supabase/functions/send-email/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts"
+Your Edge Function needs access to email credentials. Set these as secrets:
 
-serve(async (req) => {
-  const { email, resetToken, userName, type } = await req.json()
+```bash
+# Option 1: Using Supabase CLI (Recommended)
+supabase secrets set EMAIL_HOST=smtp.gmail.com
+supabase secrets set EMAIL_PORT=587
+supabase secrets set EMAIL_USER=your-email@gmail.com
+supabase secrets set EMAIL_PASSWORD=your-16-char-app-password
+supabase secrets set EMAIL_FROM="Ayubo Cafe <your-email@gmail.com>"
+supabase secrets set APP_URL=http://localhost:3000
 
-  const client = new SmtpClient()
-
-  await client.connectTLS({
-    hostname: Deno.env.get("EMAIL_HOST"),
-    port: parseInt(Deno.env.get("EMAIL_PORT") || "587"),
-    username: Deno.env.get("EMAIL_USER"),
-    password: Deno.env.get("EMAIL_PASSWORD"),
-  })
-
-  // Use email templates from src/utils/email.js
-  // Send email based on type (password_reset, welcome, password_changed)
-
-  await client.close()
-
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json" },
-  })
-})
+# Option 2: Using Supabase Dashboard
+# Go to: Project Settings > Edge Functions > Secrets
+# Add each secret one by one
 ```
 
-Deploy:
+**Step 2: Create the Edge Function**
+
+Create file: `supabase/functions/send-email/index.ts`
+
+```typescript
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  try {
+    // Get email configuration from environment
+    const emailHost = Deno.env.get("EMAIL_HOST");
+    const emailPort = Deno.env.get("EMAIL_PORT");
+    const emailUser = Deno.env.get("EMAIL_USER");
+    const emailPassword = Deno.env.get("EMAIL_PASSWORD");
+    const emailFrom = Deno.env.get("EMAIL_FROM");
+    const appUrl = Deno.env.get("APP_URL");
+
+    // Check if configuration exists
+    if (!emailHost || !emailUser || !emailPassword || !emailFrom) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Email configuration missing" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse request body
+    const { type, email, resetToken, userName, tempPassword, verificationToken } = await req.json();
+
+    // Initialize SMTP client
+    const client = new SMTPClient({
+      connection: {
+        hostname: emailHost,
+        port: parseInt(emailPort || "587"),
+        tls: false,
+        auth: {
+          username: emailUser,
+          password: emailPassword,
+        },
+      },
+    });
+
+    let subject = "";
+    let html = "";
+
+    // Generate email content based on type
+    if (type === "password_reset") {
+      const resetLink = `${appUrl}/reset-password?token=${resetToken}`;
+      subject = "Password Reset Request - Ayubo Cafe";
+      html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3B82F6, #10B981); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header h1 { color: white; margin: 0; font-size: 28px; }
+            .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .button { display: inline-block; padding: 14px 32px; background: #3B82F6; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+            .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 10px 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔐 Password Reset</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${userName || 'there'},</p>
+              <p>We received a request to reset your password for your Ayubo Cafe account.</p>
+              <p>Click the button below to create a new password:</p>
+              <div style="text-align: center;">
+                <a href="${resetLink}" class="button">Reset Password</a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link: ${resetLink}</p>
+              <p><strong>⚠️ This link expires in 1 hour.</strong></p>
+              <p>If you didn't request this, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>© 2025 Ayubo Cafe. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    } else if (type === "welcome") {
+      subject = "Welcome to Ayubo Cafe!";
+      html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3B82F6, #10B981); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header h1 { color: white; margin: 0; font-size: 28px; }
+            .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .credentials { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 10px 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>👋 Welcome!</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${userName},</p>
+              <p>Your Ayubo Cafe account has been created!</p>
+              <div class="credentials">
+                <p><strong>Username:</strong> ${userName}</p>
+                <p><strong>Temporary Password:</strong> ${tempPassword}</p>
+              </div>
+              <p>⚠️ <strong>Important:</strong> Please change your password after first login.</p>
+              <p>Login at: ${appUrl}</p>
+            </div>
+            <div class="footer">
+              <p>© 2025 Ayubo Cafe. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    } else if (type === "password_changed") {
+      subject = "Password Changed - Ayubo Cafe";
+      html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3B82F6, #10B981); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header h1 { color: white; margin: 0; font-size: 28px; }
+            .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 10px 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🔒 Password Changed</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${userName},</p>
+              <p>This is a confirmation that your Ayubo Cafe password was recently changed.</p>
+              <p>If you made this change, no further action is needed.</p>
+              <p><strong>⚠️ If you didn't change your password, contact your administrator immediately.</strong></p>
+            </div>
+            <div class="footer">
+              <p>© 2025 Ayubo Cafe. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    } else if (type === "email_verification") {
+      const verificationLink = `${appUrl}/verify-email?token=${verificationToken}`;
+      subject = "Verify Your Email - Ayubo Cafe";
+      html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #3B82F6, #10B981); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .header h1 { color: white; margin: 0; font-size: 28px; }
+            .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+            .button { display: inline-block; padding: 14px 32px; background: #10B981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+            .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 10px 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📧 Verify Your Email</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${userName || 'there'},</p>
+              <p>Welcome to Ayubo Cafe! Please verify your email address to complete your account setup.</p>
+              <p>Click the button below to verify your email:</p>
+              <div style="text-align: center;">
+                <a href="${verificationLink}" class="button">Verify Email Address</a>
+              </div>
+              <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link: ${verificationLink}</p>
+              <p><strong>⚠️ This link expires in 24 hours.</strong></p>
+              <p>If you didn't create an account, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>© 2025 Ayubo Cafe. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    // Send email
+    await client.send({
+      from: emailFrom,
+      to: email,
+      subject: subject,
+      content: html,
+      html: html,
+    });
+
+    await client.close();
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+```
+
+**Step 3: Deploy the Edge Function**
+
 ```bash
 supabase functions deploy send-email
 ```
 
-Update `src/utils/email.js` to call your edge function instead of `/api/send-password-reset-email`.
+**Step 4: Already Done! ✅**
+
+Your `src/utils/email.js` is already configured to call this Edge Function.
 
 #### B) Express.js Server
 

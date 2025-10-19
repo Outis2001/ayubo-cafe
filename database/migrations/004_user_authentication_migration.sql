@@ -37,6 +37,7 @@ DO $$ BEGIN
         'failed_login',
         'user_created',
         'user_updated',
+        'user_activated',
         'user_deactivated',
         'session_expired'
     );

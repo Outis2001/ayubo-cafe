@@ -23,6 +23,7 @@ import SortConfigPanel from './components/SortConfigPanel';
 import LoginForm from './components/auth/LoginForm';
 import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
 import ResetPasswordForm from './components/auth/ResetPasswordForm';
+import VerifyEmailForm from './components/auth/VerifyEmailForm';
 import ChangePasswordForm from './components/auth/ChangePasswordForm';
 import UserManagement from './components/UserManagement';
 import AuditLogs from './components/AuditLogs';
@@ -51,6 +52,7 @@ const AyuboCafe = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [resetToken, setResetToken] = useState(null);
+  const [verificationToken, setVerificationToken] = useState(null);
 
   // Product & billing state
   const [products, setProducts] = useState([]);
@@ -83,12 +85,19 @@ const AyuboCafe = () => {
     loading: loadingSortConfig
   } = useSortConfig();
 
-  // Check URL for reset token on mount
+  // Check URL for reset or verification token on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+    const pathname = window.location.pathname;
+    
     if (token) {
-      setResetToken(token);
+      // Check if this is a verification link or password reset link
+      if (pathname.includes('verify-email') || window.location.href.includes('verify-email')) {
+        setVerificationToken(token);
+      } else {
+        setResetToken(token);
+      }
       // Clear the URL without reloading
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -584,6 +593,19 @@ const AyuboCafe = () => {
 
   // Login screen
   if (!isAuthenticated) {
+    // Show email verification form if verification token is present
+    if (verificationToken) {
+      return (
+        <VerifyEmailForm
+          token={verificationToken}
+          onVerificationComplete={() => {
+            setVerificationToken(null);
+            // User will be redirected to login
+          }}
+        />
+      );
+    }
+
     // Show reset password form if token is present
     if (resetToken) {
     return (

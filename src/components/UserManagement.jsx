@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react';
 import { supabaseClient } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { validateUsername, validateEmail, validateName, validatePhone, validatePassword } from '../utils/validation';
-import { hashPassword, generateResetToken } from '../utils/auth';
+import { hashPassword, generateResetToken, generateVerificationToken } from '../utils/auth';
 import { invalidateUserSessions } from '../utils/session';
 import {
   logUserCreated,
@@ -26,7 +26,7 @@ import {
   logUserActivated,
   logPasswordChange
 } from '../utils/auditLog';
-import { sendWelcomeEmail, sendPasswordChangedEmail } from '../utils/email';
+import { sendWelcomeEmail, sendPasswordChangedEmail, sendVerificationEmail } from '../utils/email';
 import { User, Trash2, X, Loader, Settings } from './icons';
 
 const UserManagement = () => {
@@ -241,6 +241,27 @@ const UserManagement = () => {
         }
       );
 
+      // Generate email verification token
+      const verificationToken = generateVerificationToken();
+      
+      // Calculate expiration time (24 hours from now)
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      // Insert verification token into database
+      const { error: tokenError } = await supabaseClient
+        .from('email_verification_tokens')
+        .insert({
+          user_id: newUser.user_id,
+          verification_token: verificationToken,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (tokenError) {
+        console.error('Error creating verification token:', tokenError);
+        // Don't fail user creation if token fails, just log it
+      }
+
       // Send welcome email with login credentials
       await sendWelcomeEmail(
         newUser.email,
@@ -249,8 +270,18 @@ const UserManagement = () => {
         formData.password // Send the plain password (before hashing)
       );
 
+      // Send email verification link
+      await sendVerificationEmail(
+        newUser.email,
+        verificationToken,
+        newUser.first_name
+      );
+
       // Refresh user list
       setUsers([newUser, ...users]);
+
+      // Show success message
+      alert(`User created successfully!\n\nUsername: ${newUser.username}\nEmail: ${newUser.email}\n\n✅ Welcome email sent with temporary password\n📧 Verification email sent - user must verify email before logging in`);
 
       // Reset form and close
       setFormData({

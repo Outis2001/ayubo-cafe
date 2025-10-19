@@ -199,6 +199,72 @@ export const sendPasswordChangedEmail = async (email, userName, changedBy = 'sel
 };
 
 /**
+ * Client-side function to send email verification link to new user
+ * 
+ * @param {string} email - Recipient email
+ * @param {string} verificationToken - Email verification token
+ * @param {string} userName - User's first name
+ * @returns {Promise<boolean>} Success status
+ */
+export const sendVerificationEmail = async (email, verificationToken, userName) => {
+  try {
+    // Check if email sending is enabled
+    const emailEnabled = import.meta.env.VITE_EMAIL_ENABLED === 'true';
+    
+    // For development: Log the verification link instead of sending email
+    // ⚠️ WARNING: This logs sensitive verification tokens - DEVELOPMENT MODE ONLY
+    // Set VITE_EMAIL_ENABLED=true in .env to send real emails
+    if (!emailEnabled || import.meta.env.VITE_EMAIL_DEBUG === 'true') {
+      const verificationUrl = `${window.location.origin}/verify-email?token=${verificationToken}`;
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📧 EMAIL VERIFICATION (Development Mode)');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`To: ${email}`);
+      console.log(`Name: ${userName}`);
+      console.log('');
+      console.log('🔗 VERIFICATION LINK (copy from console, not alert):');
+      console.log(verificationUrl);
+      console.log('');
+      console.log('Token:', verificationToken); // ⚠️ SENSITIVE - Dev only
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('');
+      console.log('⚠️  On mobile: Copy the URL from the console above');
+      console.log('    Do NOT copy from the alert (it may add line breaks)');
+      console.log('');
+      
+      // Show simple alert - user should copy from console
+      alert(`Email verification link sent!\n\nTo: ${email}\n\n⚠️ IMPORTANT:\nOpen your browser console to copy the verification link.\nDo NOT copy from this alert as it may wrap the URL incorrectly.`);
+      
+      return true;
+    }
+
+    // Production: Call Supabase Edge Function
+    const response = await fetch('https://chxflnoqbapoywpibeba.supabase.co/functions/v1/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ 
+        type: 'email_verification',
+        email, 
+        verificationToken, 
+        userName 
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return false;
+  }
+};
+
+/**
  * Generate password reset email HTML
  * This template can be used server-side
  */

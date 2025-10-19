@@ -36,7 +36,7 @@
   - [x] 1.2 Add users table schema with columns: user_id (UUID PK), username (unique), email (unique), password_hash, first_name, last_name, phone, role (enum), is_active, created_at, updated_at, last_login_at
   - [x] 1.3 Add user_sessions table schema with session_id, user_id (FK), session_token (unique), remember_me, expires_at, created_at, last_activity_at
   - [x] 1.4 Add password_reset_tokens table schema with token_id, user_id (FK), reset_token (unique), expires_at, used_at, created_at
-  - [x] 1.5 Add audit_logs table schema with audit_id, user_id (FK nullable), username_attempted, action (enum: login, logout, password_change, password_reset, failed_login, user_created, user_updated, user_deactivated, session_expired), ip_address, user_agent, status (enum), details (JSONB with expiration_reason field), timestamp
+  - [x] 1.5 Add audit_logs table schema with audit_id, user_id (FK nullable), username_attempted, action (enum: login, logout, password_change, password_reset, failed_login, user_created, user_updated, user_activated, user_deactivated, session_expired), ip_address, user_agent, status (enum), details (JSONB with expiration_reason field), timestamp
   - [x] 1.6 Create indexes on users.username, users.email, user_sessions.session_token, password_reset_tokens.reset_token, audit_logs.user_id, audit_logs.timestamp
   - [x] 1.7 Add foreign key constraints with CASCADE delete for sessions and audit_logs
   - [x] 1.8 Create trigger for auto-updating users.updated_at timestamp (reuse existing function)
@@ -196,8 +196,25 @@
   - [x] 9.21 Add loading states for all async operations (login, password reset, user creation, etc.)
   - [x] 9.22 Add success/error toast notifications or alerts for better UX
   - [x] 9.23 Test all forms on mobile devices for responsive design (manual testing required)
-  - [ ] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify (SKIPPED - user decision)
-  - [ ] 9.25 Create email verification page/component (SKIPPED - user decision)
+  - [x] 9.24 Add email verification flow: after user creation, send verification email, user clicks link to verify
+    - [x] 9.24.1 Add email_verified column to users table (boolean, default false)
+    - [x] 9.24.2 Create email_verification_tokens table (token_id, user_id, verification_token, expires_at, used_at, created_at)
+    - [x] 9.24.3 Create migration file 005_email_verification.sql with new column and table
+    - [x] 9.24.4 Auto-verify owner account in migration (set email_verified=true for owner)
+    - [x] 9.24.5 Add verification token generation function to src/utils/auth.js
+    - [x] 9.24.6 Create sendVerificationEmail function in src/utils/email.js
+    - [x] 9.24.7 Update user creation flow to send verification email (in UserManagement.jsx)
+    - [x] 9.24.8 Update login flow to check email_verified status (in AuthContext.jsx)
+    - [x] 9.24.9 Add "Resend Verification Email" option in login form for unverified users
+  - [x] 9.25 Create email verification page/component
+    - [x] 9.25.1 Create src/components/auth/VerifyEmailForm.jsx component
+    - [x] 9.25.2 Add URL token extraction and validation logic
+    - [x] 9.25.3 Implement token verification: check expires_at, check used_at is null
+    - [x] 9.25.4 Update users.email_verified to true on successful verification
+    - [x] 9.25.5 Mark token as used (set used_at timestamp)
+    - [x] 9.25.6 Add routing for /verify-email page in App.jsx
+    - [x] 9.25.7 Show success message and redirect to login
+    - [x] 9.25.8 Handle expired/invalid token errors with resend option
 
 - [ ] 10.0 Testing, Security Hardening & Documentation
   - [x] 10.1 Test complete authentication flow: login with valid credentials → use app → logout
@@ -210,12 +227,12 @@
   - [x] 10.8 Test forgot password flow: request reset → receive email → click link → reset password → login
   - [ ] 10.9 Test password reset token expiration: request reset → wait 1 hour → token should be invalid
   - [x] 10.10 Test password reset token single-use: use token once → try again → should fail
-  - [ ] 10.11 Test owner creates new user → user receives email → user logs in with temporary password
+  - [x] 10.11 Test owner creates new user → user receives email → user logs in with temporary password ✅ (User confirmed)
   - [x] 10.12 Test owner resets user password → all user sessions invalidated → user must login again
   - [x] 10.13 Test user changes own password → other sessions invalidated → current session remains active
   - [x] 10.14 Test owner deactivates user → user cannot login → existing sessions invalidated
   - [x] 10.15 Test owner activates deactivated user → user can login again
-  - [ ] 10.16 Test audit logs capture all events correctly (login, logout, password changes, user management, session expiration with expiration_reason)
+  - [x] 10.16 Test audit logs capture all events correctly (login, logout, password changes, user management including user_activated and user_deactivated, session expiration with expiration_reason) ✅ (User confirmed)
   - [x] 10.17 Test audit log filters and pagination work correctly
   - [x] 10.18 Test password strength validation rejects weak passwords
   - [x] 10.19 Test email uniqueness validation prevents duplicate emails
@@ -232,9 +249,9 @@
   - [x] 10.30 Update README.md with authentication setup instructions
   - [x] 10.31 Document Gmail SMTP setup process (Step 1: Enable 2FA, Step 2: Generate App Password, Step 3: Configure .env)
   - [x] 10.32 Document environment variables required in .env.example and README
-  - [ ] 10.33 Create user guide for owner: how to create users, reset passwords, view audit logs
-  - [ ] 10.34 Add inline code comments for complex authentication logic
-  - [ ] 10.35 Remove hardcoded credentials from App.jsx after migration is complete
+  - [x] 10.33 Create user guide for owner: how to create users, reset passwords, view audit logs ✅ (OWNER_USER_GUIDE.md created)
+  - [x] 10.34 Add inline code comments for complex authentication logic ✅ (session.js, AuthContext.jsx commented)
+  - [x] 10.35 Remove hardcoded credentials from App.jsx after migration is complete ✅ (LoginForm.jsx cleaned)
   - [ ] 10.36 Deploy to production: run migration, test thoroughly, monitor for issues
   - [ ] 10.37 Post-deployment: verify owner can login with migrated account
   - [ ] 10.38 Post-deployment: verify email sending works in production environment

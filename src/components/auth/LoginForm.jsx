@@ -10,6 +10,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { checkLockoutStatus, resetFailedLoginAttempts, trackFailedLoginAttempt } from '../../utils/rateLimiter';
+import { generateVerificationToken } from '../../utils/auth';
+import { sendVerificationEmail } from '../../utils/email';
+import { supabaseClient } from '../../config/supabase';
 import { Loader } from '../icons';
 
 /**
@@ -28,6 +31,9 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTimeLeft, setLockoutTimeLeft] = useState(0);
   const [error, setError] = useState('');
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   /**
    * Check lockout status on component mount and set up interval
@@ -98,12 +104,21 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
       // Login failed - show error
       setError(result.error || 'Login failed. Please try again.');
       
-      // Track attempt
-      const lockoutResult = trackFailedLoginAttempt();
-      
-      if (lockoutResult.isLocked) {
-        setIsLocked(true);
-        setLockoutTimeLeft(lockoutResult.timeLeft);
+      // Check if login failed due to unverified email
+      if (result.emailNotVerified) {
+        setEmailNotVerified(true);
+        setUserEmail(result.userEmail);
+      } else {
+        setEmailNotVerified(false);
+        setUserEmail('');
+        
+        // Track failed attempt (only if not due to email verification)
+        const lockoutResult = trackFailedLoginAttempt();
+        
+        if (lockoutResult.isLocked) {
+          setIsLocked(true);
+          setLockoutTimeLeft(lockoutResult.timeLeft);
+        }
       }
     }
   };
@@ -114,6 +129,73 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
   const handleForgotPassword = () => {
     if (onForgotPassword) {
       onForgotPassword();
+    }
+  };
+
+  /**
+   * Handle resend verification email
+   */
+  const handleResendVerificationEmail = async () => {
+    if (!userEmail || !username) {
+      return;
+    }
+
+    setResendingEmail(true);
+    setError('');
+
+    try {
+      // Get user details
+      const { data: user, error: userError } = await supabaseClient
+        .from('users')
+        .select('user_id, first_name')
+        .eq('email', userEmail)
+        .single();
+
+      if (userError || !user) {
+        setError('Failed to resend verification email. Please try again.');
+        setResendingEmail(false);
+        return;
+      }
+
+      // Generate new verification token
+      const verificationToken = generateVerificationToken();
+      
+      // Calculate expiration time (24 hours from now)
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      // Insert new verification token (old token becomes stale)
+      const { error: tokenError } = await supabaseClient
+        .from('email_verification_tokens')
+        .insert({
+          user_id: user.user_id,
+          verification_token: verificationToken,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (tokenError) {
+        console.error('Error creating verification token:', tokenError);
+        setError('Failed to generate verification token. Please try again.');
+        setResendingEmail(false);
+        return;
+      }
+
+      // Send verification email
+      await sendVerificationEmail(
+        userEmail,
+        verificationToken,
+        user.first_name
+      );
+
+      // Show success message
+      setError('');
+      alert(`Verification email sent to ${userEmail}\n\nPlease check your inbox and verify your email address.`);
+      
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -143,6 +225,25 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
         {error && !isLocked && (
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
             <p className="text-red-700 text-sm">{error}</p>
+            
+            {/* Resend Verification Email Button */}
+            {emailNotVerified && (
+              <button
+                type="button"
+                onClick={handleResendVerificationEmail}
+                disabled={resendingEmail}
+                className="mt-3 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {resendingEmail ? (
+                  <>
+                    <Loader size={20} className="mr-2" />
+                    Sending...
+                  </>
+                ) : (
+                  '📧 Resend Verification Email'
+                )}
+              </button>
+            )}
           </div>
         )}
 
@@ -229,15 +330,6 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
             )}
           </button>
         </form>
-
-        {/* Additional Info */}
-        <div className="mt-6 pt-6 border-t-2 border-gray-200">
-          <div className="text-center text-sm text-gray-600">
-            <p>Default credentials:</p>
-            <p className="font-mono text-xs mt-1">Username: <strong>owner</strong></p>
-            <p className="font-mono text-xs">Password: <strong>Sokian@1997</strong></p>
-          </div>
-        </div>
 
         {/* Security Note */}
         <div className="mt-4 p-3 bg-yellow-50 border-2 border-yellow-300 rounded-lg">

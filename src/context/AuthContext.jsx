@@ -161,41 +161,58 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Login user with username and password
+   * Login function - Handles user authentication and session creation
    * 
-   * @param {string} username - User's username
-   * @param {string} password - User's plain text password
-   * @param {boolean} rememberMe - Whether to create a long-term session (7 days vs 8 hours)
-   * @returns {Promise<Object>} Login result with success boolean and error message
+   * This function performs the complete login flow with multiple security checks:
+   * 1. User existence validation
+   * 2. Account status check (active/inactive)
+   * 3. Email verification check
+   * 4. Password validation (bcrypt comparison)
+   * 5. Session creation with configurable duration
+   * 6. Role-based session limit enforcement
+   * 7. Audit logging for all outcomes
+   * 
+   * @param {string} username - User's login username
+   * @param {string} password - User's plain-text password (will be compared with hashed password)
+   * @param {boolean} rememberMe - If true, session lasts 7 days; if false, 8 hours with 30-min inactivity timeout
+   * @returns {Promise<Object>} Result object with success status, error message, or special flags
    */
   const login = async (username, password, rememberMe = false) => {
     try {
       setLoading(true);
 
-      // Query users table for matching username
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 1: Validate User Existence
+      // ═══════════════════════════════════════════════════════════════════
+      // Query database for user with matching username
+      // We fetch all needed fields in one query for efficiency
       const { data: user, error: userError } = await supabaseClient
         .from('users')
-        .select('user_id, username, email, first_name, last_name, role, is_active, password_hash')
+        .select('user_id, username, email, first_name, last_name, role, is_active, email_verified, password_hash')
         .eq('username', username)
-        .single();
+        .single(); // Expect exactly one result
 
       if (userError || !user) {
-        // Log failed login attempt
+        // User not found - log for security monitoring
         await logAuditEvent(
           'failed_login',
-          null,
+          null, // No user_id available since user doesn't exist
           username,
           'failure',
           { reason: 'user_not_found' }
         );
 
+        // Generic error message to prevent username enumeration attacks
         return {
           success: false,
           error: 'Invalid username or password'
         };
       }
 
-      // Check if user is active
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 2: Check Account Status
+      // ═══════════════════════════════════════════════════════════════════
+      // Prevent login for deactivated accounts (security feature)
       if (!user.is_active) {
         await logAuditEvent(
           'failed_login',
@@ -211,11 +228,37 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      // Compare password with stored hash
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 3: Check Email Verification Status
+      // ═══════════════════════════════════════════════════════════════════
+      // All users must verify their email before logging in
+      // This ensures we have a valid email address for password resets
+      if (!user.email_verified) {
+        await logAuditEvent(
+          'failed_login',
+          user.user_id,
+          username,
+          'failure',
+          { reason: 'email_not_verified', email: user.email }
+        );
+
+        // Return special flags so UI can show "Resend Verification" button
+        return {
+          success: false,
+          error: 'Please verify your email before logging in. Check your inbox for the verification link.',
+          emailNotVerified: true, // Flag to show resend option
+          userEmail: user.email   // Needed for resending verification email
+        };
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 4: Validate Password
+      // ═══════════════════════════════════════════════════════════════════
+      // Use bcrypt to securely compare plain password with stored hash
       const isPasswordValid = await comparePassword(password, user.password_hash);
 
       if (!isPasswordValid) {
-        // Log failed login attempt
+        // Password incorrect - log for security monitoring (potential brute force)
         await logAuditEvent(
           'failed_login',
           user.user_id,
@@ -224,16 +267,22 @@ export const AuthProvider = ({ children }) => {
           { reason: 'invalid_password' }
         );
 
+        // Generic error message to prevent username enumeration attacks
         return {
           success: false,
           error: 'Invalid username or password'
         };
       }
 
-      // Generate session token
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 5: Create Session
+      // ═══════════════════════════════════════════════════════════════════
+      // Generate cryptographically secure random token for session
       const sessionToken = generateSessionToken();
 
-      // Calculate expiration time (8 hours or 7 days)
+      // Calculate expiration based on "Remember Me" checkbox
+      // - Without Remember Me: 8 hours with 30-minute inactivity timeout
+      // - With Remember Me: 7 days with no inactivity timeout
       const expiresAt = new Date();
       if (rememberMe) {
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
@@ -241,7 +290,7 @@ export const AuthProvider = ({ children }) => {
         expiresAt.setHours(expiresAt.getHours() + 8); // 8 hours
       }
 
-      // Create session in database
+      // Insert new session record into database
       const { error: sessionError } = await supabaseClient
         .from('user_sessions')
         .insert({
@@ -260,12 +309,16 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      // Enforce role-based session limits
-      // Owner: Max 1 session, Cashier: Max 3 sessions
+      // ═══════════════════════════════════════════════════════════════════
+      // STEP 6: Enforce Role-Based Session Limits
+      // ═══════════════════════════════════════════════════════════════════
+      // Security policy: Limit concurrent sessions per role
+      // - Owner: Max 1 session (high security, single device only)
+      // - Cashier: Max 3 sessions (allows shift changes and device flexibility)
       const sessionLimitResult = await enforceSessionLimits(
         user.user_id,
         user.role,
-        sessionToken
+        sessionToken // Protect the current session from being deleted
       );
 
       if (sessionLimitResult.invalidatedCount > 0) {

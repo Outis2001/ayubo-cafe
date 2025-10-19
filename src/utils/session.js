@@ -430,23 +430,28 @@ export const cleanupExpiredSessions = async () => {
 };
 
 /**
- * Enforce role-based session limits
+ * Enforce role-based session limits for users
  * 
- * Implements different session policies based on user role:
- * - Owner: Maximum 1 active session (new login invalidates all others)
- * - Cashier: Maximum 3 active sessions (oldest sessions removed when limit exceeded)
+ * This function implements a security policy that limits the number of concurrent sessions per role:
+ * - Owners: Maximum 1 session (single device only)
+ * - Cashiers: Maximum 3 sessions (supports shift changes and multiple devices)
  * 
- * @param {string} userId - User ID to enforce limits for
- * @param {string} role - User role ('owner' or 'cashier')
- * @param {string} currentSessionToken - Token of current/new session to keep
- * @returns {Promise<Object>} Result with success boolean and count of invalidated sessions
+ * When called during login, it will automatically invalidate old sessions to enforce the limit.
+ * 
+ * @param {string} userId - The user's unique identifier
+ * @param {string} role - The user's role ('owner' or 'cashier')
+ * @param {string|null} currentSessionToken - The newly created session token (to preserve it)
+ * @returns {Promise<Object>} Result with success status, count of invalidated sessions, and policy info
  * 
  * @example
- * // Before creating new session
- * await enforceSessionLimits(userId, userRole, newSessionToken);
+ * // Called after creating a new session during login
+ * const result = await enforceSessionLimits(user.user_id, 'owner', newSessionToken);
+ * // Owner: Will invalidate all other sessions (only 1 allowed)
+ * // Cashier: Will invalidate oldest sessions if more than 3 exist
  */
 export const enforceSessionLimits = async (userId, role, currentSessionToken = null) => {
   try {
+    // Validate required parameters
     if (!userId || !role) {
       return {
         success: false,
@@ -454,12 +459,13 @@ export const enforceSessionLimits = async (userId, role, currentSessionToken = n
       };
     }
 
-    // Get all active sessions for this user, ordered by creation time
+    // STEP 1: Fetch all active sessions for this user
+    // Sessions are ordered newest-first so we can easily keep the most recent ones
     const { data: sessions, error: fetchError } = await supabaseClient
       .from('user_sessions')
       .select('session_token, created_at')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false }); // Newest first
+      .order('created_at', { ascending: false }); // Newest first (important for cashier logic)
 
     if (fetchError) {
       console.error('Error fetching user sessions:', fetchError);
@@ -469,6 +475,7 @@ export const enforceSessionLimits = async (userId, role, currentSessionToken = n
       };
     }
 
+    // If no sessions exist, nothing to enforce
     if (!sessions || sessions.length === 0) {
       return {
         success: true,
@@ -477,37 +484,46 @@ export const enforceSessionLimits = async (userId, role, currentSessionToken = n
       };
     }
 
+    // STEP 2: Determine which sessions to invalidate based on role
     let sessionsToInvalidate = [];
 
     if (role === 'owner') {
-      // Owner: Only 1 session allowed - invalidate ALL other sessions
+      // OWNER POLICY: Only 1 session allowed (single device security)
+      // When owner logs in on a new device, all other sessions are terminated
+      // This prevents unauthorized access if owner's device is compromised
       sessionsToInvalidate = sessions
-        .filter(session => session.session_token !== currentSessionToken)
-        .map(session => session.session_token);
+        .filter(session => session.session_token !== currentSessionToken) // Keep current
+        .map(session => session.session_token); // Invalidate all others
 
     } else if (role === 'cashier') {
-      // Cashier: Maximum 3 sessions allowed
+      // CASHIER POLICY: Maximum 3 sessions allowed (supports shift changes)
+      // Allows cashiers to be logged in on multiple devices (e.g., during shift overlap)
+      // Oldest sessions are automatically removed when limit is reached
       const MAX_CASHIER_SESSIONS = 3;
       
-      // If we have more than max sessions, remove oldest ones
+      // Only enforce limit if we've reached or exceeded it
       if (sessions.length >= MAX_CASHIER_SESSIONS) {
-        // Keep the newest (MAX_CASHIER_SESSIONS - 1) sessions + current session
-        // This means when adding the new session, we'll have exactly MAX_CASHIER_SESSIONS
+        // Keep the newest (MAX - 1) sessions to make room for the current one
+        // Example: If we have 4 sessions and max is 3:
+        // - Keep newest 2 sessions (indices 0-1)
+        // - Remove oldest 2 sessions (indices 2-3)
+        // - After adding current session, we'll have exactly 3 sessions
         const sessionsToKeep = sessions.slice(0, MAX_CASHIER_SESSIONS - 1);
         const sessionsToRemove = sessions.slice(MAX_CASHIER_SESSIONS - 1);
         
         sessionsToInvalidate = sessionsToRemove
-          .filter(session => session.session_token !== currentSessionToken)
+          .filter(session => session.session_token !== currentSessionToken) // Protect current
           .map(session => session.session_token);
       }
+      // If sessions.length < MAX_CASHIER_SESSIONS, no action needed
     }
 
-    // Invalidate the selected sessions
+    // STEP 3: Delete the sessions marked for invalidation
     if (sessionsToInvalidate.length > 0) {
       const { error: deleteError } = await supabaseClient
         .from('user_sessions')
         .delete()
-        .in('session_token', sessionsToInvalidate);
+        .in('session_token', sessionsToInvalidate); // Batch delete for efficiency
 
       if (deleteError) {
         console.error('Error invalidating sessions:', deleteError);
@@ -516,13 +532,16 @@ export const enforceSessionLimits = async (userId, role, currentSessionToken = n
           error: 'Failed to invalidate sessions'
         };
       }
+
+      console.log(`✅ Session policy enforced: Invalidated ${sessionsToInvalidate.length} old session(s) for ${role}`);
     }
 
+    // Return success with details about what was done
     return {
       success: true,
       invalidatedCount: sessionsToInvalidate.length,
       message: `Invalidated ${sessionsToInvalidate.length} session(s) based on ${role} policy`,
-      policy: role === 'owner' ? 'Single session only' : `Maximum ${3} sessions`
+      policy: role === 'owner' ? 'Single session only' : `Maximum ${MAX_CASHIER_SESSIONS} sessions`
     };
 
   } catch (error) {
