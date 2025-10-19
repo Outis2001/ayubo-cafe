@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { supabaseClient } from '../../config/supabase';
 import { validateEmail } from '../../utils/validation';
 import { generateResetToken } from '../../utils/auth';
+import { sendPasswordResetEmail } from '../../utils/email';
 import { X, Loader } from '../icons';
 
 /**
@@ -140,15 +141,17 @@ const ForgotPasswordForm = ({ onClose, onBackToLogin }) => {
         return;
       }
 
-      // TODO: Send email with reset link
-      // For now, we'll log the token (in production, send email)
-      console.log('Password reset token:', resetToken);
-      console.log('Reset URL:', `${window.location.origin}/reset-password?token=${resetToken}`);
+      // Send password reset email
+      const emailSent = await sendPasswordResetEmail(
+        user.email,
+        resetToken,
+        user.first_name
+      );
       
       // Log successful reset request
       await logAuditEvent(user.user_id, user.username, 'success', {
         identifier_type: isEmail ? 'email' : 'username',
-        email_sent: false, // Will be true once email is implemented
+        email_sent: emailSent,
         expires_at: expiresAt.toISOString()
       });
 

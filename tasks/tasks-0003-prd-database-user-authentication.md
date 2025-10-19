@@ -152,25 +152,25 @@
   - [x] 7.20 Add export to CSV functionality (optional, nice-to-have)
   - [x] 7.21 Style component using TailwindCSS
 
-- [ ] 8.0 Email Service Integration (Gmail SMTP)
-  - [ ] 8.1 Install nodemailer: `npm install nodemailer`
-  - [ ] 8.2 Create `.env.example` file with template for Gmail SMTP configuration
-  - [ ] 8.3 Add environment variables to .env.example: EMAIL_HOST, EMAIL_PORT, EMAIL_SECURE, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM
-  - [ ] 8.4 Add .env to .gitignore (if not already present)
-  - [ ] 8.5 Create `src/utils/email.js` with Nodemailer transporter configuration
-  - [ ] 8.6 Configure transporter with Gmail SMTP settings from environment variables
-  - [ ] 8.7 Create sendEmail(to, subject, text, html) utility function
-  - [ ] 8.8 Add error handling and retry logic (3 retries with exponential backoff)
-  - [ ] 8.9 Create `src/templates/passwordResetEmail.js` - plain text template function
-  - [ ] 8.10 Password reset email template: greeting with first_name, explanation, reset link with token, expiration notice (1 hour), warning if not requested
-  - [ ] 8.11 Create `src/templates/welcomeEmail.js` - new user welcome email template
-  - [ ] 8.12 Welcome email template: greeting with first_name, credentials (username, temporary password), login link, change password reminder
-  - [ ] 8.13 Implement sendPasswordResetEmail(userEmail, userName, resetToken) function
-  - [ ] 8.14 Generate reset URL: `${window.location.origin}/reset-password?token=${resetToken}`
-  - [ ] 8.15 Implement sendWelcomeEmail(userEmail, userName, username, tempPassword) function
-  - [ ] 8.16 Add email verification notification: sendPasswordChangedEmail(userEmail, userName) for owner override resets
-  - [ ] 8.17 Test email sending in development environment (send test email to your own Gmail)
-  - [ ] 8.18 Document Gmail SMTP setup in README or separate SETUP.md
+- [x] 8.0 Email Service Integration (Gmail SMTP)
+  - [x] 8.1 Install nodemailer: `npm install nodemailer`
+  - [x] 8.2 Create `.env.example` file with template for Gmail SMTP configuration
+  - [x] 8.3 Add environment variables to .env.example: EMAIL_HOST, EMAIL_PORT, EMAIL_SECURE, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM
+  - [x] 8.4 Add .env to .gitignore (if not already present)
+  - [x] 8.5 Create `src/utils/email.js` with Nodemailer transporter configuration
+  - [x] 8.6 Configure transporter with Gmail SMTP settings from environment variables
+  - [x] 8.7 Create sendEmail(to, subject, text, html) utility function
+  - [x] 8.8 Add error handling and retry logic (3 retries with exponential backoff)
+  - [x] 8.9 Create `src/templates/passwordResetEmail.js` - plain text template function
+  - [x] 8.10 Password reset email template: greeting with first_name, explanation, reset link with token, expiration notice (1 hour), warning if not requested
+  - [x] 8.11 Create `src/templates/welcomeEmail.js` - new user welcome email template
+  - [x] 8.12 Welcome email template: greeting with first_name, credentials (username, temporary password), login link, change password reminder
+  - [x] 8.13 Implement sendPasswordResetEmail(userEmail, userName, resetToken) function
+  - [x] 8.14 Generate reset URL: `${window.location.origin}/reset-password?token=${resetToken}`
+  - [x] 8.15 Implement sendWelcomeEmail(userEmail, userName, username, tempPassword) function
+  - [x] 8.16 Add email verification notification: sendPasswordChangedEmail(userEmail, userName) for owner override resets
+  - [x] 8.17 Test email sending in development environment (send test email to your own Gmail)
+  - [x] 8.18 Document Gmail SMTP setup in README or separate SETUP.md
 
 - [x] 9.0 UI Components & Forms
   - [x] 9.1 Create `src/components/auth/LoginForm.jsx` - replace hardcoded login screen in App.jsx

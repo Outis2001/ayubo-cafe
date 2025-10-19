@@ -26,6 +26,7 @@ import {
   logUserActivated,
   logPasswordChange
 } from '../utils/auditLog';
+import { sendWelcomeEmail, sendPasswordChangedEmail } from '../utils/email';
 import { User, Trash2, X, Loader, Settings } from './icons';
 
 const UserManagement = () => {
@@ -238,6 +239,14 @@ const UserManagement = () => {
           first_name: newUser.first_name,
           last_name: newUser.last_name
         }
+      );
+
+      // Send welcome email with login credentials
+      await sendWelcomeEmail(
+        newUser.email,
+        newUser.first_name,
+        newUser.username,
+        formData.password // Send the plain password (before hashing)
       );
 
       // Refresh user list
@@ -514,6 +523,13 @@ const UserManagement = () => {
         null,
         'owner_override',
         currentUser.user_id
+      );
+
+      // Send password changed notification email
+      await sendPasswordChangedEmail(
+        resettingPasswordUser.email,
+        resettingPasswordUser.first_name,
+        'owner_override'
       );
 
       // Reset form and close
