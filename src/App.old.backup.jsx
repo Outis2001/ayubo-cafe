@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabaseClient } from './config/supabase';
-import { useAuth } from './context/AuthContext';
-import { useSession } from './hooks/useSession';
 import {
   Search,
   Trash2,
@@ -20,11 +18,6 @@ import useSortConfig from './hooks/useSortConfig';
 import StockBadge from './components/StockBadge';
 import SalesBadge from './components/SalesBadge';
 import SortConfigPanel from './components/SortConfigPanel';
-import LoginForm from './components/auth/LoginForm';
-import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
-import ChangePasswordForm from './components/auth/ChangePasswordForm';
-import UserManagement from './components/UserManagement';
-import AuditLogs from './components/AuditLogs';
 import {
   validateStock,
   calculateStockDeductions,
@@ -39,16 +32,9 @@ import {
 } from './utils/productSorting';
 
 const AyuboCafe = () => {
-  const { currentUser, isAuthenticated, loading: authLoading, logout } = useAuth();
-  useSession(); // Initialize session management (auto-refresh, inactivity detection)
-
-  // Navigation state
-  const [currentView, setCurrentView] = useState('billing'); // 'billing', 'users', 'audit-logs'
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Product & billing state
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loginRole, setLoginRole] = useState('');
+  const [password, setPassword] = useState('');
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [bills, setBills] = useState([]);
@@ -81,13 +67,16 @@ const AyuboCafe = () => {
     loading: loadingSortConfig
   } = useSortConfig();
 
+  const users = {
+    owner: { password: 'Sokian@1997', role: 'owner' },
+    cashier: { password: 'cashier123', role: 'cashier' }
+  };
+
   useEffect(() => {
-    if (isAuthenticated && currentView === 'billing') {
-      loadProducts();
-      loadBills();
-      loadSalesData();
-    }
-  }, [isAuthenticated, sortN, currentView]);
+    loadProducts();
+    loadBills();
+    loadSalesData();
+  }, [sortN]); // Reload when sortN changes
 
   const loadProducts = async () => {
     try {
@@ -163,6 +152,7 @@ const AyuboCafe = () => {
 
   const loadBills = async () => {
     try {
+      // Query orders with their items
       const { data, error } = await supabaseClient
         .from('orders')
         .select(`
@@ -201,23 +191,32 @@ const AyuboCafe = () => {
     }
   };
 
-  const handleLogout = async () => {
-    if (confirm('Are you sure you want to log out?')) {
-      await logout();
-      setCurrentView('billing');
-      setCart([]);
-      setShowSettings(false);
-      setShowSales(false);
+  const handleLogin = () => {
+    if (loginRole === 'guest') {
+      setCurrentUser({ role: 'guest' });
+      return;
+    }
+
+    const user = users[loginRole];
+    if (user && user.password === password) {
+      setCurrentUser({ role: loginRole });
+      setPassword('');
+    } else {
+      alert('Invalid password!');
     }
   };
 
-  // ... [Keep all the existing cart, billing, and product management functions]
-  // addToCart, addWeightBasedProduct, updateQuantity, removeFromCart, 
-  // calculateTotal, calculateBalance, generateBill, confirmBill,
-  // addProduct, deleteProduct, deleteBill, startEdit, saveEdit,
-  // getDailySales, getTotalSales, getItemWiseSales, getUniqueBills
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setLoginRole('');
+    setPassword('');
+    setCart([]);
+    setShowSettings(false);
+    setShowSales(false);
+  };
 
   const addToCart = (product) => {
+    // Check if product is out of stock
     const stockStatus = getStockStatus(product);
     if (stockStatus === 'out') {
       alert(`❌ ${product.name} is out of stock!`);
@@ -230,6 +229,7 @@ const AyuboCafe = () => {
       return;
     }
 
+    // Check if adding one more would exceed stock
     const existing = cart.find(item => item.product_id === product.product_id && !item.weight);
     const currentCartQuantity = existing ? existing.quantity : 0;
     
@@ -254,6 +254,7 @@ const AyuboCafe = () => {
       return;
     }
 
+    // Check if weight exceeds available stock
     if (weightValue > selectedProduct.stock_quantity) {
       alert(`❌ Only ${selectedProduct.stock_quantity} kg available in stock.`);
       return;
@@ -306,6 +307,7 @@ const AyuboCafe = () => {
 
   const confirmBill = async () => {
     try {
+      // Step 1: Validate stock availability
       const stockValidation = validateStock(cart, products);
       if (!stockValidation.isValid) {
         const errorMessage = generateInsufficientStockMessage(stockValidation.insufficientItems);
@@ -314,7 +316,9 @@ const AyuboCafe = () => {
       }
 
       const totalAmount = parseFloat(calculateTotal());
+      const paidAmount = parseFloat(customerPaid) || 0;
 
+      // Step 2: Create order record in orders table
       const { data: orderData, error: orderError } = await supabaseClient
         .from('orders')
         .insert({
@@ -328,6 +332,7 @@ const AyuboCafe = () => {
 
       const orderId = orderData.order_id;
 
+      // Step 3: Create order items in order_items table
       const orderItems = cart.map(item => ({
         order_id: orderId,
         product_id: item.product_id,
@@ -341,12 +346,14 @@ const AyuboCafe = () => {
 
       if (itemsError) throw itemsError;
 
+      // Step 4: Deduct stock quantities with decimal precision
       const stockDeductions = calculateStockDeductions(cart);
       
       const stockUpdatePromises = stockDeductions.map(async ({ product_id, deductAmount }) => {
         const product = products.find(p => p.product_id === product_id);
         const newStock = product.stock_quantity - deductAmount;
 
+        // Prevent negative stock (database constraint)
         if (newStock < 0) {
           throw new Error(`Stock deduction would result in negative stock for ${product.name}`);
         }
@@ -362,16 +369,22 @@ const AyuboCafe = () => {
 
       const stockResults = await Promise.all(stockUpdatePromises);
       
+      // Check for actual errors (error exists and status is not 2xx)
       const stockErrors = stockResults.filter(result => {
+        // Success if error is null/undefined OR status is 2xx
         const isSuccess = !result.error || (result.status >= 200 && result.status < 300);
         return !isSuccess;
       });
       
       if (stockErrors.length > 0) {
         console.error('Stock update errors:', stockErrors);
+        console.error('Error details:', stockErrors.map(e => e.error));
         throw new Error('Failed to update stock quantities');
       }
+      
+      console.log('✅ Stock updated successfully for', stockResults.length, 'products');
 
+      // Step 5: Invalidate sales cache and reload data
       invalidateSalesCache();
       await loadProducts();
       await loadBills();
@@ -440,6 +453,7 @@ const AyuboCafe = () => {
     if (!window.confirm('Are you sure you want to delete this order?')) return;
 
     try {
+      // Delete from orders table (order_items will cascade delete)
       const { error } = await supabaseClient
         .from('orders')
         .delete()
@@ -467,6 +481,7 @@ const AyuboCafe = () => {
         is_weight_based: editingProduct.is_weight_based
       };
 
+      // Only owner can edit stock quantity and threshold
       if (currentUser.role === 'owner') {
         updateData.stock_quantity = parseFloat(editingProduct.stock_quantity) || 0;
         updateData.low_stock_threshold = parseFloat(editingProduct.low_stock_threshold) || 5;
@@ -489,6 +504,7 @@ const AyuboCafe = () => {
   };
 
   const getDailySales = () => {
+    // Get today's date at midnight in local timezone for consistent comparison
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
@@ -536,16 +552,17 @@ const AyuboCafe = () => {
     }));
   };
 
+  // Sorted products using sales data (with 5-minute cache)
   const sortedProducts = useMemo(() => {
     return sortProductsBySales(products, salesData);
   }, [products, salesData]);
 
+  // Filter sorted products by search query
   const filteredProducts = sortedProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Loading state for auth
-  if (authLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-yellow-50 to-green-50 flex items-center justify-center">
         <div className="text-center">
@@ -556,46 +573,91 @@ const AyuboCafe = () => {
     );
   }
 
-  // Login screen
-  if (!isAuthenticated) {
-    if (showForgotPassword) {
-      return (
-        <ForgotPasswordForm
-          onClose={() => setShowForgotPassword(false)}
-          onBackToLogin={() => setShowForgotPassword(false)}
-        />
-      );
-    }
-
+  if (!currentUser) {
     return (
-      <LoginForm
-        onForgotPassword={() => setShowForgotPassword(true)}
-        onLoginSuccess={() => setCurrentView('billing')}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-yellow-50 to-green-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-blue-700 mb-2">Ayubo Cafe</h1>
+            <p className="text-gray-600">Select your role to continue</p>
+          </div>
+          
+          <div className="space-y-4">
+            <button
+              onClick={() => setLoginRole('guest')}
+              className={`w-full p-4 rounded-lg border-2 transition ${
+                loginRole === 'guest'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <User size={24} />
+                <div className="text-left">
+                  <div className="font-bold">Guest</div>
+                  <div className="text-sm text-gray-600">Billing only</div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setLoginRole('cashier')}
+              className={`w-full p-4 rounded-lg border-2 transition ${
+                loginRole === 'cashier'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <User size={24} />
+                <div className="text-left">
+                  <div className="font-bold">Cashier</div>
+                  <div className="text-sm text-gray-600">Manage products & billing</div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setLoginRole('owner')}
+              className={`w-full p-4 rounded-lg border-2 transition ${
+                loginRole === 'owner'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <User size={24} />
+                <div className="text-left">
+                  <div className="font-bold">Owner</div>
+                  <div className="text-sm text-gray-600">Full access</div>
+                </div>
+              </div>
+            </button>
+
+            {(loginRole === 'cashier' || loginRole === 'owner') && (
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            )}
+
+            <button
+              onClick={handleLogin}
+              disabled={!loginRole}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-blue-800 transition"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  // User Management view (owner only)
-  if (currentView === 'users') {
-    return <UserManagement />;
-  }
-
-  // Audit Logs view (owner only)
-  if (currentView === 'audit-logs') {
-    return <AuditLogs />;
-  }
-
-  // Change Password modal
-  if (showChangePassword) {
-    return (
-      <ChangePasswordForm
-        onClose={() => setShowChangePassword(false)}
-        onSuccess={() => setShowChangePassword(false)}
-      />
-    );
-  }
-
-  // Weight modal
   if (showWeightModal) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -643,9 +705,6 @@ const AyuboCafe = () => {
       </div>
     );
   }
-
-  // Bill Preview modal - Continue with existing implementation...
-  // [Rest of the component continues as in original App.jsx]
 
   if (showBillPreview) {
     return (
@@ -726,7 +785,6 @@ const AyuboCafe = () => {
     );
   }
 
-  // Main billing view with new header
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-yellow-50 to-green-50 p-2 sm:p-4">
       <div className="max-w-7xl mx-auto">
@@ -734,54 +792,19 @@ const AyuboCafe = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-blue-700">Ayubo Cafe</h1>
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold">{currentUser?.first_name} {currentUser?.last_name}</span>
-                {' '}• <span className="capitalize">{currentUser?.role}</span>
-              </p>
+              <p className="text-sm text-gray-600">Logged in as: <span className="font-semibold capitalize">{currentUser.role}</span></p>
             </div>
-            
-            {/* Navigation & User Menu */}
-            <div className="flex flex-wrap gap-2 items-center">
-              {/* Billing button */}
-              {currentView !== 'billing' && (
+            <div className="flex flex-wrap gap-2">
+              {currentUser.role === 'owner' && (
                 <button
-                  onClick={() => setCurrentView('billing')}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                  onClick={() => setShowSales(!showSales)}
+                  className="flex items-center gap-2 bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
                 >
-                  <ShoppingCart size={18} />
-                  <span className="hidden sm:inline">Billing</span>
+                  <TrendingUp size={18} />
+                  <span className="hidden sm:inline">Sales</span>
                 </button>
               )}
-
-              {/* Owner-only navigation */}
-              {currentUser?.role === 'owner' && (
-                <>
-                  <button
-                    onClick={() => setCurrentView('users')}
-                    className="flex items-center gap-2 bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm"
-                  >
-                    <User size={18} />
-                    <span className="hidden sm:inline">Users</span>
-                  </button>
-                  <button
-                    onClick={() => setCurrentView('audit-logs')}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm"
-                  >
-                    📋
-                    <span className="hidden sm:inline">Audit</span>
-                  </button>
-                  <button
-                    onClick={() => setShowSales(!showSales)}
-                    className="flex items-center gap-2 bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
-                  >
-                    <TrendingUp size={18} />
-                    <span className="hidden sm:inline">Sales</span>
-                  </button>
-                </>
-              )}
-
-              {/* Settings button (cashier and owner) */}
-              {(currentUser?.role === 'cashier' || currentUser?.role === 'owner') && currentView === 'billing' && (
+              {(currentUser.role === 'cashier' || currentUser.role === 'owner') && (
                 <button
                   onClick={() => setShowSettings(!showSettings)}
                   className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
@@ -790,48 +813,17 @@ const AyuboCafe = () => {
                   <span className="hidden sm:inline">Products</span>
                 </button>
               )}
-
-              {/* User menu dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 bg-gray-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm"
-                >
-                  <User size={18} />
-                  <span>▼</span>
-                </button>
-
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-50">
-                    <button
-                      onClick={() => {
-                        setShowChangePassword(true);
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg text-sm"
-                    >
-                      🔑 Change Password
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 rounded-b-lg text-sm flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm"
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
 
-          {/* Rest of the billing interface continues as before... */}
-          {/* [Include all existing product management, cart, sales reports, etc.] */}
-
-{showSettings && (
+          {showSettings && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-blue-800">Manage Products</h2>
@@ -840,6 +832,7 @@ const AyuboCafe = () => {
                 </button>
               </div>
               
+              {/* Sort Configuration Panel - Owner Only */}
               {currentUser.role === 'owner' && (
                 <SortConfigPanel
                   currentN={sortN}
@@ -1125,6 +1118,7 @@ const AyuboCafe = () => {
                           </div>
                         )}
                         
+                        {/* Normal state - show everything */}
                         <div className="group-hover:hidden">
                           <div className="flex items-center justify-between gap-2">
                             <div className="font-semibold text-sm sm:text-base line-clamp-1 flex-1">{product.name}</div>
@@ -1142,11 +1136,14 @@ const AyuboCafe = () => {
                               )}
                             </div>
                             <div className="flex items-center">
-                              <StockBadge product={product} showFullText={false} />
+                              {currentUser.role !== 'guest' && (
+                                <StockBadge product={product} showFullText={false} />
+                              )}
                             </div>
                           </div>
                         </div>
                         
+                        {/* Hover state - only show centered full product name */}
                         <div className="hidden group-hover:flex items-center justify-center h-full absolute inset-0 p-3 sm:p-4">
                           <div className="font-semibold text-sm sm:text-base text-center">
                             {product.name}
@@ -1233,7 +1230,7 @@ const AyuboCafe = () => {
         </div>
 
         {/* Daily Stock Check-In Modal */}
-        {shouldShowCheckIn && currentUser && (
+        {shouldShowCheckIn && currentUser && currentUser.role !== 'guest' && (
           <DailyStockCheckIn
             products={products}
             onSave={async () => {

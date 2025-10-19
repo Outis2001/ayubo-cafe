@@ -172,27 +172,27 @@
   - [ ] 8.17 Test email sending in development environment (send test email to your own Gmail)
   - [ ] 8.18 Document Gmail SMTP setup in README or separate SETUP.md
 
-- [ ] 9.0 UI Components & Forms
-  - [ ] 9.1 Create `src/components/auth/LoginForm.jsx` - replace hardcoded login screen in App.jsx
-  - [ ] 9.2 Add form fields: username (not role selector), password, remember me checkbox
-  - [ ] 9.3 Add "Forgot Password?" link that opens ForgotPasswordForm
-  - [ ] 9.4 Add "Login as Guest" button (preserve existing guest functionality)
-  - [ ] 9.5 Add password visibility toggle icon (eye icon)
-  - [ ] 9.6 Style form using TailwindCSS matching existing app design (centered card, blue theme)
-  - [ ] 9.7 Integrate with AuthContext: call login() function on submit
-  - [ ] 9.8 Display error messages for invalid credentials or account lockout
-  - [ ] 9.9 Create `src/components/auth/PasswordStrengthIndicator.jsx` - visual strength meter
-  - [ ] 9.10 Implement strength calculation: weak (red), medium (yellow), strong (green)
-  - [ ] 9.11 Display requirements checklist with checkmarks: min 8 chars, uppercase, lowercase, number, special char
-  - [ ] 9.12 Update indicator in real-time as user types
-  - [ ] 9.13 Add routing for /reset-password page (use react-router if not already installed, or conditional rendering)
-  - [ ] 9.14 Create reset password page that renders ResetPasswordForm component
-  - [ ] 9.15 Update App.jsx: remove hardcoded users object and login logic
-  - [ ] 9.16 Update App.jsx: use AuthContext instead of local state for currentUser
-  - [ ] 9.17 Add protected route logic: redirect to login if not authenticated
-  - [ ] 9.18 Integrate UserManagement component into Settings panel (owner only)
-  - [ ] 9.19 Integrate AuditLogs component into Settings or separate panel (owner only)
-  - [ ] 9.20 Integrate ChangePasswordForm into user menu/settings dropdown
+- [x] 9.0 UI Components & Forms
+  - [x] 9.1 Create `src/components/auth/LoginForm.jsx` - replace hardcoded login screen in App.jsx
+  - [x] 9.2 Add form fields: username (not role selector), password, remember me checkbox
+  - [x] 9.3 Add "Forgot Password?" link that opens ForgotPasswordForm
+  - [x] 9.4 Add "Login as Guest" button (preserve existing guest functionality)
+  - [x] 9.5 Add password visibility toggle icon (eye icon)
+  - [x] 9.6 Style form using TailwindCSS matching existing app design (centered card, blue theme)
+  - [x] 9.7 Integrate with AuthContext: call login() function on submit
+  - [x] 9.8 Display error messages for invalid credentials or account lockout
+  - [x] 9.9 Create `src/components/auth/PasswordStrengthIndicator.jsx` - visual strength meter
+  - [x] 9.10 Implement strength calculation: weak (red), medium (yellow), strong (green)
+  - [x] 9.11 Display requirements checklist with checkmarks: min 8 chars, uppercase, lowercase, number, special char
+  - [x] 9.12 Update indicator in real-time as user types
+  - [x] 9.13 Add routing for /reset-password page (use react-router if not already installed, or conditional rendering)
+  - [x] 9.14 Create reset password page that renders ResetPasswordForm component
+  - [x] 9.15 Update App.jsx: remove hardcoded users object and login logic
+  - [x] 9.16 Update App.jsx: use AuthContext instead of local state for currentUser
+  - [x] 9.17 Add protected route logic: redirect to login if not authenticated
+  - [x] 9.18 Integrate UserManagement component into Settings panel (owner only)
+  - [x] 9.19 Integrate AuditLogs component into Settings or separate panel (owner only)
+  - [x] 9.20 Integrate ChangePasswordForm into user menu/settings dropdown
   - [ ] 9.21 Add loading states for all async operations (login, password reset, user creation, etc.)
   - [ ] 9.22 Add success/error toast notifications or alerts for better UX
   - [ ] 9.23 Test all forms on mobile devices for responsive design
