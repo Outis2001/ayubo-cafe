@@ -12,7 +12,7 @@
  * @component
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabaseClient } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import useSortConfig from '../hooks/useSortConfig';
@@ -23,6 +23,7 @@ import SalesBadge from './SalesBadge';
 import SortConfigPanel from './SortConfigPanel';
 import DailyStockCheckIn from './DailyStockCheckIn';
 import { fetchSalesData, invalidateSalesCache } from '../utils/productSorting';
+import { getStockStatus } from '../utils/inventory';
 
 const ProductsPage = () => {
   const { currentUser } = useAuth();
@@ -175,6 +176,21 @@ const ProductsPage = () => {
     }
   };
 
+  // Sort products to move out-of-stock items to the bottom
+  const sortedProducts = useMemo(() => {
+    return [...products].sort((a, b) => {
+      const aStock = getStockStatus(a);
+      const bStock = getStockStatus(b);
+      
+      // Out-of-stock items go to bottom
+      if (aStock === 'out' && bStock !== 'out') return 1;
+      if (aStock !== 'out' && bStock === 'out') return -1;
+      
+      // Keep original order for items with same stock status
+      return 0;
+    });
+  }, [products]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
@@ -282,13 +298,13 @@ const ProductsPage = () => {
         {/* Product List */}
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-bold text-blue-800 mb-4">
-            All Products ({products.length})
+            All Products ({sortedProducts.length})
           </h2>
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
-            {products.length === 0 ? (
+            {sortedProducts.length === 0 ? (
               <p className="text-center py-8 text-gray-500">No products found. Add one above!</p>
             ) : (
-              products.map(product => (
+              sortedProducts.map(product => (
                 <div key={product.product_id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-3 bg-gray-50 rounded-lg border border-blue-200 hover:border-blue-400 transition text-sm">
                   {editingProduct?.product_id === product.product_id ? (
                     <>

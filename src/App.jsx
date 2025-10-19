@@ -551,9 +551,24 @@ const AyuboCafe = () => {
     return sortProductsBySales(products, salesData);
   }, [products, salesData]);
 
-  const filteredProducts = sortedProducts.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    const filtered = sortedProducts.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    // Move out-of-stock products to the bottom
+    return filtered.sort((a, b) => {
+      const aStock = getStockStatus(a);
+      const bStock = getStockStatus(b);
+      
+      // Out-of-stock items go to bottom
+      if (aStock === 'out' && bStock !== 'out') return 1;
+      if (aStock !== 'out' && bStock === 'out') return -1;
+      
+      // Keep original order for items with same stock status
+      return 0;
+    });
+  }, [sortedProducts, searchQuery]);
 
   // Loading state for auth
   if (authLoading) {

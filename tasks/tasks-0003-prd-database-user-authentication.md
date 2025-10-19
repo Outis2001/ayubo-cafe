@@ -224,8 +224,8 @@
   - [x] 10.22 Security: verify session tokens are cryptographically random (check length and randomness)
   - [x] 10.23 Security: verify password reset tokens are single-use only
   - [x] 10.24 Security: test SQL injection prevention (Supabase client handles this, but verify)
-  - [ ] 10.25 Security: verify no sensitive data in browser console.log (remove debug logs)
-  - [ ] 10.26 Security: verify session tokens cleared from storage on logout
+  - [x] 10.25 Security: verify no sensitive data in browser console.log (remove debug logs)
+  - [x] 10.26 Security: verify session tokens cleared from storage on logout
   - [x] 10.27 Performance: test login response time (should be < 2 seconds)
   - [x] 10.28 Performance: test audit log query with 1000+ records (pagination should work smoothly)
   - [ ] 10.29 Create migration rollback script (if needed to undo changes)
