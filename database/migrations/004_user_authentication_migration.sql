@@ -221,8 +221,17 @@ CREATE TRIGGER update_users_updated_at
 -- SECTION 8: INSERT INITIAL OWNER ACCOUNT
 -- ============================================================================
 
--- Insert the initial owner account with hashed password
--- Password: 'Sokian@1997' (as specified in current system)
+-- ⚠️⚠️⚠️ SECURITY WARNING ⚠️⚠️⚠️
+-- Insert the initial owner account with TEMPORARY hashed password
+-- DEFAULT PASSWORD: 'ChangeMe@2025' 
+-- This MUST be changed immediately after first login!
+-- 
+-- To change after setup:
+-- 1. Login: username='owner', password='ChangeMe@2025'
+-- 2. Go to Settings → Change Password
+-- 3. Set a strong, unique password (8+ chars, mixed case, numbers, special chars)
+--
+-- Or via SQL: UPDATE users SET password_hash = crypt('YOUR_NEW_PASSWORD', gen_salt('bf', 10)) WHERE username = 'owner';
 -- Using crypt() function with bcrypt algorithm and salt rounds = 10
 INSERT INTO users (
     username,
@@ -238,7 +247,7 @@ INSERT INTO users (
 VALUES (
     'owner',
     'benujith@gmail.com',
-    crypt('Sokian@1997', gen_salt('bf', 10)),
+    crypt('ChangeMe@2025', gen_salt('bf', 10)),  -- ⚠️ CHANGE THIS PASSWORD IMMEDIATELY!
     'Cafe',
     'Owner',
     'owner',
