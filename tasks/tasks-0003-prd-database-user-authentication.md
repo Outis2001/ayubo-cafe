@@ -116,17 +116,17 @@
   - [x] 5.17 Add sorting functionality (by name, last login, created date)
   - [x] 5.18 Style component using TailwindCSS following existing app patterns
 
-- [ ] 6.0 Self-Service Password Change
-  - [ ] 6.1 Create `src/components/auth/ChangePasswordForm.jsx` - modal/panel component
-  - [ ] 6.2 Add form fields: current password, new password, confirm new password
-  - [ ] 6.3 Add PasswordStrengthIndicator component below new password field
-  - [ ] 6.4 Implement form validation: check all fields filled, new password meets requirements, passwords match, new != current
-  - [ ] 6.5 Add "Change Password" link in user menu/settings (visible to owner and cashier)
-  - [ ] 6.6 Implement password change handler: verify current password is correct, hash new password, update users table
-  - [ ] 6.7 Invalidate all other sessions (keep current session active): delete from user_sessions where user_id = X and session_token != current
-  - [ ] 6.8 Log password_change to audit_logs
-  - [ ] 6.9 Show success message: "Password changed successfully"
-  - [ ] 6.10 Add error handling for incorrect current password
+- [x] 6.0 Self-Service Password Change
+  - [x] 6.1 Create `src/components/auth/ChangePasswordForm.jsx` - modal/panel component
+  - [x] 6.2 Add form fields: current password, new password, confirm new password
+  - [x] 6.3 Add PasswordStrengthIndicator component below new password field
+  - [x] 6.4 Implement form validation: check all fields filled, new password meets requirements, passwords match, new != current
+  - [x] 6.5 Add "Change Password" link in user menu/settings (visible to owner and cashier)
+  - [x] 6.6 Implement password change handler: verify current password is correct, hash new password, update users table
+  - [x] 6.7 Invalidate all other sessions (keep current session active): delete from user_sessions where user_id = X and session_token != current
+  - [x] 6.8 Log password_change to audit_logs
+  - [x] 6.9 Show success message: "Password changed successfully"
+  - [x] 6.10 Add error handling for incorrect current password
 
 - [x] 7.0 Audit Logging System
   - [x] 7.1 Create `src/utils/auditLog.js` with function: logAuditEvent(action, userId, usernameAttempted, status, details, ipAddress, userAgent)
