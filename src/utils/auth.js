@@ -3,13 +3,12 @@
  * 
  * Provides core authentication functionality including:
  * - Password hashing and verification using bcrypt
- * - Secure token generation for sessions and password resets
+ * - Secure token generation for sessions and password resets (using Web Crypto API)
  * 
  * @module utils/auth
  */
 
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 
 /**
  * Salt rounds for bcrypt hashing
@@ -84,7 +83,7 @@ export const comparePassword = async (password, hash) => {
  * Generate a cryptographically secure session token
  * 
  * Creates a random 64-character hexadecimal string suitable for session tokens.
- * Uses Node.js crypto.randomBytes for cryptographic randomness.
+ * Uses Web Crypto API for browser-compatible cryptographic randomness.
  * 
  * @returns {string} 64-character hexadecimal session token
  * @throws {Error} If token generation fails
@@ -95,8 +94,15 @@ export const comparePassword = async (password, hash) => {
  */
 export const generateSessionToken = () => {
   try {
-    // Generate 32 random bytes and convert to hexadecimal (64 characters)
-    const token = crypto.randomBytes(32).toString('hex');
+    // Generate 32 random bytes using Web Crypto API
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    
+    // Convert to hexadecimal string (64 characters)
+    const token = Array.from(array)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('');
+    
     return token;
   } catch (error) {
     console.error('Error generating session token:', error);
@@ -108,7 +114,7 @@ export const generateSessionToken = () => {
  * Generate a cryptographically secure password reset token
  * 
  * Creates a random 64-character hexadecimal string suitable for password reset links.
- * Uses Node.js crypto.randomBytes for cryptographic randomness.
+ * Uses Web Crypto API for browser-compatible cryptographic randomness.
  * 
  * @returns {string} 64-character hexadecimal reset token
  * @throws {Error} If token generation fails
@@ -119,8 +125,15 @@ export const generateSessionToken = () => {
  */
 export const generateResetToken = () => {
   try {
-    // Generate 32 random bytes and convert to hexadecimal (64 characters)
-    const token = crypto.randomBytes(32).toString('hex');
+    // Generate 32 random bytes using Web Crypto API
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    
+    // Convert to hexadecimal string (64 characters)
+    const token = Array.from(array)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('');
+    
     return token;
   } catch (error) {
     console.error('Error generating reset token:', error);
