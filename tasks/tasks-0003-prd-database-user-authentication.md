@@ -230,8 +230,8 @@
   - [x] 10.28 Performance: test audit log query with 1000+ records (pagination should work smoothly)
   - [x] 10.29 Create migration rollback script (if needed to undo changes)
   - [x] 10.30 Update README.md with authentication setup instructions
-  - [ ] 10.31 Document Gmail SMTP setup process (Step 1: Enable 2FA, Step 2: Generate App Password, Step 3: Configure .env)
-  - [ ] 10.32 Document environment variables required in .env.example and README
+  - [x] 10.31 Document Gmail SMTP setup process (Step 1: Enable 2FA, Step 2: Generate App Password, Step 3: Configure .env)
+  - [x] 10.32 Document environment variables required in .env.example and README
   - [ ] 10.33 Create user guide for owner: how to create users, reset passwords, view audit logs
   - [ ] 10.34 Add inline code comments for complex authentication logic
   - [ ] 10.35 Remove hardcoded credentials from App.jsx after migration is complete
