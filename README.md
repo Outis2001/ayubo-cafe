@@ -11,7 +11,11 @@ See: [Database Migrations Guide](database/README.md)
 ## Features
 
 ### Core Features
-- **User Roles**: Guest (billing only), Cashier (products & billing), Owner (full access including sales reports)
+- **🔐 Database-Driven Authentication**: Secure login system with password hashing and session management
+- **👥 User Management**: Owner can create, edit, and deactivate user accounts
+- **🔒 Password Recovery**: Email-based password reset with owner override capability
+- **📋 Audit Logging**: Complete tracking of authentication events and user actions
+- **User Roles**: Guest (billing only), Cashier (products & billing), Owner (full access)
 - **Product Management**: Add, edit, and delete products with support for weight-based pricing
 - **Cart System**: Add products to cart, adjust quantities, and generate bills
 - **Sales Reports**: Track daily sales, total sales, and item-wise sales (Owner only)
@@ -36,12 +40,24 @@ See: [Database Migrations Guide](database/README.md)
 - **🎯 Efficiency Boost**: Popular items appear first for faster checkout
 - **📱 Responsive**: Works beautifully on all devices
 
+### 🆕 Authentication & Security
+- **🔐 Secure Login**: bcrypt password hashing with session-based authentication
+- **🔑 Password Management**: Self-service password change and forgot password flow
+- **📧 Email Integration**: Gmail SMTP for password reset and user notifications
+- **🛡️ Session Security**: Automatic expiration (8 hours default, 7 days with "Remember Me")
+- **⏱️ Inactivity Timeout**: 30-minute inactivity detection for short sessions
+- **🚫 Rate Limiting**: 5 failed attempts = 15-minute lockout
+- **👤 Role-Based Sessions**: Owner (1 session max), Cashier (3 sessions max)
+- **📊 Audit Logs**: Complete tracking of logins, logouts, password changes, and user management
+
 ## Tech Stack
 
 - **React 18** - UI framework
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Styling
-- **Supabase** - Backend database
+- **Supabase** - Backend database (PostgreSQL)
+- **bcryptjs** - Password hashing
+- **Nodemailer** - Email service (optional, for password reset)
 - **JavaScript (ES6+)** - Programming language
 
 ## Prerequisites
@@ -125,51 +141,217 @@ Preview the production build:
 npm run preview
 ```
 
-## User Credentials
+## Authentication Setup
 
-- **Guest**: No password required (billing only)
-- **Cashier**: Password: `cashier123`
-- **Owner**: Password: `Sokian@1997`
+### Initial Owner Account
+
+After running the database migration (`004_user_authentication_migration.sql`), an owner account is automatically created:
+
+- **Username**: `owner`
+- **Email**: `benujith@gmail.com`
+- **Password**: `Cafe@2025`
+- **Role**: Owner (full access)
+
+⚠️ **IMPORTANT**: Change this password immediately after first login!
+
+### Creating Additional Users
+
+**As Owner:**
+1. Login to the application
+2. Navigate to **Users** page (owner-only access)
+3. Click **"Create User"**
+4. Fill in user details:
+   - First Name & Last Name
+   - Username (3-50 characters)
+   - Email (must be unique)
+   - Temporary Password
+   - Role (Owner or Cashier)
+5. User receives welcome email with credentials (in development, check console)
+
+### Password Requirements
+
+All passwords must meet these requirements:
+- ✅ Minimum 8 characters
+- ✅ At least 1 uppercase letter
+- ✅ At least 1 lowercase letter
+- ✅ At least 1 number
+- ✅ At least 1 special character (!@#$%^&*())
+
+### Session Management
+
+**Owner Accounts:**
+- Maximum 1 active session
+- New login automatically logs out all other devices
+- Strictest security for privileged accounts
+
+**Cashier Accounts:**
+- Maximum 3 active sessions
+- Can use multiple devices simultaneously
+- Oldest session removed when limit exceeded
+
+**Session Duration:**
+- **Standard**: 8 hours (with 30-minute inactivity timeout)
+- **Remember Me**: 7 days (no inactivity timeout)
+
+### Password Recovery
+
+**Self-Service:**
+1. Click **"Forgot Password?"** on login page
+2. Enter username or email
+3. Receive reset link via email (check console in dev mode)
+4. Click link and set new password
+5. Reset links expire after 1 hour
+
+**Owner Override:**
+1. Login as Owner
+2. Go to **Users** page
+3. Click 🔑 button next to any user
+4. Set new temporary password
+5. User's other sessions are invalidated
+
+### Email Configuration (Optional)
+
+For production password reset emails, configure Gmail SMTP:
+
+1. **Create `.env` file** in project root:
+   ```env
+   # Email Configuration (Gmail SMTP)
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_SECURE=false
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASSWORD=your-app-password
+   EMAIL_FROM="Ayubo Cafe <your-email@gmail.com>"
+   EMAIL_DEBUG=false
+   ```
+
+2. **Generate Gmail App Password**:
+   - Go to https://myaccount.google.com/security
+   - Enable 2-Step Verification
+   - Search for "App passwords"
+   - Generate password for "Mail"
+   - Copy 16-character password to `EMAIL_PASSWORD`
+
+3. **Test in Development**:
+   - Emails are logged to console by default
+   - Set `EMAIL_DEBUG=true` to see full email content
+   - In production, actual emails will be sent
+
+📚 **Full Setup Guide**: See [EMAIL_SETUP_GUIDE.md](EMAIL_SETUP_GUIDE.md)
+
+### Audit Logs (Owner Only)
+
+Track all security events:
+- ✅ User logins and logouts
+- ✅ Failed login attempts (with rate limiting)
+- ✅ Password changes (self-service & admin reset)
+- ✅ User account creation, updates, deactivation
+- ✅ Session expirations (inactivity, timeout, manual)
+
+**Access:** Navigate to **Audit** page from owner dashboard
+
+**Features:**
+- Filter by username, action, status, IP address
+- Date range filtering
+- Pagination (20 logs per page)
+- Export to CSV
+- Detailed event information
 
 ## Project Structure
 
 ```
 ayubo_cafe/
+├── database/
+│   ├── migrations/
+│   │   ├── 004_user_authentication_migration.sql       # Authentication schema
+│   │   └── 004_user_authentication_rollback.sql       # Rollback script
+│   ├── run-auth-migration.js    # Migration guide script
+│   └── README.md                 # Database setup guide
 ├── public/
-│   └── index.html          # HTML template
+│   └── index.html                # HTML template
 ├── src/
 │   ├── components/
-│   │   └── icons/          # SVG icon components
+│   │   ├── auth/
+│   │   │   ├── LoginForm.jsx              # Login interface
+│   │   │   ├── ForgotPasswordForm.jsx     # Password recovery
+│   │   │   ├── ResetPasswordForm.jsx      # Password reset
+│   │   │   └── ChangePasswordForm.jsx     # Self-service password change
+│   │   ├── icons/                         # SVG icon components
+│   │   ├── UserManagement.jsx             # User CRUD (owner only)
+│   │   ├── AuditLogs.jsx                  # Audit log viewer (owner only)
+│   │   ├── ProductsPage.jsx               # Product management page
+│   │   ├── SalesPage.jsx                  # Sales analytics page
+│   │   └── DailyStockCheckIn.jsx          # Stock update modal
+│   ├── context/
+│   │   └── AuthContext.jsx                # Authentication state management
 │   ├── config/
-│   │   └── supabase.js     # Supabase client configuration
-│   ├── App.jsx             # Main application component
-│   ├── main.jsx            # Application entry point
-│   └── index.css           # Global styles and Tailwind imports
+│   │   └── supabase.js                    # Supabase client configuration
+│   ├── hooks/
+│   │   ├── useSession.js                  # Session management hook
+│   │   ├── useSortConfig.js               # Product sorting hook
+│   │   └── useStockCheckIn.js             # Stock check-in hook
+│   ├── utils/
+│   │   ├── auth.js                        # Password hashing, token generation
+│   │   ├── validation.js                  # Input validation
+│   │   ├── session.js                     # Session CRUD operations
+│   │   ├── rateLimiter.js                 # Login rate limiting
+│   │   ├── email.js                       # Email sending (Nodemailer)
+│   │   ├── auditLog.js                    # Audit logging utilities
+│   │   ├── inventory.js                   # Stock management
+│   │   └── productSorting.js              # Sales-based sorting
+│   ├── App.jsx                            # Main application component
+│   ├── main.jsx                           # Application entry point
+│   └── index.css                          # Global styles and Tailwind imports
+├── tasks/
+│   └── 0003-prd-database-user-authentication.md   # Authentication PRD & tasks
+├── .env.example                           # Environment variables template
 ├── .gitignore
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
 ├── postcss.config.js
+├── EMAIL_SETUP_GUIDE.md                   # Gmail SMTP setup guide
 └── README.md
 ```
 
 ## Usage
 
-### For Guests
-1. Select "Guest" role and login
-2. Browse products and add to cart
-3. Generate and save bills
+### First-Time Setup
+
+1. **Run Database Migration**: Follow [Database Migrations Guide](database/README.md)
+2. **Login as Owner**: Use initial credentials (`owner` / `Cafe@2025`)
+3. **Change Password**: Immediately change the default password
+4. **(Optional) Configure Email**: Set up Gmail SMTP for password recovery
+5. **Create Cashier Accounts**: Add staff members through User Management
 
 ### For Cashiers
-1. Login with cashier credentials
-2. Access product management to add/edit/delete products
-3. Manage billing operations
+
+**Login:**
+1. Enter username and password provided by owner
+2. Choose "Remember Me" for 7-day session (optional)
+3. Access billing and product management
+
+**Features:**
+- ✅ View and manage products
+- ✅ Process sales and generate bills
+- ✅ Update stock quantities
+- ✅ Change own password
+- ✅ Request password reset via email
 
 ### For Owners
-1. Login with owner credentials
-2. Full access to all features
-3. View sales reports and analytics
-4. Delete bills if needed
+
+**Login:**
+1. Use owner credentials
+2. Single session policy (new login kicks out other devices)
+
+**Features:**
+- ✅ All cashier features, plus:
+- ✅ View sales analytics and reports
+- ✅ Create, edit, and deactivate user accounts
+- ✅ Reset passwords for any user
+- ✅ View complete audit logs
+- ✅ Configure product sorting (N-value)
+- ✅ Access user management dashboard
 
 ## Features in Detail
 

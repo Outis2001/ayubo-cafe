@@ -228,8 +228,8 @@
   - [x] 10.26 Security: verify session tokens cleared from storage on logout
   - [x] 10.27 Performance: test login response time (should be < 2 seconds)
   - [x] 10.28 Performance: test audit log query with 1000+ records (pagination should work smoothly)
-  - [ ] 10.29 Create migration rollback script (if needed to undo changes)
-  - [ ] 10.30 Update README.md with authentication setup instructions
+  - [x] 10.29 Create migration rollback script (if needed to undo changes)
+  - [x] 10.30 Update README.md with authentication setup instructions
   - [ ] 10.31 Document Gmail SMTP setup process (Step 1: Enable 2FA, Step 2: Generate App Password, Step 3: Configure .env)
   - [ ] 10.32 Document environment variables required in .env.example and README
   - [ ] 10.33 Create user guide for owner: how to create users, reset passwords, view audit logs
