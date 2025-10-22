@@ -221,9 +221,9 @@
   - [x] 10.2 Test failed login with invalid password (should log to audit_logs)
   - [x] 10.3 Test failed login with non-existent username (should not reveal user doesn't exist)
   - [x] 10.4 Test rate limiting: 5 failed attempts → account lockout for 15 minutes
-  - [ ] 10.5 Test short session expiration: login without remember me → wait 8 hours → session should expire
-  - [ ] 10.6 Test long session expiration: login with remember me → wait 7 days → session should expire
-  - [ ] 10.7 Test inactivity timeout: login without remember me → 30 minutes inactive → session should expire and be logged to audit_logs with expiration_reason='inactivity'
+  - [x] 10.5 Test short session expiration: login without remember me → wait 8 hours → session should expire ✅ (Automated tests passing)
+  - [x] 10.6 Test long session expiration: login with remember me → wait 7 days → session should expire ✅ (Automated tests passing)
+  - [x] 10.7 Test inactivity timeout: login without remember me → 30 minutes inactive → session should expire and be logged to audit_logs with expiration_reason='inactivity' ✅ (Automated tests passing)
   - [x] 10.8 Test forgot password flow: request reset → receive email → click link → reset password → login
   - [x] 10.9 Test password reset token expiration: request reset → wait 1 hour → token should be invalid ✅
   - [x] 10.10 Test password reset token single-use: use token once → try again → should fail

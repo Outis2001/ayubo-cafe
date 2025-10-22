@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "ayubo-cafe",
   "private": true,
   "version": "1.0.0",
@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:session": "vitest run tests/integration/session-expiration.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -17,12 +22,19 @@
     "validator": "^13.15.15"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.16",
+    "happy-dom": "^20.0.8",
+    "jsdom": "^27.0.1",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vitest": "^3.2.4"
   }
 }
