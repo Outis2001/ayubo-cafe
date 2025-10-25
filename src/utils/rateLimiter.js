@@ -325,8 +325,120 @@ export const getRateLimitInfo = () => {
   };
 };
 
+/**
+ * API Endpoint Rate Limiter
+ * 
+ * Tracks API endpoint calls to prevent abuse
+ * 
+ * @param {string} endpoint - API endpoint name
+ * @param {number} maxCalls - Maximum calls allowed
+ * @param {number} windowMs - Time window in milliseconds
+ * @returns {Object} Result with allowed boolean
+ */
+export const checkAPIRateLimit = (endpoint, maxCalls = 10, windowMs = 60000) => {
+  const key = `api_rate_limit_${endpoint}`;
+  const now = Date.now();
+  
+  try {
+    const data = localStorage.getItem(key);
+    let calls = data ? JSON.parse(data) : [];
+    
+    // Remove old calls outside the window
+    calls = calls.filter(timestamp => now - timestamp < windowMs);
+    
+    // Check if limit exceeded
+    if (calls.length >= maxCalls) {
+      const oldestCall = Math.min(...calls);
+      const resetTime = oldestCall + windowMs;
+      const secondsRemaining = Math.ceil((resetTime - now) / 1000);
+      
+      return {
+        allowed: false,
+        remaining: 0,
+        resetIn: secondsRemaining,
+        message: `Too many requests. Try again in ${secondsRemaining} seconds.`
+      };
+    }
+    
+    // Add new call
+    calls.push(now);
+    localStorage.setItem(key, JSON.stringify(calls));
+    
+    return {
+      allowed: true,
+      remaining: maxCalls - calls.length,
+      callsMade: calls.length,
+      maxCalls
+    };
+  } catch (error) {
+    console.error('[Rate Limiter] Error checking API rate limit:', error);
+    // Fail open in case of error
+    return {
+      allowed: true,
+      remaining: maxCalls,
+      callsMade: 0,
+      maxCalls
+    };
+  }
+};
+
+/**
+ * Reset API rate limit for specific endpoint
+ * 
+ * @param {string} endpoint - API endpoint name
+ */
+export const resetAPIRateLimit = (endpoint) => {
+  const key = `api_rate_limit_${endpoint}`;
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error('[Rate Limiter] Error resetting API rate limit:', error);
+  }
+};
+
+/**
+ * Clean up all API rate limit data
+ */
+export const cleanupAPIRateLimits = () => {
+  const now = Date.now();
+  const keys = [];
+  
+  try {
+    // Get all API rate limit keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('api_rate_limit_')) {
+        keys.push(key);
+      }
+    }
+    
+    // Clean up old data
+    keys.forEach(key => {
+      const data = localStorage.getItem(key);
+      if (data) {
+        try {
+          let calls = JSON.parse(data);
+          calls = calls.filter(timestamp => now - timestamp < 3600000); // Keep last hour
+          
+          if (calls.length === 0) {
+            localStorage.removeItem(key);
+          } else {
+            localStorage.setItem(key, JSON.stringify(calls));
+          }
+        } catch (e) {
+          // Invalid data, remove it
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[Rate Limiter] Error cleaning up API rate limits:', error);
+  }
+};
+
 // Initialize: Clean up old data on module load
 cleanupRateLimitData();
+cleanupAPIRateLimits();
 
 // Alias exports for compatibility with LoginForm
 export const checkLockoutStatus = checkRateLimit;

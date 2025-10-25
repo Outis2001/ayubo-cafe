@@ -354,6 +354,377 @@ export const validatePhone = (phone) => {
 };
 
 /**
+ * Validate Sri Lankan phone number format
+ * 
+ * Validates phone numbers in Sri Lankan format: +94XXXXXXXXX (9 digits after country code)
+ * 
+ * @param {string} phone - Phone number to validate
+ * @returns {Object} Validation result with isValid boolean and error message
+ * 
+ * @example
+ * const result = validateSriLankanPhone('+94771234567');
+ * // Returns: { isValid: true, error: null }
+ */
+export const validateSriLankanPhone = (phone) => {
+  if (!phone || typeof phone !== 'string') {
+    return {
+      isValid: false,
+      error: 'Phone number must be provided'
+    };
+  }
+
+  const trimmedPhone = phone.trim();
+
+  // Must start with +94
+  if (!trimmedPhone.startsWith('+94')) {
+    return {
+      isValid: false,
+      error: 'Phone number must start with +94'
+    };
+  }
+
+  // Remove +94 prefix and check remaining digits
+  const digitsAfterCode = trimmedPhone.slice(3);
+  
+  // Must have exactly 9 digits after +94
+  if (!/^\d{9}$/.test(digitsAfterCode)) {
+    return {
+      isValid: false,
+      error: 'Phone number must have exactly 9 digits after +94'
+    };
+  }
+
+  // First digit after +94 should be 7 (mobile) or 1-9 (landline)
+  const firstDigit = digitsAfterCode[0];
+  if (firstDigit === '0') {
+    return {
+      isValid: false,
+      error: 'Phone number should not have leading zero after country code'
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
+ * Validate order amount
+ * 
+ * Checks if order amount is within acceptable range
+ * 
+ * @param {number} amount - Order amount to validate
+ * @param {number} minAmount - Minimum allowed amount (default: 100)
+ * @param {number} maxAmount - Maximum allowed amount (default: 1000000)
+ * @returns {Object} Validation result with isValid boolean and error message
+ * 
+ * @example
+ * const result = validateOrderAmount(1500);
+ * // Returns: { isValid: true, error: null }
+ */
+export const validateOrderAmount = (amount, minAmount = 100, maxAmount = 1000000) => {
+  if (typeof amount !== 'number') {
+    return {
+      isValid: false,
+      error: 'Order amount must be a number'
+    };
+  }
+
+  if (isNaN(amount)) {
+    return {
+      isValid: false,
+      error: 'Order amount is not a valid number'
+    };
+  }
+
+  if (amount < minAmount) {
+    return {
+      isValid: false,
+      error: `Order amount must be at least Rs. ${minAmount.toLocaleString()}`
+    };
+  }
+
+  if (amount > maxAmount) {
+    return {
+      isValid: false,
+      error: `Order amount cannot exceed Rs. ${maxAmount.toLocaleString()}`
+    };
+  }
+
+  // Check for negative amounts
+  if (amount < 0) {
+    return {
+      isValid: false,
+      error: 'Order amount cannot be negative'
+    };
+  }
+
+  // Check for reasonable decimal places (max 2)
+  const decimalPart = (amount.toString().split('.')[1] || '').length;
+  if (decimalPart > 2) {
+    return {
+      isValid: false,
+      error: 'Order amount can have maximum 2 decimal places'
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
+ * Validate pickup date
+ * 
+ * Checks if pickup date is valid and within acceptable range
+ * 
+ * @param {string|Date} pickupDate - Pickup date to validate
+ * @param {number} minAdvanceDays - Minimum days in advance (default: 2)
+ * @param {number} maxAdvanceDays - Maximum days in advance (default: 90)
+ * @returns {Object} Validation result with isValid boolean and error message
+ * 
+ * @example
+ * const result = validatePickupDate('2025-12-01');
+ * // Returns: { isValid: true, error: null }
+ */
+export const validatePickupDate = (pickupDate, minAdvanceDays = 2, maxAdvanceDays = 90) => {
+  if (!pickupDate) {
+    return {
+      isValid: false,
+      error: 'Pickup date must be provided'
+    };
+  }
+
+  let date;
+  try {
+    date = new Date(pickupDate);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date');
+    }
+  } catch (error) {
+    return {
+      isValid: false,
+      error: 'Invalid date format'
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const pickupDateOnly = new Date(date);
+  pickupDateOnly.setHours(0, 0, 0, 0);
+
+  // Check if date is in the past
+  if (pickupDateOnly < today) {
+    return {
+      isValid: false,
+      error: 'Pickup date cannot be in the past'
+    };
+  }
+
+  // Check minimum advance notice
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + minAdvanceDays);
+  
+  if (pickupDateOnly < minDate) {
+    return {
+      isValid: false,
+      error: `Pickup date must be at least ${minAdvanceDays} days in advance`
+    };
+  }
+
+  // Check maximum advance notice
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + maxAdvanceDays);
+  
+  if (pickupDateOnly > maxDate) {
+    return {
+      isValid: false,
+      error: `Pickup date cannot be more than ${maxAdvanceDays} days in advance`
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
+ * Validate quote expiration date
+ * 
+ * Checks if quote expiration date is valid and reasonable
+ * 
+ * @param {string|Date} expirationDate - Expiration date to validate
+ * @param {number} minDays - Minimum days from now (default: 1)
+ * @param {number} maxDays - Maximum days from now (default: 30)
+ * @returns {Object} Validation result with isValid boolean and error message
+ * 
+ * @example
+ * const result = validateQuoteExpiration('2025-11-01');
+ * // Returns: { isValid: true, error: null }
+ */
+export const validateQuoteExpiration = (expirationDate, minDays = 1, maxDays = 30) => {
+  if (!expirationDate) {
+    return {
+      isValid: false,
+      error: 'Expiration date must be provided'
+    };
+  }
+
+  let date;
+  try {
+    date = new Date(expirationDate);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date');
+    }
+  } catch (error) {
+    return {
+      isValid: false,
+      error: 'Invalid date format'
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const expirationDateOnly = new Date(date);
+  expirationDateOnly.setHours(0, 0, 0, 0);
+
+  // Check if date is in the past or today
+  if (expirationDateOnly <= today) {
+    return {
+      isValid: false,
+      error: 'Expiration date must be in the future'
+    };
+  }
+
+  // Check minimum days
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + minDays);
+  
+  if (expirationDateOnly < minDate) {
+    return {
+      isValid: false,
+      error: `Expiration date must be at least ${minDays} day(s) from today`
+    };
+  }
+
+  // Check maximum days
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + maxDays);
+  
+  if (expirationDateOnly > maxDate) {
+    return {
+      isValid: false,
+      error: `Expiration date cannot be more than ${maxDays} days from today`
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
+ * Sanitize string input to prevent XSS attacks
+ * 
+ * Removes or escapes potentially dangerous characters
+ * 
+ * @param {string} input - String to sanitize
+ * @returns {string} Sanitized string
+ * 
+ * @example
+ * const safe = sanitizeInput('<script>alert("xss")</script>');
+ * // Returns: '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'
+ */
+export const sanitizeInput = (input) => {
+  if (typeof input !== 'string') {
+    return input;
+  }
+
+  // Escape HTML special characters
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+};
+
+/**
+ * Validate file upload
+ * 
+ * Checks file type, size, and basic malicious content
+ * 
+ * @param {File} file - File object to validate
+ * @param {Object} options - Validation options
+ * @param {Array} options.allowedTypes - Allowed MIME types (default: images only)
+ * @param {number} options.maxSizeMB - Maximum file size in MB (default: 5)
+ * @returns {Object} Validation result with isValid boolean and error message
+ * 
+ * @example
+ * const result = validateFileUpload(file, { allowedTypes: ['image/jpeg', 'image/png'], maxSizeMB: 2 });
+ */
+export const validateFileUpload = (file, options = {}) => {
+  const {
+    allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+    maxSizeMB = 5
+  } = options;
+
+  if (!file) {
+    return {
+      isValid: false,
+      error: 'No file provided'
+    };
+  }
+
+  // Check if it's a File object
+  if (!(file instanceof File)) {
+    return {
+      isValid: false,
+      error: 'Invalid file object'
+    };
+  }
+
+  // Check file type
+  if (!allowedTypes.includes(file.type)) {
+    return {
+      isValid: false,
+      error: `File type ${file.type} is not allowed. Allowed types: ${allowedTypes.join(', ')}`
+    };
+  }
+
+  // Check file size
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    return {
+      isValid: false,
+      error: `File size (${(file.size / 1024 / 1024).toFixed(2)} MB) exceeds maximum allowed size of ${maxSizeMB} MB`
+    };
+  }
+
+  // Check for suspicious file names
+  const suspiciousPatterns = ['.exe', '.bat', '.cmd', '.sh', '.php', '.asp', '.jsp'];
+  const fileName = file.name.toLowerCase();
+  if (suspiciousPatterns.some(pattern => fileName.includes(pattern))) {
+    return {
+      isValid: false,
+      error: 'File name contains suspicious patterns'
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null
+  };
+};
+
+/**
  * Validate multiple fields at once
  * 
  * Convenience function to validate multiple inputs and return all errors.
@@ -422,6 +793,30 @@ export const validateFields = (fields) => {
 
       case 'phone':
         result = validatePhone(value);
+        if (!result.isValid) {
+          errors[fieldName] = result.error;
+          isValid = false;
+        }
+        break;
+
+      case 'sri_lankan_phone':
+        result = validateSriLankanPhone(value);
+        if (!result.isValid) {
+          errors[fieldName] = result.error;
+          isValid = false;
+        }
+        break;
+
+      case 'order_amount':
+        result = validateOrderAmount(value);
+        if (!result.isValid) {
+          errors[fieldName] = result.error;
+          isValid = false;
+        }
+        break;
+
+      case 'pickup_date':
+        result = validatePickupDate(value);
         if (!result.isValid) {
           errors[fieldName] = result.error;
           isValid = false;

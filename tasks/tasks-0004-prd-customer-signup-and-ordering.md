@@ -459,47 +459,47 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 11.31 Add view for rejected custom cake requests in order history
   - [x] 11.32 Display rejection reason (if provided by staff)
 
-- [ ] 12.0 **Testing, Validation & Security**
-  - [ ] 12.1 Create comprehensive validation utilities in `src/utils/validation.js`
-  - [ ] 12.2 Add phone number validation (Sri Lankan format +94XXXXXXXXX)
-  - [ ] 12.3 Add email validation (if provided)
-  - [ ] 12.4 Add order amount validation (min/max checks)
-  - [ ] 12.5 Add date validation (pickup date, quote expiration)
-  - [ ] 12.6 Implement rate limiting for OTP requests (extend existing rate limiter)
-  - [ ] 12.7 Add rate limiting for API endpoints (order creation, payment processing)
-  - [ ] 12.8 Implement CSRF protection for form submissions
-  - [ ] 12.9 Add input sanitization for all user inputs (XSS prevention)
-  - [ ] 12.10 Implement file upload validation (type, size, malicious content check)
-  - [ ] 12.11 Add SQL injection prevention (use parameterized queries)
-  - [ ] 12.12 Implement secure session management for customers
-  - [ ] 12.13 Add environment variable validation on app startup
-  - [ ] 12.14 Create test environment configuration
-  - [ ] 12.15 Set up test database separate from production
-  - [ ] 12.16 Create test SMS mode - log OTP to console instead of sending
-  - [ ] 12.17 Configure Stripe test mode with test API keys
-  - [ ] 12.18 Create test data seeding script for development
-  - [ ] 12.19 Write unit tests for `customerAuth.js` functions
-  - [ ] 12.20 Write unit tests for `phoneValidation.js`
-  - [ ] 12.21 Write unit tests for `orderHolds.js` validation
-  - [ ] 12.22 Write unit tests for order total calculations
-  - [ ] 12.23 Create integration test for customer signup flow
-  - [ ] 12.24 Create integration test for order placement flow
-  - [ ] 12.25 Create integration test for payment processing (mock Stripe)
-  - [ ] 12.26 Test custom cake request and quote workflow
-  - [ ] 12.27 Test order holds blocking pickup dates
-  - [ ] 12.28 Test notification creation and delivery
-  - [ ] 12.29 Test RLS policies - customers can only see their own data
-  - [ ] 12.30 Test role-based access - cashiers can't access owner-only features
-  - [ ] 12.31 Perform security audit - check for common vulnerabilities
-  - [ ] 12.32 Test mobile responsiveness on various devices
-  - [ ] 12.33 Perform load testing on order creation endpoints
-  - [ ] 12.34 Create user acceptance testing checklist
-  - [ ] 12.35 Document all environment variables needed
-  - [ ] 12.36 Create deployment guide for production environment
-  - [ ] 12.37 Set up error monitoring and logging (e.g., Sentry integration)
-  - [ ] 12.38 Create customer-facing error messages (user-friendly, non-technical)
-  - [ ] 12.39 Test error recovery scenarios (payment failure, OTP timeout, etc.)
-  - [ ] 12.40 Perform end-to-end testing of complete customer journey
+- [x] 12.0 **Testing, Validation & Security**
+  - [x] 12.1 Create comprehensive validation utilities in `src/utils/validation.js`
+  - [x] 12.2 Add phone number validation (Sri Lankan format +94XXXXXXXXX)
+  - [x] 12.3 Add email validation (if provided)
+  - [x] 12.4 Add order amount validation (min/max checks)
+  - [x] 12.5 Add date validation (pickup date, quote expiration)
+  - [x] 12.6 Implement rate limiting for OTP requests (extend existing rate limiter)
+  - [x] 12.7 Add rate limiting for API endpoints (order creation, payment processing)
+  - [x] 12.8 Implement CSRF protection for form submissions
+  - [x] 12.9 Add input sanitization for all user inputs (XSS prevention)
+  - [x] 12.10 Implement file upload validation (type, size, malicious content check)
+  - [x] 12.11 Add SQL injection prevention (use parameterized queries)
+  - [x] 12.12 Implement secure session management for customers
+  - [x] 12.13 Add environment variable validation on app startup
+  - [x] 12.14 Create test environment configuration
+  - [x] 12.15 Set up test database separate from production
+  - [x] 12.16 Create test SMS mode - log OTP to console instead of sending
+  - [x] 12.17 Configure Stripe test mode with test API keys
+  - [x] 12.18 Create test data seeding script for development
+  - [x] 12.19 Write unit tests for `customerAuth.js` functions
+  - [x] 12.20 Write unit tests for `phoneValidation.js`
+  - [x] 12.21 Write unit tests for `orderHolds.js` validation
+  - [x] 12.22 Write unit tests for order total calculations
+  - [x] 12.23 Create integration test for customer signup flow
+  - [x] 12.24 Create integration test for order placement flow
+  - [x] 12.25 Create integration test for payment processing (mock Stripe)
+  - [x] 12.26 Test custom cake request and quote workflow
+  - [x] 12.27 Test order holds blocking pickup dates
+  - [x] 12.28 Test notification creation and delivery
+  - [x] 12.29 Test RLS policies - customers can only see their own data
+  - [x] 12.30 Test role-based access - cashiers can't access owner-only features
+  - [x] 12.31 Perform security audit - check for common vulnerabilities
+  - [x] 12.32 Test mobile responsiveness on various devices
+  - [x] 12.33 Perform load testing on order creation endpoints
+  - [x] 12.34 Create user acceptance testing checklist
+  - [x] 12.35 Document all environment variables needed
+  - [x] 12.36 Create deployment guide for production environment
+  - [x] 12.37 Set up error monitoring and logging (e.g., Sentry integration)
+  - [x] 12.38 Create customer-facing error messages (user-friendly, non-technical)
+  - [x] 12.39 Test error recovery scenarios (payment failure, OTP timeout, etc.)
+  - [x] 12.40 Perform end-to-end testing of complete customer journey
 
 ---
 
