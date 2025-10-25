@@ -393,37 +393,37 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 9.24 Add notification preferences (future: allow staff to configure which notifications to receive)
   - [x] 9.25 Test notification flow end-to-end
 
-- [ ] 10.0 **Order Holds & Pickup Time Management**
-  - [ ] 10.1 Create `src/utils/orderHolds.js` for order hold utilities
-  - [ ] 10.2 Create `src/components/staff/OrderHoldsManagement.jsx` management page (owner only)
-  - [ ] 10.3 Add role check - restrict access to owner only
-  - [ ] 10.4 Display calendar view of current and upcoming holds
-  - [ ] 10.5 Fetch order holds from database
-  - [ ] 10.6 Implement create new hold form (date, reason)
-  - [ ] 10.7 Add date picker for selecting hold date(s)
-  - [ ] 10.8 Add reason input field (e.g., "Fully Booked", "Holiday", "Maintenance")
-  - [ ] 10.9 Validate that hold date is not in the past
-  - [ ] 10.10 Insert hold into `order_holds` table with created_by = owner user_id
-  - [ ] 10.11 Implement hold deactivation (set is_active = false)
-  - [ ] 10.12 Add confirmation dialog before deactivating hold
-  - [ ] 10.13 Display list of active holds with date and reason
-  - [ ] 10.14 Implement hold deletion (permanent removal from database)
-  - [ ] 10.15 Add confirmation dialog before deleting hold
-  - [ ] 10.16 Create `src/utils/pickupTimeSlots.js` for time slot management
-  - [ ] 10.17 Create `src/components/staff/PickupTimeSlots.jsx` configuration page (owner only)
-  - [ ] 10.18 Store pickup time slots in `system_configuration` table as JSON
-  - [ ] 10.19 Display current configured time slots
-  - [ ] 10.20 Implement add time slot form (start time, end time)
-  - [ ] 10.21 Validate time slot format and no overlaps
-  - [ ] 10.22 Implement remove time slot functionality
-  - [ ] 10.23 Implement enable/disable time slot (without deleting)
-  - [ ] 10.24 Save time slots configuration to database
-  - [ ] 10.25 Create validation function `validate_pickup_date()` stored procedure
-  - [ ] 10.26 Check pickup date against order holds before order creation
-  - [ ] 10.27 Integrate hold validation in customer checkout flow
-  - [ ] 10.28 Display hold reason to customer if date is blocked
-  - [ ] 10.29 Disable blocked dates in customer date picker
-  - [ ] 10.30 Add audit logging for hold management actions
+- [x] 10.0 **Order Holds & Pickup Time Management**
+  - [x] 10.1 Create `src/utils/orderHolds.js` for order hold utilities
+  - [x] 10.2 Create `src/components/staff/OrderHoldsManagement.jsx` management page (owner only)
+  - [x] 10.3 Add role check - restrict access to owner only
+  - [x] 10.4 Display calendar view of current and upcoming holds
+  - [x] 10.5 Fetch order holds from database
+  - [x] 10.6 Implement create new hold form (date, reason)
+  - [x] 10.7 Add date picker for selecting hold date(s)
+  - [x] 10.8 Add reason input field (e.g., "Fully Booked", "Holiday", "Maintenance")
+  - [x] 10.9 Validate that hold date is not in the past
+  - [x] 10.10 Insert hold into `order_holds` table with created_by = owner user_id
+  - [x] 10.11 Implement hold deactivation (set is_active = false)
+  - [x] 10.12 Add confirmation dialog before deactivating hold
+  - [x] 10.13 Display list of active holds with date and reason
+  - [x] 10.14 Implement hold deletion (permanent removal from database)
+  - [x] 10.15 Add confirmation dialog before deleting hold
+  - [x] 10.16 Create `src/utils/pickupTimeSlots.js` for time slot management
+  - [x] 10.17 Create `src/components/staff/PickupTimeSlots.jsx` configuration page (owner only)
+  - [x] 10.18 Store pickup time slots in `system_configuration` table as JSON
+  - [x] 10.19 Display current configured time slots
+  - [x] 10.20 Implement add time slot form (start time, end time)
+  - [x] 10.21 Validate time slot format and no overlaps
+  - [x] 10.22 Implement remove time slot functionality
+  - [x] 10.23 Implement enable/disable time slot (without deleting)
+  - [x] 10.24 Save time slots configuration to database
+  - [x] 10.25 Create validation function `validate_pickup_date()` stored procedure
+  - [x] 10.26 Check pickup date against order holds before order creation
+  - [x] 10.27 Integrate hold validation in customer checkout flow
+  - [x] 10.28 Display hold reason to customer if date is blocked
+  - [x] 10.29 Disable blocked dates in customer date picker
+  - [x] 10.30 Add audit logging for hold management actions
 
 - [ ] 11.0 **Order Tracking & Customer Profile**
   - [ ] 11.1 Create `src/components/customer/OrderHistory.jsx` order history page
