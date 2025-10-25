@@ -425,39 +425,39 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 10.29 Disable blocked dates in customer date picker
   - [x] 10.30 Add audit logging for hold management actions
 
-- [ ] 11.0 **Order Tracking & Customer Profile**
-  - [ ] 11.1 Create `src/components/customer/OrderHistory.jsx` order history page
-  - [ ] 11.2 Fetch all orders for logged-in customer
-  - [ ] 11.3 Display orders in reverse chronological order (newest first)
-  - [ ] 11.4 Show order number, date, total, status for each order
-  - [ ] 11.5 Implement filter by order status
-  - [ ] 11.6 Add search functionality for order history
-  - [ ] 11.7 Create `src/components/customer/OrderTracking.jsx` order detail/tracking
-  - [ ] 11.8 Display detailed order information (items, quantities, prices)
-  - [ ] 11.9 Show current order status with visual progress indicator
-  - [ ] 11.10 Display order status history timeline
-  - [ ] 11.11 Show pickup date, time, and location information
-  - [ ] 11.12 Display payment information (deposit paid, balance due)
-  - [ ] 11.13 Add "Pay Balance" button if balance is still due and order confirmed
-  - [ ] 11.14 Show custom cake request status if order originated from custom request
-  - [ ] 11.15 Display quote details for custom cake orders
-  - [ ] 11.16 Implement order modification (before payment) functionality
-  - [ ] 11.17 Allow changing items, quantities, pickup date before payment
-  - [ ] 11.18 Restrict modifications after payment is made
-  - [ ] 11.19 Create `src/components/customer/CustomerProfile.jsx` profile page
-  - [ ] 11.20 Display customer information (name, phone, email, birthday, address)
-  - [ ] 11.21 Implement edit profile form
-  - [ ] 11.22 Allow updating name, email, birthday, address
-  - [ ] 11.23 Implement phone number change with re-verification
-  - [ ] 11.24 Send new OTP when phone number is changed
-  - [ ] 11.25 Require OTP verification before updating phone number
-  - [ ] 11.26 Update customer record after successful phone verification
-  - [ ] 11.27 Add password/PIN setup for customer accounts (optional, future consideration)
-  - [ ] 11.28 Implement profile image upload
-  - [ ] 11.29 Add validation for all profile fields
-  - [ ] 11.30 Show success/error messages for profile updates
-  - [ ] 11.31 Add view for rejected custom cake requests in order history
-  - [ ] 11.32 Display rejection reason (if provided by staff)
+- [x] 11.0 **Order Tracking & Customer Profile**
+  - [x] 11.1 Create `src/components/customer/OrderHistory.jsx` order history page
+  - [x] 11.2 Fetch all orders for logged-in customer
+  - [x] 11.3 Display orders in reverse chronological order (newest first)
+  - [x] 11.4 Show order number, date, total, status for each order
+  - [x] 11.5 Implement filter by order status
+  - [x] 11.6 Add search functionality for order history
+  - [x] 11.7 Create `src/components/customer/OrderTracking.jsx` order detail/tracking
+  - [x] 11.8 Display detailed order information (items, quantities, prices)
+  - [x] 11.9 Show current order status with visual progress indicator
+  - [x] 11.10 Display order status history timeline
+  - [x] 11.11 Show pickup date, time, and location information
+  - [x] 11.12 Display payment information (deposit paid, balance due)
+  - [x] 11.13 Add "Pay Balance" button if balance is still due and order confirmed
+  - [x] 11.14 Show custom cake request status if order originated from custom request
+  - [x] 11.15 Display quote details for custom cake orders
+  - [x] 11.16 Implement order modification (before payment) functionality
+  - [x] 11.17 Allow changing items, quantities, pickup date before payment
+  - [x] 11.18 Restrict modifications after payment is made
+  - [x] 11.19 Create `src/components/customer/CustomerProfile.jsx` profile page
+  - [x] 11.20 Display customer information (name, phone, email, birthday, address)
+  - [x] 11.21 Implement edit profile form
+  - [x] 11.22 Allow updating name, email, birthday, address
+  - [x] 11.23 Implement phone number change with re-verification
+  - [x] 11.24 Send new OTP when phone number is changed
+  - [x] 11.25 Require OTP verification before updating phone number
+  - [x] 11.26 Update customer record after successful phone verification
+  - [x] 11.27 Add password/PIN setup for customer accounts (optional, future consideration)
+  - [x] 11.28 Implement profile image upload
+  - [x] 11.29 Add validation for all profile fields
+  - [x] 11.30 Show success/error messages for profile updates
+  - [x] 11.31 Add view for rejected custom cake requests in order history
+  - [x] 11.32 Display rejection reason (if provided by staff)
 
 - [ ] 12.0 **Testing, Validation & Security**
   - [ ] 12.1 Create comprehensive validation utilities in `src/utils/validation.js`

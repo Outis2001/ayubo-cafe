@@ -900,6 +900,127 @@ export const updateCustomerProfile = async (customerId, updates) => {
 };
 
 /**
+ * Request phone number change
+ * 
+ * @param {string} customerId - Customer ID
+ * @param {string} newPhone - New phone number
+ * @returns {Promise<Object>} Result with OTP ID
+ */
+export const requestPhoneChange = async (customerId, newPhone) => {
+  try {
+    // Check if new phone is already in use
+    const { data: existing } = await supabaseClient
+      .from('customers')
+      .select('customer_id')
+      .eq('phone_number', newPhone)
+      .single();
+    
+    if (existing && existing.customer_id !== customerId) {
+      return {
+        success: false,
+        error: 'This phone number is already registered',
+      };
+    }
+    
+    // Request OTP for new phone number
+    const otpResult = await requestOTP(newPhone);
+    
+    if (!otpResult.success) {
+      return otpResult;
+    }
+    
+    // Store pending phone change in database (or use temp storage)
+    // For now, we'll rely on OTP verification and update directly
+    
+    return {
+      success: true,
+      otpId: otpResult.otpId,
+      message: 'OTP sent to new phone number',
+    };
+  } catch (error) {
+    console.error('Error requesting phone change:', error);
+    return {
+      success: false,
+      error: 'Failed to request phone change',
+    };
+  }
+};
+
+/**
+ * Verify phone number change
+ * 
+ * @param {string} customerId - Customer ID
+ * @param {string} newPhone - New phone number
+ * @param {string} otpCode - OTP code
+ * @returns {Promise<Object>} Result
+ */
+export const verifyPhoneChange = async (customerId, newPhone, otpCode) => {
+  try {
+    // Get OTP record
+    const { data: otpRecord, error: fetchError } = await supabaseClient
+      .from('customer_otps')
+      .select('*')
+      .eq('phone_number', newPhone)
+      .eq('is_verified', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (fetchError || !otpRecord) {
+      return {
+        success: false,
+        error: 'No pending OTP found',
+      };
+    }
+    
+    // Verify OTP
+    const verifyResult = await verifyOTP(otpRecord.otp_id, otpCode, newPhone);
+    
+    if (!verifyResult.success) {
+      return verifyResult;
+    }
+    
+    // Update customer phone number
+    const { data: updated, error: updateError } = await supabaseClient
+      .from('customers')
+      .update({ phone_number: newPhone })
+      .eq('customer_id', customerId)
+      .select()
+      .single();
+    
+    if (updateError) {
+      console.error('Error updating phone number:', updateError);
+      return {
+        success: false,
+        error: 'Failed to update phone number',
+      };
+    }
+    
+    // Audit log
+    await logAuditEvent({
+      action: 'customer_phone_changed',
+      target_type: 'customer',
+      target_id: customerId,
+      details: {
+        new_phone: newPhone,
+      },
+    });
+    
+    return {
+      success: true,
+      customer: updated,
+      message: 'Phone number updated successfully',
+    };
+  } catch (error) {
+    console.error('Error verifying phone change:', error);
+    return {
+      success: false,
+      error: 'An error occurred',
+    };
+  }
+};
+
+/**
  * Export constants for use in components
  */
 export const OTP_CONFIG = {
