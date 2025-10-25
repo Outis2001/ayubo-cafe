@@ -30,20 +30,20 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/customer/ShoppingCart.jsx` - **CREATED** Shopping cart component (cart items display, quantity controls, remove items, totals with deposit/balance breakdown)
 - `src/components/customer/CheckoutFlow.jsx` - **CREATED** Checkout and order placement (date/time selection, validation, payment method, terms acceptance, order summary)
 - `src/components/customer/OrderConfirmation.jsx` - **CREATED** Order confirmation screen (order number display, order details, payment summary, next steps, action buttons)
-- `src/components/customer/CustomCakeRequest.jsx` - Custom cake request form
+- `src/components/customer/CustomCakeRequest.jsx` - **CREATED** Custom cake request form (image upload, customer notes for occasion/age/colors/writing, pickup date/time, validation, submission)
+- `src/components/customer/QuoteApproval.jsx` - **CREATED** Quote approval component (display quote with price options, expiration date, approve/reject buttons, create order from quote, rejection reason, expired quote handling)
 - `src/components/customer/OrderHistory.jsx` - Customer order history
 - `src/components/customer/OrderTracking.jsx` - Order status tracking
 - `src/components/customer/CustomerProfile.jsx` - Customer profile management
-- `src/components/customer/QuoteApproval.jsx` - Custom cake quote approval
 
 #### Staff Portal Components
 - `src/components/staff/ProductCatalogManagement.jsx` - **CREATED** Owner product catalog management (list view, filters, search, statistics dashboard)
 - `src/components/staff/ProductForm.jsx` - **CREATED** Add/edit product form (with pricing, categories, images, validation)
 - `src/components/staff/CategoryManagement.jsx` - **CREATED** Category management modal (CRUD operations, reordering, icon upload)
+- `src/components/staff/CustomRequestsPage.jsx` - **CREATED** Custom requests management (display all requests, filters by status, sort by date, search, urgent highlights, statistics)
+- `src/components/staff/QuoteForm.jsx` - **CREATED** Quote form for custom requests (display request details/image, multiple price options, servings/prep time, send quote with notifications, 7-day expiration, owner-only)
 - `src/components/staff/CustomerOrders.jsx` - Customer orders list
 - `src/components/staff/OrderDetails.jsx` - Detailed order view
-- `src/components/staff/CustomRequestsPage.jsx` - Custom cake requests management
-- `src/components/staff/QuoteForm.jsx` - Send quote to customer
 - `src/components/staff/OrderHoldsManagement.jsx` - Manage blocked dates (owner only)
 - `src/components/staff/PickupTimeSlots.jsx` - Configure pickup time slots
 - `src/components/staff/NotificationBell.jsx` - In-app notification bell icon
@@ -253,46 +253,46 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 5.31 Add error handling for order creation failures
   - [x] 5.32 Persist cart to localStorage for recovery
 
-- [ ] 6.0 **Custom Cake Request & Quote System**
-  - [ ] 6.1 Create `src/components/customer/CustomCakeRequest.jsx` request form
-  - [ ] 6.2 Add image upload for reference cake design (max 10MB, JPG/PNG only)
-  - [ ] 6.3 Implement image preview before upload
-  - [ ] 6.4 Upload image to Supabase Storage and get URL
-  - [ ] 6.5 Add text fields for customer notes (Occasion, Age, Colors, Writing)
-  - [ ] 6.6 Implement pickup date and time selection (same validation as pre-made orders)
-  - [ ] 6.7 Validate all required fields before submission
-  - [ ] 6.8 Create custom cake request record in `custom_cake_requests` table
-  - [ ] 6.9 Set initial status to 'pending_review'
-  - [ ] 6.10 Show success message with request ID after submission
-  - [ ] 6.11 Create `src/components/staff/CustomRequestsPage.jsx` for staff
-  - [ ] 6.12 Display all custom requests with filters (pending, quoted, approved, rejected)
-  - [ ] 6.13 Sort by delivery date and creation date
-  - [ ] 6.14 Add search by customer name/phone
-  - [ ] 6.15 Highlight urgent requests (delivery date within 3 days)
-  - [ ] 6.16 Create `src/components/staff/QuoteForm.jsx` for sending quotes
-  - [ ] 6.17 Display customer uploaded image in quote form
-  - [ ] 6.18 Show customer notes and requested delivery details
-  - [ ] 6.19 Add multiple price/weight options input (table or repeating fields)
-  - [ ] 6.20 Add servings estimate input
-  - [ ] 6.21 Add preparation time estimate input
-  - [ ] 6.22 Add additional notes field for quote
-  - [ ] 6.23 Implement send quote function - update request status to 'quoted'
-  - [ ] 6.24 Store quote details (price, weight options, notes) in database
-  - [ ] 6.25 Record staff member who sent quote (quoted_by)
-  - [ ] 6.26 Send notification to customer (SMS/email) when quote is sent
-  - [ ] 6.27 Set quote expiration (1 week from sent date)
-  - [ ] 6.28 Restrict quote sending to owner only (role check)
-  - [ ] 6.29 Create `src/components/customer/QuoteApproval.jsx` customer quote view
-  - [ ] 6.30 Display received quote with price options
-  - [ ] 6.31 Show quote expiration date
-  - [ ] 6.32 Add approve/reject buttons for customer
-  - [ ] 6.33 Implement quote approval - create order from custom request
-  - [ ] 6.34 Convert custom request to order with quoted price
-  - [ ] 6.35 Link order_id back to custom request
-  - [ ] 6.36 Implement quote rejection - update status and record reason
-  - [ ] 6.37 Add response time tracking (staff must quote within 3 hours)
-  - [ ] 6.38 Show warning if request approaching 3-hour deadline
-  - [ ] 6.39 Mark quotes as expired after 1 week
+- [x] 6.0 **Custom Cake Request & Quote System**
+  - [x] 6.1 Create `src/components/customer/CustomCakeRequest.jsx` request form
+  - [x] 6.2 Add image upload for reference cake design (max 10MB, JPG/PNG only)
+  - [x] 6.3 Implement image preview before upload
+  - [x] 6.4 Upload image to Supabase Storage and get URL
+  - [x] 6.5 Add text fields for customer notes (Occasion, Age, Colors, Writing)
+  - [x] 6.6 Implement pickup date and time selection (same validation as pre-made orders)
+  - [x] 6.7 Validate all required fields before submission
+  - [x] 6.8 Create custom cake request record in `custom_cake_requests` table
+  - [x] 6.9 Set initial status to 'pending_review'
+  - [x] 6.10 Show success message with request ID after submission
+  - [x] 6.11 Create `src/components/staff/CustomRequestsPage.jsx` for staff
+  - [x] 6.12 Display all custom requests with filters (pending, quoted, approved, rejected)
+  - [x] 6.13 Sort by delivery date and creation date
+  - [x] 6.14 Add search by customer name/phone
+  - [x] 6.15 Highlight urgent requests (delivery date within 3 days)
+  - [x] 6.16 Create `src/components/staff/QuoteForm.jsx` for sending quotes
+  - [x] 6.17 Display customer uploaded image in quote form
+  - [x] 6.18 Show customer notes and requested delivery details
+  - [x] 6.19 Add multiple price/weight options input (table or repeating fields)
+  - [x] 6.20 Add servings estimate input
+  - [x] 6.21 Add preparation time estimate input
+  - [x] 6.22 Add additional notes field for quote
+  - [x] 6.23 Implement send quote function - update request status to 'quoted'
+  - [x] 6.24 Store quote details (price, weight options, notes) in database
+  - [x] 6.25 Record staff member who sent quote (quoted_by)
+  - [x] 6.26 Send notification to customer (SMS/email) when quote is sent
+  - [x] 6.27 Set quote expiration (1 week from sent date)
+  - [x] 6.28 Restrict quote sending to owner only (role check)
+  - [x] 6.29 Create `src/components/customer/QuoteApproval.jsx` customer quote view
+  - [x] 6.30 Display received quote with price options
+  - [x] 6.31 Show quote expiration date
+  - [x] 6.32 Add approve/reject buttons for customer
+  - [x] 6.33 Implement quote approval - create order from custom request
+  - [x] 6.34 Convert custom request to order with quoted price
+  - [x] 6.35 Link order_id back to custom request
+  - [x] 6.36 Implement quote rejection - update status and record reason
+  - [x] 6.37 Add response time tracking (staff must quote within 3 hours)
+  - [x] 6.38 Show warning if request approaching 3-hour deadline
+  - [x] 6.39 Mark quotes as expired after 1 week
 
 - [ ] 7.0 **Payment Integration (Stripe & Bank Transfer)**
   - [ ] 7.1 Install Stripe npm package (`npm install @stripe/stripe-js`)
