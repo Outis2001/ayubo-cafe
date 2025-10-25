@@ -46,8 +46,8 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/staff/CategoryManagement.jsx` - **CREATED** Category management modal (CRUD operations, reordering, icon upload)
 - `src/components/staff/CustomRequestsPage.jsx` - **CREATED** Custom requests management (display all requests, filters by status, sort by date, search, urgent highlights, statistics)
 - `src/components/staff/QuoteForm.jsx` - **CREATED** Quote form for custom requests (display request details/image, multiple price options, servings/prep time, send quote with notifications, 7-day expiration, owner-only)
-- `src/components/staff/CustomerOrders.jsx` - Customer orders list
-- `src/components/staff/OrderDetails.jsx` - Detailed order view
+- `src/components/staff/CustomerOrders.jsx` - **CREATED** Customer orders list page (comprehensive filtering, search, sorting, pagination, real-time updates, order cards with badges, payment status tracking)
+- `src/components/staff/OrderDetails.jsx` - **CREATED** Detailed order view (complete order info, customer details, order items, payment history, status timeline, status updates, staff notes, order cancellation, print functionality)
 - `src/components/staff/OrderHoldsManagement.jsx` - Manage blocked dates (owner only)
 - `src/components/staff/PickupTimeSlots.jsx` - Configure pickup time slots
 - `src/components/staff/NotificationBell.jsx` - In-app notification bell icon
@@ -334,37 +334,37 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 7.33 Implement payment retry mechanism for failed payments
   - [x] 7.34 Create audit logging for all payment operations
 
-- [ ] 8.0 **Staff Order Management Portal**
-  - [ ] 8.1 Create `src/components/staff/CustomerOrders.jsx` orders list page
-  - [ ] 8.2 Add navigation item "Customer Orders" to staff menu (owner & cashier)
-  - [ ] 8.3 Fetch all customer orders with customer and payment details
-  - [ ] 8.4 Display orders in table/card format with key info (order#, customer, date, status, total)
-  - [ ] 8.5 Implement filter by order status (pending, confirmed, in preparation, ready, completed)
-  - [ ] 8.6 Implement filter by payment status (pending, deposit paid, fully paid)
-  - [ ] 8.7 Implement filter by order type (pre-made, custom)
-  - [ ] 8.8 Add date range filter for order date
-  - [ ] 8.9 Implement search by customer name, phone, or order number
-  - [ ] 8.10 Add sorting options (date, total amount, pickup date)
-  - [ ] 8.11 Implement pagination for order list (20 orders per page)
-  - [ ] 8.12 Create `src/components/staff/OrderDetails.jsx` detailed order view
-  - [ ] 8.13 Display complete order information (items, pricing, quantities)
-  - [ ] 8.14 Show customer contact information (name, phone, email)
-  - [ ] 8.15 Display pickup date, time, and special instructions
-  - [ ] 8.16 Show payment details (method, status, deposit/balance amounts)
-  - [ ] 8.17 Display order status history timeline
-  - [ ] 8.18 Implement order status update dropdown (staff can change status)
-  - [ ] 8.19 Use `update_order_status()` stored function to update with history
-  - [ ] 8.20 Add status badges with color coding (pending=yellow, confirmed=blue, ready=green, etc.)
-  - [ ] 8.21 Implement staff notes field - internal notes only visible to staff
-  - [ ] 8.22 Add staff note creation with timestamp and staff name
-  - [ ] 8.23 Implement order cancellation (staff only) with mandatory reason
-  - [ ] 8.24 Record cancellation in order_status_history
-  - [ ] 8.25 Send notification to customer when order status changes
-  - [ ] 8.26 Add print order button for order receipt/label
-  - [ ] 8.27 Implement order details modal/drawer for quick view
-  - [ ] 8.28 Add loading states for data fetching
-  - [ ] 8.29 Handle errors gracefully with user-friendly messages
-  - [ ] 8.30 Create audit logging for all staff order actions
+- [x] 8.0 **Staff Order Management Portal**
+  - [x] 8.1 Create `src/components/staff/CustomerOrders.jsx` orders list page
+  - [x] 8.2 Add navigation item "Customer Orders" to staff menu (owner & cashier)
+  - [x] 8.3 Fetch all customer orders with customer and payment details
+  - [x] 8.4 Display orders in table/card format with key info (order#, customer, date, status, total)
+  - [x] 8.5 Implement filter by order status (pending, confirmed, in preparation, ready, completed)
+  - [x] 8.6 Implement filter by payment status (pending, deposit paid, fully paid)
+  - [x] 8.7 Implement filter by order type (pre-made, custom)
+  - [x] 8.8 Add date range filter for order date
+  - [x] 8.9 Implement search by customer name, phone, or order number
+  - [x] 8.10 Add sorting options (date, total amount, pickup date)
+  - [x] 8.11 Implement pagination for order list (20 orders per page)
+  - [x] 8.12 Create `src/components/staff/OrderDetails.jsx` detailed order view
+  - [x] 8.13 Display complete order information (items, pricing, quantities)
+  - [x] 8.14 Show customer contact information (name, phone, email)
+  - [x] 8.15 Display pickup date, time, and special instructions
+  - [x] 8.16 Show payment details (method, status, deposit/balance amounts)
+  - [x] 8.17 Display order status history timeline
+  - [x] 8.18 Implement order status update dropdown (staff can change status)
+  - [x] 8.19 Use `update_order_status()` stored function to update with history
+  - [x] 8.20 Add status badges with color coding (pending=yellow, confirmed=blue, ready=green, etc.)
+  - [x] 8.21 Implement staff notes field - internal notes only visible to staff
+  - [x] 8.22 Add staff note creation with timestamp and staff name
+  - [x] 8.23 Implement order cancellation (staff only) with mandatory reason
+  - [x] 8.24 Record cancellation in order_status_history
+  - [x] 8.25 Send notification to customer when order status changes
+  - [x] 8.26 Add print order button for order receipt/label
+  - [x] 8.27 Implement order details modal/drawer for quick view
+  - [x] 8.28 Add loading states for data fetching
+  - [x] 8.29 Handle errors gracefully with user-friendly messages
+  - [x] 8.30 Create audit logging for all staff order actions
 
 - [ ] 9.0 **In-App Notifications System**
   - [ ] 9.1 Create `src/utils/notifications.js` for notification utilities
