@@ -23,10 +23,10 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 #### Customer Portal Components
 - `src/components/customer/CustomerSignup.jsx` - **CREATED** Multi-step signup form (phone → OTP → details) with validation & countdown timers
 - `src/components/customer/CustomerLogin.jsx` - **CREATED** Login form for returning customers (phone → OTP verification)
-- `src/components/customer/CustomerApp.jsx` - Main customer portal component
-- `src/components/customer/ProductGallery.jsx` - Product browsing gallery
-- `src/components/customer/ProductCard.jsx` - Individual product display card
-- `src/components/customer/ProductDetail.jsx` - Product detail view with pricing options
+- `src/components/customer/CustomerApp.jsx` - **CREATED** Main customer portal component (mobile-first, navigation, routing, auth integration, product detail integration)
+- `src/components/customer/ProductGallery.jsx` - **CREATED** Product browsing gallery (grid layout, category filters, search, featured filter, loading/error states)
+- `src/components/customer/ProductCard.jsx` - **INTEGRATED** Individual product display card (integrated into ProductGallery)
+- `src/components/customer/ProductDetail.jsx` - **CREATED** Product detail modal (image carousel, full description, allergens, pricing selector, quantity selector, add to cart)
 - `src/components/customer/ShoppingCart.jsx` - Shopping cart component
 - `src/components/customer/CheckoutFlow.jsx` - Checkout and order placement
 - `src/components/customer/CustomCakeRequest.jsx` - Custom cake request form
@@ -60,7 +60,7 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 
 #### Context & Hooks
 - `src/context/CustomerOrderContext.jsx` - Customer order/cart state management
-- `src/hooks/useProductCatalog.js` - Product catalog data hook
+- `src/hooks/useProductCatalog.js` - **CREATED** Product catalog data hook (with caching, loading states, refetch, single product fetch)
 - `src/hooks/useCustomerOrders.js` - Customer orders hook
 - `src/hooks/useNotifications.js` - Staff notifications hook
 - `src/hooks/usePayments.js` - Payment processing hook
@@ -182,32 +182,32 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 3.29 Add validation for all form fields
   - [x] 3.30 Create audit logging for all product management actions
 
-- [ ] 4.0 **Customer Portal - Product Browsing**
-  - [ ] 4.1 Create `src/components/customer/CustomerApp.jsx` main customer portal container
-  - [ ] 4.2 Implement customer-friendly navigation (distinct from staff interface)
-  - [ ] 4.3 Design mobile-first responsive layout for customer portal
-  - [ ] 4.4 Create `src/hooks/useProductCatalog.js` to fetch products with pricing
-  - [ ] 4.5 Implement caching for product catalog data
-  - [ ] 4.6 Create `src/components/customer/ProductGallery.jsx` gallery view
-  - [ ] 4.7 Implement category filter tabs/buttons
-  - [ ] 4.8 Add "All", "Featured" category options
-  - [ ] 4.9 Implement product search with real-time filtering
-  - [ ] 4.10 Create `src/components/customer/ProductCard.jsx` individual product card
-  - [ ] 4.11 Display product image, name, description on card
-  - [ ] 4.12 Show pricing options (e.g., "From Rs. 1500") on card
-  - [ ] 4.13 Add "Featured" badge for featured products
-  - [ ] 4.14 Implement lazy loading for product images
-  - [ ] 4.15 Add availability indicator (hide unavailable products or show as sold out)
-  - [ ] 4.16 Create `src/components/customer/ProductDetail.jsx` detail modal/page
-  - [ ] 4.17 Implement image carousel for multiple product images
-  - [ ] 4.18 Display full product description, allergens, preparation time
-  - [ ] 4.19 Show all pricing options with weight/price/servings in a table or list
-  - [ ] 4.20 Add weight/price selector for adding to cart
-  - [ ] 4.21 Implement "Add to Cart" button with selected pricing option
-  - [ ] 4.22 Add loading states and skeleton screens for better UX
-  - [ ] 4.23 Implement error handling for failed product fetches
-  - [ ] 4.24 Add empty states (no products found, no search results)
-  - [ ] 4.25 Optimize for mobile touch interactions
+- [x] 4.0 **Customer Portal - Product Browsing**
+  - [x] 4.1 Create `src/components/customer/CustomerApp.jsx` main customer portal container
+  - [x] 4.2 Implement customer-friendly navigation (distinct from staff interface)
+  - [x] 4.3 Design mobile-first responsive layout for customer portal
+  - [x] 4.4 Create `src/hooks/useProductCatalog.js` to fetch products with pricing
+  - [x] 4.5 Implement caching for product catalog data
+  - [x] 4.6 Create `src/components/customer/ProductGallery.jsx` gallery view
+  - [x] 4.7 Implement category filter tabs/buttons
+  - [x] 4.8 Add "All", "Featured" category options
+  - [x] 4.9 Implement product search with real-time filtering
+  - [x] 4.10 Create `src/components/customer/ProductCard.jsx` individual product card
+  - [x] 4.11 Display product image, name, description on card
+  - [x] 4.12 Show pricing options (e.g., "From Rs. 1500") on card
+  - [x] 4.13 Add "Featured" badge for featured products
+  - [x] 4.14 Implement lazy loading for product images
+  - [x] 4.15 Add availability indicator (hide unavailable products or show as sold out)
+  - [x] 4.16 Create `src/components/customer/ProductDetail.jsx` detail modal/page
+  - [x] 4.17 Implement image carousel for multiple product images
+  - [x] 4.18 Display full product description, allergens, preparation time
+  - [x] 4.19 Show all pricing options with weight/price/servings in a table or list
+  - [x] 4.20 Add weight/price selector for adding to cart
+  - [x] 4.21 Implement "Add to Cart" button with selected pricing option
+  - [x] 4.22 Add loading states and skeleton screens for better UX
+  - [x] 4.23 Implement error handling for failed product fetches
+  - [x] 4.24 Add empty states (no products found, no search results)
+  - [x] 4.25 Optimize for mobile touch interactions
 
 - [ ] 5.0 **Pre-made Cake Ordering System**
   - [ ] 5.1 Create `src/context/CustomerOrderContext.jsx` for cart/order state
