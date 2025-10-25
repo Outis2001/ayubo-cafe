@@ -32,6 +32,10 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/customer/OrderConfirmation.jsx` - **CREATED** Order confirmation screen (order number display, order details, payment summary, next steps, action buttons)
 - `src/components/customer/CustomCakeRequest.jsx` - **CREATED** Custom cake request form (image upload, customer notes for occasion/age/colors/writing, pickup date/time, validation, submission)
 - `src/components/customer/QuoteApproval.jsx` - **CREATED** Quote approval component (display quote with price options, expiration date, approve/reject buttons, create order from quote, rejection reason, expired quote handling)
+- `src/components/customer/PaymentSelection.jsx` - **CREATED** Payment method selection (choose Stripe or bank transfer, display amount, payment type info)
+- `src/components/customer/BankTransferPayment.jsx` - **CREATED** Bank transfer payment form (bank account details, receipt upload, transaction reference, copy to clipboard)
+- `src/components/customer/PaymentSuccess.jsx` - **CREATED** Payment success page (display confirmation, payment details, order info, next steps)
+- `src/components/customer/PaymentCancelled.jsx` - **CREATED** Payment cancelled page (retry payment, return to orders)
 - `src/components/customer/OrderHistory.jsx` - Customer order history
 - `src/components/customer/OrderTracking.jsx` - Order status tracking
 - `src/components/customer/CustomerProfile.jsx` - Customer profile management
@@ -48,12 +52,12 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/staff/PickupTimeSlots.jsx` - Configure pickup time slots
 - `src/components/staff/NotificationBell.jsx` - In-app notification bell icon
 - `src/components/staff/NotificationPanel.jsx` - Notification dropdown panel
-- `src/components/staff/PaymentVerification.jsx` - Bank transfer verification
+- `src/components/staff/PaymentVerification.jsx` - **CREATED** Bank transfer verification (display pending payments, view receipts, approve/reject with notes, real-time updates)
 
 #### Utility Functions
 - `src/utils/customerOrders.js` - **CREATED** Customer order management utilities (order creation with stored procedures, fetch orders, update status, cancel orders, validation)
 - `src/utils/productCatalog.js` - **CREATED** Product catalog utilities (CRUD operations, pricing management, category management, search/filtering)
-- `src/utils/payments.js` - Payment processing utilities (Stripe integration)
+- `src/utils/payments.js` - **CREATED** Payment processing utilities (Stripe checkout, bank transfer, payment records, verification, deposit/balance calculations, audit logging)
 - `src/utils/imageUpload.js` - **CREATED** Image upload utilities (Supabase Storage, compression, thumbnail generation, drag-and-drop)
 - `src/utils/notifications.js` - Notification utilities
 - `src/utils/orderHolds.js` - **CREATED** Order holds and date validation (fetch holds, validate dates, block dates, CRUD operations)
@@ -62,14 +66,14 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 #### Context & Hooks
 - `src/context/CustomerOrderContext.jsx` - **CREATED** Customer order/cart state management (cart operations, totals, localStorage persistence)
 - `src/hooks/useProductCatalog.js` - **CREATED** Product catalog data hook (with caching, loading states, refetch, single product fetch)
+- `src/hooks/usePayments.js` - **CREATED** Payment processing hook (Stripe payment, bank transfer, fetch order payments, check deposit/fully paid status)
 - `src/hooks/useCustomerOrders.js` - Customer orders hook
 - `src/hooks/useNotifications.js` - Staff notifications hook
-- `src/hooks/usePayments.js` - Payment processing hook
 
 #### Netlify Functions
 - `netlify/functions/send-otp.js` - Send OTP via SMS webhook
-- `netlify/functions/stripe-webhook.js` - Stripe payment webhook handler
-- `netlify/functions/process-payment.js` - Process Stripe payment
+- `netlify/functions/process-payment.js` - **CREATED** Server-side Stripe checkout session creation (secure API key handling)
+- `netlify/functions/stripe-webhook.js` - **CREATED** Stripe webhook handler (payment success/failure events, signature verification, order status updates)
 
 ### Files to Modify
 
@@ -294,41 +298,41 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 6.38 Show warning if request approaching 3-hour deadline
   - [x] 6.39 Mark quotes as expired after 1 week
 
-- [ ] 7.0 **Payment Integration (Stripe & Bank Transfer)**
-  - [ ] 7.1 Install Stripe npm package (`npm install @stripe/stripe-js`)
-  - [ ] 7.2 Create `src/utils/payments.js` for payment utilities
-  - [ ] 7.3 Add Stripe publishable and secret keys to environment variables
-  - [ ] 7.4 Create `src/hooks/usePayments.js` for payment processing hook
-  - [ ] 7.5 Implement Stripe checkout session creation
-  - [ ] 7.6 Create Netlify function `process-payment.js` for server-side Stripe API calls
-  - [ ] 7.7 Implement payment intent creation for deposit amount (40%)
-  - [ ] 7.8 Add support for full payment option (100%) if customer chooses
-  - [ ] 7.9 Handle payment success callback - update order payment status
-  - [ ] 7.10 Create payment record in `customer_payments` table
-  - [ ] 7.11 Update order status to 'payment_verified' on success
-  - [ ] 7.12 Create Netlify function `stripe-webhook.js` for webhook handling
-  - [ ] 7.13 Verify webhook signatures for security
-  - [ ] 7.14 Handle payment.succeeded webhook event
-  - [ ] 7.15 Handle payment.failed webhook event
-  - [ ] 7.16 Implement bank transfer payment flow
-  - [ ] 7.17 Display bank account details from `system_configuration`
-  - [ ] 7.18 Add receipt image upload for bank transfer
-  - [ ] 7.19 Create payment record with status 'pending' for bank transfer
-  - [ ] 7.20 Update order status to 'payment_pending_verification'
-  - [ ] 7.21 Create `src/components/staff/PaymentVerification.jsx` for staff
-  - [ ] 7.22 Display orders with pending payment verification
-  - [ ] 7.23 Show uploaded receipt image for verification
-  - [ ] 7.24 Implement verify payment button (staff action)
-  - [ ] 7.25 Update payment status to 'success' and order status to 'payment_verified'
-  - [ ] 7.26 Record staff member who verified payment
-  - [ ] 7.27 Add reject payment option with reason
-  - [ ] 7.28 Implement balance payment (remaining 60%) for online payment
-  - [ ] 7.29 Check if deposit already paid before allowing balance payment
-  - [ ] 7.30 Update payment status to 'fully_paid' when balance is paid
-  - [ ] 7.31 Handle payment failures gracefully with user-friendly messages
-  - [ ] 7.32 Add test mode for Stripe using test API keys
-  - [ ] 7.33 Implement payment retry mechanism for failed payments
-  - [ ] 7.34 Create audit logging for all payment operations
+- [x] 7.0 **Payment Integration (Stripe & Bank Transfer)**
+  - [x] 7.1 Install Stripe npm package (`npm install @stripe/stripe-js`)
+  - [x] 7.2 Create `src/utils/payments.js` for payment utilities
+  - [x] 7.3 Add Stripe publishable and secret keys to environment variables
+  - [x] 7.4 Create `src/hooks/usePayments.js` for payment processing hook
+  - [x] 7.5 Implement Stripe checkout session creation
+  - [x] 7.6 Create Netlify function `process-payment.js` for server-side Stripe API calls
+  - [x] 7.7 Implement payment intent creation for deposit amount (40%)
+  - [x] 7.8 Add support for full payment option (100%) if customer chooses
+  - [x] 7.9 Handle payment success callback - update order payment status
+  - [x] 7.10 Create payment record in `customer_payments` table
+  - [x] 7.11 Update order status to 'payment_verified' on success
+  - [x] 7.12 Create Netlify function `stripe-webhook.js` for webhook handling
+  - [x] 7.13 Verify webhook signatures for security
+  - [x] 7.14 Handle payment.succeeded webhook event
+  - [x] 7.15 Handle payment.failed webhook event
+  - [x] 7.16 Implement bank transfer payment flow
+  - [x] 7.17 Display bank account details from `system_configuration`
+  - [x] 7.18 Add receipt image upload for bank transfer
+  - [x] 7.19 Create payment record with status 'pending' for bank transfer
+  - [x] 7.20 Update order status to 'payment_pending_verification'
+  - [x] 7.21 Create `src/components/staff/PaymentVerification.jsx` for staff
+  - [x] 7.22 Display orders with pending payment verification
+  - [x] 7.23 Show uploaded receipt image for verification
+  - [x] 7.24 Implement verify payment button (staff action)
+  - [x] 7.25 Update payment status to 'success' and order status to 'payment_verified'
+  - [x] 7.26 Record staff member who verified payment
+  - [x] 7.27 Add reject payment option with reason
+  - [x] 7.28 Implement balance payment (remaining 60%) for online payment
+  - [x] 7.29 Check if deposit already paid before allowing balance payment
+  - [x] 7.30 Update payment status to 'fully_paid' when balance is paid
+  - [x] 7.31 Handle payment failures gracefully with user-friendly messages
+  - [x] 7.32 Add test mode for Stripe using test API keys
+  - [x] 7.33 Implement payment retry mechanism for failed payments
+  - [x] 7.34 Create audit logging for all payment operations
 
 - [ ] 8.0 **Staff Order Management Portal**
   - [ ] 8.1 Create `src/components/staff/CustomerOrders.jsx` orders list page

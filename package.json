@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "ayubo-cafe",
   "private": true,
   "version": "1.0.0",
@@ -14,11 +14,13 @@
     "test:session": "vitest run tests/integration/session-expiration.test.js"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.1.0",
     "@supabase/supabase-js": "^2.39.0",
     "bcryptjs": "^3.0.2",
     "nodemailer": "^7.0.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "stripe": "^19.1.0",
     "validator": "^13.15.15"
   },
   "devDependencies": {
