@@ -27,8 +27,9 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/customer/ProductGallery.jsx` - **CREATED** Product browsing gallery (grid layout, category filters, search, featured filter, loading/error states)
 - `src/components/customer/ProductCard.jsx` - **INTEGRATED** Individual product display card (integrated into ProductGallery)
 - `src/components/customer/ProductDetail.jsx` - **CREATED** Product detail modal (image carousel, full description, allergens, pricing selector, quantity selector, add to cart)
-- `src/components/customer/ShoppingCart.jsx` - Shopping cart component
-- `src/components/customer/CheckoutFlow.jsx` - Checkout and order placement
+- `src/components/customer/ShoppingCart.jsx` - **CREATED** Shopping cart component (cart items display, quantity controls, remove items, totals with deposit/balance breakdown)
+- `src/components/customer/CheckoutFlow.jsx` - **CREATED** Checkout and order placement (date/time selection, validation, payment method, terms acceptance, order summary)
+- `src/components/customer/OrderConfirmation.jsx` - **CREATED** Order confirmation screen (order number display, order details, payment summary, next steps, action buttons)
 - `src/components/customer/CustomCakeRequest.jsx` - Custom cake request form
 - `src/components/customer/OrderHistory.jsx` - Customer order history
 - `src/components/customer/OrderTracking.jsx` - Order status tracking
@@ -50,16 +51,16 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/staff/PaymentVerification.jsx` - Bank transfer verification
 
 #### Utility Functions
-- `src/utils/customerOrders.js` - Customer order management utilities
+- `src/utils/customerOrders.js` - **CREATED** Customer order management utilities (order creation with stored procedures, fetch orders, update status, cancel orders, validation)
 - `src/utils/productCatalog.js` - **CREATED** Product catalog utilities (CRUD operations, pricing management, category management, search/filtering)
 - `src/utils/payments.js` - Payment processing utilities (Stripe integration)
 - `src/utils/imageUpload.js` - **CREATED** Image upload utilities (Supabase Storage, compression, thumbnail generation, drag-and-drop)
 - `src/utils/notifications.js` - Notification utilities
-- `src/utils/orderHolds.js` - Order holds and date validation
+- `src/utils/orderHolds.js` - **CREATED** Order holds and date validation (fetch holds, validate dates, block dates, CRUD operations)
 - `src/utils/pickupTimeSlots.js` - Pickup time slot management
 
 #### Context & Hooks
-- `src/context/CustomerOrderContext.jsx` - Customer order/cart state management
+- `src/context/CustomerOrderContext.jsx` - **CREATED** Customer order/cart state management (cart operations, totals, localStorage persistence)
 - `src/hooks/useProductCatalog.js` - **CREATED** Product catalog data hook (with caching, loading states, refetch, single product fetch)
 - `src/hooks/useCustomerOrders.js` - Customer orders hook
 - `src/hooks/useNotifications.js` - Staff notifications hook
@@ -85,7 +86,11 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 ### Test Files
 - `tests/unit/customerAuth.test.js` - Customer authentication tests
 - `tests/unit/phoneValidation.test.js` - Phone validation tests
-- `tests/unit/orderHolds.test.js` - Order holds validation tests
+- `tests/unit/orderHolds.test.js` - **CREATED** Order holds validation tests (18 tests - all passing)
+- `tests/unit/customerOrders.test.js` - **CREATED** Customer orders management tests (24 tests - all passing)
+- `tests/integration/customer-order-flow.test.js` - **CREATED** Complete order flow integration tests (9 tests - all passing)
+- `tests/CUSTOMER_ORDERING_TESTS.md` - **CREATED** Test documentation and guide
+- `tests/CUSTOMER_ORDERING_TEST_RESULTS.md` - **CREATED** Test execution results and analysis
 - `tests/integration/customer-signup.test.js` - Customer signup flow test
 - `tests/integration/order-placement.test.js` - Order placement test
 - `tests/integration/payment-processing.test.js` - Payment processing test
@@ -210,38 +215,38 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 4.25 Optimize for mobile touch interactions
 
 - [ ] 5.0 **Pre-made Cake Ordering System**
-  - [ ] 5.1 Create `src/context/CustomerOrderContext.jsx` for cart/order state
-  - [ ] 5.2 Implement cart state management (add, update, remove items)
-  - [ ] 5.3 Store selected pricing option (pricing_id) with each cart item
-  - [ ] 5.4 Create `src/components/customer/ShoppingCart.jsx` cart component
-  - [ ] 5.5 Display cart items with product name, weight option, quantity, price
-  - [ ] 5.6 Implement quantity adjustment for cart items
-  - [ ] 5.7 Add remove item from cart functionality
-  - [ ] 5.8 Calculate and display subtotal, deposit amount (40%), total amount
-  - [ ] 5.9 Show remaining balance (60%) due at pickup
-  - [ ] 5.10 Create `src/components/customer/CheckoutFlow.jsx` checkout component
-  - [ ] 5.11 Implement pickup date selector with date validation
-  - [ ] 5.12 Create `src/utils/orderHolds.js` to check for blocked dates
-  - [ ] 5.13 Integrate order holds check - disable dates with active holds
-  - [ ] 5.14 Implement pickup time slot selector (configurable by owner)
-  - [ ] 5.15 Fetch available time slots from `system_configuration` table
-  - [ ] 5.16 Add special instructions text area (optional)
-  - [ ] 5.17 Validate minimum advance order days (configurable)
-  - [ ] 5.18 Validate maximum advance order days (configurable)
-  - [ ] 5.19 Display order summary before payment
-  - [ ] 5.20 Implement payment method selection (Stripe or Bank Transfer)
-  - [ ] 5.21 Add terms and conditions display (no cancellation, no refund policy)
-  - [ ] 5.22 Require checkbox acceptance of terms before order placement
-  - [ ] 5.23 Create `src/utils/customerOrders.js` for order creation utilities
-  - [ ] 5.24 Implement order creation function using `create_customer_order()` stored procedure
-  - [ ] 5.25 Generate unique order number (ORD-YYYYMMDD-XXX format)
-  - [ ] 5.26 Create order items with pricing_id and denormalized data
-  - [ ] 5.27 Calculate deposit and totals using stored function
-  - [ ] 5.28 Add loading states during order creation
-  - [ ] 5.29 Implement order confirmation screen with order number
-  - [ ] 5.30 Clear cart after successful order placement
-  - [ ] 5.31 Add error handling for order creation failures
-  - [ ] 5.32 Persist cart to localStorage for recovery
+  - [x] 5.1 Create `src/context/CustomerOrderContext.jsx` for cart/order state
+  - [x] 5.2 Implement cart state management (add, update, remove items)
+  - [x] 5.3 Store selected pricing option (pricing_id) with each cart item
+  - [x] 5.4 Create `src/components/customer/ShoppingCart.jsx` cart component
+  - [x] 5.5 Display cart items with product name, weight option, quantity, price
+  - [x] 5.6 Implement quantity adjustment for cart items
+  - [x] 5.7 Add remove item from cart functionality
+  - [x] 5.8 Calculate and display subtotal, deposit amount (40%), total amount
+  - [x] 5.9 Show remaining balance (60%) due at pickup
+  - [x] 5.10 Create `src/components/customer/CheckoutFlow.jsx` checkout component
+  - [x] 5.11 Implement pickup date selector with date validation
+  - [x] 5.12 Create `src/utils/orderHolds.js` to check for blocked dates
+  - [x] 5.13 Integrate order holds check - disable dates with active holds
+  - [x] 5.14 Implement pickup time slot selector (configurable by owner)
+  - [x] 5.15 Fetch available time slots from `system_configuration` table
+  - [x] 5.16 Add special instructions text area (optional)
+  - [x] 5.17 Validate minimum advance order days (configurable)
+  - [x] 5.18 Validate maximum advance order days (configurable)
+  - [x] 5.19 Display order summary before payment
+  - [x] 5.20 Implement payment method selection (Stripe or Bank Transfer)
+  - [x] 5.21 Add terms and conditions display (no cancellation, no refund policy)
+  - [x] 5.22 Require checkbox acceptance of terms before order placement
+  - [x] 5.23 Create `src/utils/customerOrders.js` for order creation utilities
+  - [x] 5.24 Implement order creation function using `create_customer_order()` stored procedure
+  - [x] 5.25 Generate unique order number (ORD-YYYYMMDD-XXX format)
+  - [x] 5.26 Create order items with pricing_id and denormalized data
+  - [x] 5.27 Calculate deposit and totals using stored function
+  - [x] 5.28 Add loading states during order creation
+  - [x] 5.29 Implement order confirmation screen with order number
+  - [x] 5.30 Clear cart after successful order placement
+  - [x] 5.31 Add error handling for order creation failures
+  - [x] 5.32 Persist cart to localStorage for recovery
 
 - [ ] 6.0 **Custom Cake Request & Quote System**
   - [ ] 6.1 Create `src/components/customer/CustomCakeRequest.jsx` request form
