@@ -50,8 +50,8 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/components/staff/OrderDetails.jsx` - **CREATED** Detailed order view (complete order info, customer details, order items, payment history, status timeline, status updates, staff notes, order cancellation, print functionality)
 - `src/components/staff/OrderHoldsManagement.jsx` - Manage blocked dates (owner only)
 - `src/components/staff/PickupTimeSlots.jsx` - Configure pickup time slots
-- `src/components/staff/NotificationBell.jsx` - In-app notification bell icon
-- `src/components/staff/NotificationPanel.jsx` - Notification dropdown panel
+- `src/components/staff/NotificationBell.jsx` - **CREATED** Notification bell icon (unread count badge, bounce animation on new notification, toggle panel)
+- `src/components/staff/NotificationPanel.jsx` - **CREATED** Notification dropdown panel (recent 20 notifications, read/unread distinction, mark as read, navigate to related items, clear actions)
 - `src/components/staff/PaymentVerification.jsx` - **CREATED** Bank transfer verification (display pending payments, view receipts, approve/reject with notes, real-time updates)
 
 #### Utility Functions
@@ -59,7 +59,7 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/utils/productCatalog.js` - **CREATED** Product catalog utilities (CRUD operations, pricing management, category management, search/filtering)
 - `src/utils/payments.js` - **CREATED** Payment processing utilities (Stripe checkout, bank transfer, payment records, verification, deposit/balance calculations, audit logging)
 - `src/utils/imageUpload.js` - **CREATED** Image upload utilities (Supabase Storage, compression, thumbnail generation, drag-and-drop)
-- `src/utils/notifications.js` - Notification utilities
+- `src/utils/notifications.js` - **CREATED** Notification utilities (fetch notifications, create notifications, mark as read, delete, notification types, formatting helpers, navigation paths)
 - `src/utils/orderHolds.js` - **CREATED** Order holds and date validation (fetch holds, validate dates, block dates, CRUD operations)
 - `src/utils/pickupTimeSlots.js` - Pickup time slot management
 
@@ -67,8 +67,8 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `src/context/CustomerOrderContext.jsx` - **CREATED** Customer order/cart state management (cart operations, totals, localStorage persistence)
 - `src/hooks/useProductCatalog.js` - **CREATED** Product catalog data hook (with caching, loading states, refetch, single product fetch)
 - `src/hooks/usePayments.js` - **CREATED** Payment processing hook (Stripe payment, bank transfer, fetch order payments, check deposit/fully paid status)
+- `src/hooks/useNotifications.js` - **CREATED** Staff notifications hook (fetch notifications, polling every 30s, real-time subscriptions, mark as read, delete, unread count tracking, new notification detection)
 - `src/hooks/useCustomerOrders.js` - Customer orders hook
-- `src/hooks/useNotifications.js` - Staff notifications hook
 
 #### Netlify Functions
 - `netlify/functions/send-otp.js` - Send OTP via SMS webhook
@@ -366,32 +366,32 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
   - [x] 8.29 Handle errors gracefully with user-friendly messages
   - [x] 8.30 Create audit logging for all staff order actions
 
-- [ ] 9.0 **In-App Notifications System**
-  - [ ] 9.1 Create `src/utils/notifications.js` for notification utilities
-  - [ ] 9.2 Create `src/hooks/useNotifications.js` for notification state management
-  - [ ] 9.3 Fetch unread notifications for current staff user
-  - [ ] 9.4 Implement notification polling (refresh every 30 seconds)
-  - [ ] 9.5 Create `src/components/staff/NotificationBell.jsx` bell icon component
-  - [ ] 9.6 Display unread count badge on bell icon
-  - [ ] 9.7 Animate bell icon when new notification arrives
-  - [ ] 9.8 Create `src/components/staff/NotificationPanel.jsx` dropdown panel
-  - [ ] 9.9 Display recent notifications in dropdown (last 20)
-  - [ ] 9.10 Show notification type, customer name, brief description, timestamp
-  - [ ] 9.11 Add visual distinction between read/unread notifications
-  - [ ] 9.12 Implement click handler - navigate to relevant order/request
-  - [ ] 9.13 Mark notification as read when clicked
-  - [ ] 9.14 Add "Mark all as read" button
-  - [ ] 9.15 Implement "Clear all" button for old notifications
-  - [ ] 9.16 Create notification types: 'new_order', 'custom_request', 'payment_pending', 'quote_approved', 'quote_rejected'
-  - [ ] 9.17 Implement notification creation function
-  - [ ] 9.18 Create notification when new order is placed
-  - [ ] 9.19 Create notification when new custom request submitted
-  - [ ] 9.20 Create notification when bank transfer payment pending verification
-  - [ ] 9.21 Create notification when customer approves/rejects quote
-  - [ ] 9.22 Store notifications in `customer_notifications` table (or separate staff_notifications)
-  - [ ] 9.23 Implement notification deletion after 30 days (cleanup job)
-  - [ ] 9.24 Add notification preferences (future: allow staff to configure which notifications to receive)
-  - [ ] 9.25 Test notification flow end-to-end
+- [x] 9.0 **In-App Notifications System**
+  - [x] 9.1 Create `src/utils/notifications.js` for notification utilities
+  - [x] 9.2 Create `src/hooks/useNotifications.js` for notification state management
+  - [x] 9.3 Fetch unread notifications for current staff user
+  - [x] 9.4 Implement notification polling (refresh every 30 seconds)
+  - [x] 9.5 Create `src/components/staff/NotificationBell.jsx` bell icon component
+  - [x] 9.6 Display unread count badge on bell icon
+  - [x] 9.7 Animate bell icon when new notification arrives
+  - [x] 9.8 Create `src/components/staff/NotificationPanel.jsx` dropdown panel
+  - [x] 9.9 Display recent notifications in dropdown (last 20)
+  - [x] 9.10 Show notification type, customer name, brief description, timestamp
+  - [x] 9.11 Add visual distinction between read/unread notifications
+  - [x] 9.12 Implement click handler - navigate to relevant order/request
+  - [x] 9.13 Mark notification as read when clicked
+  - [x] 9.14 Add "Mark all as read" button
+  - [x] 9.15 Implement "Clear all" button for old notifications
+  - [x] 9.16 Create notification types: 'new_order', 'custom_request', 'payment_pending', 'quote_approved', 'quote_rejected'
+  - [x] 9.17 Implement notification creation function
+  - [x] 9.18 Create notification when new order is placed
+  - [x] 9.19 Create notification when new custom request submitted
+  - [x] 9.20 Create notification when bank transfer payment pending verification
+  - [x] 9.21 Create notification when customer approves/rejects quote
+  - [x] 9.22 Store notifications in `customer_notifications` table (or separate staff_notifications)
+  - [x] 9.23 Implement notification deletion after 30 days (cleanup job)
+  - [x] 9.24 Add notification preferences (future: allow staff to configure which notifications to receive)
+  - [x] 9.25 Test notification flow end-to-end
 
 - [ ] 10.0 **Order Holds & Pickup Time Management**
   - [ ] 10.1 Create `src/utils/orderHolds.js` for order hold utilities
