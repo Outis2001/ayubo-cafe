@@ -84,16 +84,21 @@ Generated from: `0004-prd-customer-signup-and-ordering.md`
 - `documentation/PRODUCT_IMAGE_STORAGE_SETUP.md` - **CREATED** Complete guide for setting up Supabase Storage for product images
 
 ### Test Files
-- `tests/unit/customerAuth.test.js` - Customer authentication tests
-- `tests/unit/phoneValidation.test.js` - Phone validation tests
-- `tests/unit/orderHolds.test.js` - **CREATED** Order holds validation tests (18 tests - all passing)
-- `tests/unit/customerOrders.test.js` - **CREATED** Customer orders management tests (24 tests - all passing)
-- `tests/integration/customer-order-flow.test.js` - **CREATED** Complete order flow integration tests (9 tests - all passing)
-- `tests/CUSTOMER_ORDERING_TESTS.md` - **CREATED** Test documentation and guide
-- `tests/CUSTOMER_ORDERING_TEST_RESULTS.md` - **CREATED** Test execution results and analysis
-- `tests/integration/customer-signup.test.js` - Customer signup flow test
-- `tests/integration/order-placement.test.js` - Order placement test
-- `tests/integration/payment-processing.test.js` - Payment processing test
+- `tests/unit/customerAuth.test.js` - **CREATED** Customer authentication tests (35 tests - unit tests for auth utilities)
+- `tests/unit/phoneValidation.test.js` - **CREATED** Phone validation tests (57 tests - ✅ all passing)
+- `tests/unit/productCatalog.test.js` - **CREATED** Product catalog tests (19 tests - ✅ all passing)
+- `tests/unit/orderHolds.test.js` - **CREATED** Order holds validation tests (18 tests - ✅ all passing)
+- `tests/unit/customerOrders.test.js` - **CREATED** Customer orders management tests (24 tests - ✅ all passing)
+- `tests/integration/customer-auth-flow.test.js` - **CREATED** Complete auth flow tests (15 tests - 2 passing, 13 need mock improvements)
+- `tests/integration/customer-order-flow.test.js` - **CREATED** Complete order flow integration tests (9 tests - ✅ all passing)
+- `tests/integration/product-browsing-flow.test.js` - **CREATED** Product browsing integration tests (25 tests - 19 passing, 6 need mock improvements)
+- `tests/CUSTOMER_ORDERING_TESTS.md` - **CREATED** Test documentation for Section 5.0
+- `tests/CUSTOMER_ORDERING_TEST_RESULTS.md` - **CREATED** Test results for Section 5.0
+- `tests/SECTIONS_2_3_4_TESTS.md` - **CREATED** Test documentation for Sections 2.0, 3.0, 4.0
+- `tests/SECTIONS_2_3_4_TEST_RESULTS.md` - **CREATED** Test execution results (116 tests - 97 passing, 84% pass rate)
+- `tests/integration/customer-signup.test.js` - Customer signup flow test (future)
+- `tests/integration/order-placement.test.js` - Order placement test (future)
+- `tests/integration/payment-processing.test.js` - Payment processing test (future)
 
 ### Notes
 
