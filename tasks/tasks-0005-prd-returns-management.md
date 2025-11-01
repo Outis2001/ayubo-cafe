@@ -87,48 +87,48 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 2.15 Update `src/utils/inventory.js` to calculate stock from batches instead of stock_quantity column
   - [x] 2.16 Add validation to prevent negative batch quantities
 
-- [ ] 3.0 Returns Page UI & Functionality
-  - [ ] 3.1 Create `src/components/ReturnsPage.jsx` component
-  - [ ] 3.2 Add "Returns" navigation button in `App.jsx` header (owner and cashier only)
-  - [ ] 3.3 Implement role-based access control for Returns page
-  - [ ] 3.4 Create main layout: header, batch list table, summary footer, action buttons
-  - [ ] 3.5 Implement `useBatches()` hook to fetch all batches with quantity > 0
-  - [ ] 3.6 Display batches in table format with columns: Product Name, Batch Qty, Age Badge, Date Added, Original Price, Sale Price, Return %, Return Value/Unit, Keep Checkbox
-  - [ ] 3.7 Sort batches with oldest at the top using `sortBatchesByAge()`
-  - [ ] 3.8 Create `src/components/BatchAgeIndicator.jsx` component for color-coded age badges
-  - [ ] 3.9 Implement age badge logic: Green (0-2 days), Yellow (3-7 days), Red (7+ days)
-  - [ ] 3.10 Display age both as number (e.g., "Day 3") and color
-  - [ ] 3.11 Add "Keep for tomorrow" checkbox for each batch
-  - [ ] 3.12 Implement checkbox state management (track which batches to keep)
-  - [ ] 3.13 Add return percentage override dropdown/input for each batch (20% or 100%)
-  - [ ] 3.14 Implement real-time return value calculation as user toggles checkboxes
-  - [ ] 3.15 Create sticky summary footer showing: Total batches to return, Total quantity, Total return value
-  - [ ] 3.16 Add product-level breakdown in summary (combined totals for same products with multiple batches)
-  - [ ] 3.17 Implement filter/search functionality for long product lists
-  - [ ] 3.18 Add filter by age option (show only old, medium, fresh items)
-  - [ ] 3.19 Create "Process Return" button with confirmation dialog
-  - [ ] 3.20 Implement confirmation dialog showing return summary before processing
-  - [ ] 3.21 Create `src/utils/returns.js` with `processReturn()` function
-  - [ ] 3.22 Implement return processing logic: create return record, create return_items, delete returned batches, increment age for kept batches
-  - [ ] 3.23 Handle batch age increment: update date_added to maintain age tracking for kept items
-  - [ ] 3.24 Add success/error notifications after processing
-  - [ ] 3.25 Reload batches and clear selections after successful return
-  - [ ] 3.26 Add "Returned Log" button to open historical log window
-  - [ ] 3.27 Implement loading states during data fetching and processing
-  - [ ] 3.28 Style visual distinction for batches marked "keep for tomorrow" (grayed out or special styling)
+- [x] 3.0 Returns Page UI & Functionality
+  - [x] 3.1 Create `src/components/ReturnsPage.jsx` component
+  - [x] 3.2 Add "Returns" navigation button in `App.jsx` header (owner and cashier only)
+  - [x] 3.3 Implement role-based access control for Returns page
+  - [x] 3.4 Create main layout: header, batch list table, summary footer, action buttons
+  - [x] 3.5 Implement `useBatches()` hook to fetch all batches with quantity > 0
+  - [x] 3.6 Display batches in table format with columns: Product Name, Batch Qty, Age Badge, Date Added, Original Price, Sale Price, Return %, Return Value/Unit, Keep Checkbox
+  - [x] 3.7 Sort batches with oldest at the top using `sortBatchesByAge()`
+  - [x] 3.8 Create `src/components/BatchAgeIndicator.jsx` component for color-coded age badges
+  - [x] 3.9 Implement age badge logic: Green (0-2 days), Yellow (3-7 days), Red (7+ days)
+  - [x] 3.10 Display age both as number (e.g., "Day 3") and color
+  - [x] 3.11 Add "Keep for tomorrow" checkbox for each batch
+  - [x] 3.12 Implement checkbox state management (track which batches to keep)
+  - [x] 3.13 Add return percentage override dropdown/input for each batch (20% or 100%)
+  - [x] 3.14 Implement real-time return value calculation as user toggles checkboxes
+  - [x] 3.15 Create sticky summary footer showing: Total batches to return, Total quantity, Total return value
+  - [x] 3.16 Add product-level breakdown in summary (combined totals for same products with multiple batches)
+  - [x] 3.17 Implement filter/search functionality for long product lists
+  - [x] 3.18 Add filter by age option (show only old, medium, fresh items)
+  - [x] 3.19 Create "Process Return" button with confirmation dialog
+  - [x] 3.20 Implement confirmation dialog showing return summary before processing
+  - [x] 3.21 Create `src/utils/returns.js` with `processReturn()` function
+  - [x] 3.22 Implement return processing logic: create return record, create return_items, delete returned batches, increment age for kept batches
+  - [x] 3.23 Handle batch age increment: update date_added to maintain age tracking for kept items
+  - [x] 3.24 Add success/error notifications after processing
+  - [x] 3.25 Reload batches and clear selections after successful return
+  - [x] 3.26 Add "Returned Log" button to open historical log window
+  - [x] 3.27 Implement loading states during data fetching and processing
+  - [x] 3.28 Style visual distinction for batches marked "keep for tomorrow" (grayed out or special styling)
 
 - [ ] 4.0 Returned Log Window & Analytics
-  - [ ] 4.1 Create `src/components/ReturnedLog.jsx` modal/window component
-  - [ ] 4.2 Implement modal open/close functionality from Returns page
-  - [ ] 4.3 Create `src/hooks/useReturns.js` hook for fetching return history
-  - [ ] 4.4 Implement `fetchReturnsByDateRange()` function
-  - [ ] 4.5 Display date list in reverse chronological order (most recent first)
-  - [ ] 4.6 For each date, show: Return date, Total return value, Number of batches, Total quantity, Number of transactions
-  - [ ] 4.7 Implement date selection to view detailed return information
-  - [ ] 4.8 Display multiple transactions per day separately with timestamps
-  - [ ] 4.9 For each transaction, show: Timestamp, Username who processed, List of batches returned
-  - [ ] 4.10 For each batch in transaction, display: Product name, Quantity, Age at return, Date added, Original price, Sale price, Return %, Return value/unit, Total value
-  - [ ] 4.11 Show batch age with same color-coding as Returns page
+  - [x] 4.1 Create `src/components/ReturnedLog.jsx` modal/window component
+  - [x] 4.2 Implement modal open/close functionality from Returns page
+  - [x] 4.3 Create `src/hooks/useReturns.js` hook for fetching return history
+  - [x] 4.4 Implement `fetchReturnsByDateRange()` function
+  - [x] 4.5 Display date list in reverse chronological order (most recent first)
+  - [x] 4.6 For each date, show: Return date, Total return value, Number of batches, Total quantity, Number of transactions
+  - [x] 4.7 Implement date selection to view detailed return information
+  - [x] 4.8 Display multiple transactions per day separately with timestamps
+  - [x] 4.9 For each transaction, show: Timestamp, Username who processed, List of batches returned
+  - [x] 4.10 For each batch in transaction, display: Product name, Quantity, Age at return, Date added, Original price, Sale price, Return %, Return value/unit, Total value
+  - [x] 4.11 Show batch age with same color-coding as Returns page
   - [ ] 4.12 Implement edit/reprocess functionality for past returns
   - [ ] 4.13 Add confirmation when editing past returns
   - [ ] 4.14 Update inventory when editing (recreate batches if needed)

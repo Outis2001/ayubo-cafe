@@ -14,6 +14,9 @@ import {
   Weight,
   Loader
 } from './components/icons';
+
+// Returns icon - using emoji for now
+const ReturnsIcon = () => <span>📦</span>;
 import DailyStockCheckIn from './components/DailyStockCheckIn';
 import useStockCheckIn from './hooks/useStockCheckIn';
 import useSortConfig from './hooks/useSortConfig';
@@ -29,6 +32,7 @@ import UserManagement from './components/UserManagement';
 import AuditLogs from './components/AuditLogs';
 import ProductsPage from './components/ProductsPage';
 import SalesPage from './components/SalesPage';
+import ReturnsPage from './components/ReturnsPage';
 import {
   validateStock,
   calculateStockDeductions,
@@ -51,7 +55,7 @@ const AyuboCafe = () => {
   useSession(); // Initialize session management (auto-refresh, inactivity detection)
 
   // Navigation state
-  const [currentView, setCurrentView] = useState('billing'); // 'billing', 'products', 'sales', 'users', 'audit-logs'
+  const [currentView, setCurrentView] = useState('billing'); // 'billing', 'products', 'sales', 'returns', 'users', 'audit-logs'
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -828,6 +832,17 @@ const AyuboCafe = () => {
                 </button>
               )}
 
+              {/* Returns button (cashier and owner) */}
+              {(currentUser?.role === 'cashier' || currentUser?.role === 'owner') && (
+                <button
+                  onClick={() => setCurrentView('returns')}
+                  className="flex items-center gap-2 bg-orange-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-orange-700 transition text-sm"
+                >
+                  <ReturnsIcon />
+                  <span className="hidden sm:inline">Returns</span>
+                </button>
+              )}
+
               {/* Owner-only navigation */}
               {currentUser?.role === 'owner' && (
                 <>
@@ -902,6 +917,11 @@ const AyuboCafe = () => {
           {/* Sales Reports View */}
           {currentView === 'sales' && (
             <SalesPage />
+          )}
+
+          {/* Returns Management View */}
+          {currentView === 'returns' && (
+            <ReturnsPage />
           )}
 
           {/* User Management View */}

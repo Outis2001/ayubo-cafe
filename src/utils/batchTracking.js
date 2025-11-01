@@ -296,7 +296,7 @@ export const incrementBatchAge = async (supabaseClient, batchId) => {
 
     const currentDate = new Date(batch.date_added);
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() - 1); // Move date back by 1 day to increase age
+    newDate.setDate(currentDate.getDate() - 1); // Decrement date by 1 to increase age
 
     const { data, error } = await supabaseClient
       .from('inventory_batches')
