@@ -1,15 +1,36 @@
 /**
  * Inventory Management Utilities
  * Handles stock validation, calculations, and deduction logic
+ * Now supports batch-based inventory tracking
  */
+
+import { getBatchesByProduct, getTotalStockForProduct } from './batchTracking';
+
+/**
+ * Get total stock quantity for a product from batches
+ * @param {Object} supabaseClient - Supabase client instance
+ * @param {number} productId - Product ID
+ * @returns {Promise<number>} Total stock quantity
+ */
+export const getProductStockFromBatches = async (supabaseClient, productId) => {
+  try {
+    const batches = await getBatchesByProduct(supabaseClient, productId);
+    return getTotalStockForProduct(batches);
+  } catch (error) {
+    console.error('Error getting product stock from batches:', error);
+    return 0;
+  }
+};
 
 /**
  * Validates if there's sufficient stock for all items in the cart
+ * Now checks batch-based inventory instead of stock_quantity column
  * @param {Array} cart - Array of cart items with {product_id, quantity, name}
  * @param {Array} products - Array of all products with stock information
- * @returns {Object} { isValid: boolean, insufficientItems: Array }
+ * @param {Object} supabaseClient - Supabase client instance (optional for batch checking)
+ * @returns {Promise<Object>} { isValid: boolean, insufficientItems: Array }
  */
-export const validateStock = (cart, products) => {
+export const validateStock = async (cart, products, supabaseClient = null) => {
   const insufficientItems = [];
 
   for (const cartItem of cart) {
@@ -24,12 +45,22 @@ export const validateStock = (cart, products) => {
       continue;
     }
 
+    let availableStock = 0;
+
+    // If supabaseClient is provided, check batch-based stock
+    if (supabaseClient) {
+      availableStock = await getProductStockFromBatches(supabaseClient, product.product_id);
+    } else {
+      // Fallback to stock_quantity for backward compatibility
+      availableStock = product.stock_quantity || 0;
+    }
+
     // Check if requested quantity exceeds available stock
-    if (cartItem.quantity > product.stock_quantity) {
+    if (cartItem.quantity > availableStock) {
       insufficientItems.push({
         name: product.name,
         requested: cartItem.quantity,
-        available: product.stock_quantity
+        available: availableStock
       });
     }
   }
@@ -76,19 +107,25 @@ export const generateInsufficientStockMessage = (insufficientItems) => {
 
 /**
  * Determines the stock status of a product
+ * Can use either stock_quantity (legacy) or batch-based stock
  * @param {Object} product - Product object with stock_quantity and low_stock_threshold
+ * @param {number} batchStock - Optional: total stock from batches (if already calculated)
  * @returns {string} 'out' | 'low' | 'adequate'
  */
-export const getStockStatus = (product) => {
-  if (!product || product.stock_quantity === undefined) {
+export const getStockStatus = (product, batchStock = null) => {
+  if (!product) {
     return 'adequate';
   }
 
-  if (product.stock_quantity === 0) {
+  // Use batch stock if provided, otherwise fall back to stock_quantity
+  const stockQuantity = batchStock !== null ? batchStock : (product.stock_quantity || 0);
+
+  if (stockQuantity === 0) {
     return 'out';
   }
 
-  if (product.stock_quantity <= product.low_stock_threshold) {
+  const threshold = product.low_stock_threshold || 5;
+  if (stockQuantity <= threshold) {
     return 'low';
   }
 
@@ -130,6 +167,58 @@ export const getStockStatusColors = (status) => {
         border: 'border-gray-200',
         badge: 'bg-gray-100 text-gray-700'
       };
+  }
+};
+
+/**
+ * Get stock quantities for all products from batches
+ * @param {Object} supabaseClient - Supabase client instance
+ * @returns {Promise<Object>} Map of product_id to stock quantity
+ */
+export const getAllProductStockFromBatches = async (supabaseClient) => {
+  try {
+    const { data, error } = await supabaseClient
+      .from('inventory_batches')
+      .select('product_id, quantity');
+
+    if (error) throw error;
+
+    const stockByProduct = {};
+    
+    (data || []).forEach(batch => {
+      const productId = batch.product_id;
+      const quantity = parseFloat(batch.quantity) || 0;
+      
+      if (!stockByProduct[productId]) {
+        stockByProduct[productId] = 0;
+      }
+      stockByProduct[productId] += quantity;
+    });
+
+    return stockByProduct;
+  } catch (error) {
+    console.error('Error getting all product stock from batches:', error);
+    return {};
+  }
+};
+
+/**
+ * Enrich products with batch-based stock quantities
+ * @param {Array} products - Array of products
+ * @param {Object} supabaseClient - Supabase client instance
+ * @returns {Promise<Array>} Products with updated stock_quantity from batches
+ */
+export const enrichProductsWithBatchStock = async (products, supabaseClient) => {
+  try {
+    const stockByProduct = await getAllProductStockFromBatches(supabaseClient);
+    
+    return products.map(product => ({
+      ...product,
+      stock_quantity: stockByProduct[product.product_id] || 0
+    }));
+  } catch (error) {
+    console.error('Error enriching products with batch stock:', error);
+    return products;
   }
 };
 

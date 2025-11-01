@@ -41,6 +41,10 @@ import {
   sortProductsBySales,
   invalidateSalesCache
 } from './utils/productSorting';
+import {
+  getBatchesByProduct,
+  deductFromOldestBatches
+} from './utils/batchTracking';
 
 const AyuboCafe = () => {
   const { currentUser, isAuthenticated, loading: authLoading, logout } = useAuth();
@@ -326,7 +330,7 @@ const AyuboCafe = () => {
 
   const confirmBill = async () => {
     try {
-      const stockValidation = validateStock(cart, products);
+      const stockValidation = await validateStock(cart, products, supabaseClient);
       if (!stockValidation.isValid) {
         const errorMessage = generateInsufficientStockMessage(stockValidation.insufficientItems);
         alert(`❌ ${errorMessage}`);
@@ -363,33 +367,39 @@ const AyuboCafe = () => {
 
       const stockDeductions = calculateStockDeductions(cart);
       
-      const stockUpdatePromises = stockDeductions.map(async ({ product_id, deductAmount }) => {
+      // Deduct from oldest batches first (FIFO logic)
+      const batchDeductionPromises = stockDeductions.map(async ({ product_id, deductAmount }) => {
         const product = products.find(p => p.product_id === product_id);
-        const newStock = product.stock_quantity - deductAmount;
-
-        if (newStock < 0) {
-          throw new Error(`Stock deduction would result in negative stock for ${product.name}`);
+        
+        // Get all batches for this product
+        const batches = await getBatchesByProduct(supabaseClient, product_id);
+        
+        if (batches.length === 0) {
+          throw new Error(`No inventory batches available for ${product.name}`);
         }
 
-        return supabaseClient
-          .from('products')
-          .update({ 
-            stock_quantity: newStock,
-            updated_time: new Date().toISOString()
-          })
-          .eq('product_id', product_id);
+        // Deduct from oldest batches first
+        const result = await deductFromOldestBatches(
+          supabaseClient,
+          product_id,
+          deductAmount,
+          batches
+        );
+
+        if (!result.success) {
+          throw new Error(`Failed to deduct stock for ${product.name}: ${result.error}`);
+        }
+
+        return result;
       });
 
-      const stockResults = await Promise.all(stockUpdatePromises);
+      const batchResults = await Promise.all(batchDeductionPromises);
       
-      const stockErrors = stockResults.filter(result => {
-        const isSuccess = !result.error || (result.status >= 200 && result.status < 300);
-        return !isSuccess;
-      });
-      
-      if (stockErrors.length > 0) {
-        console.error('Stock update errors:', stockErrors);
-        throw new Error('Failed to update stock quantities');
+      // Check for any failures
+      const failures = batchResults.filter(result => !result.success);
+      if (failures.length > 0) {
+        console.error('Batch deduction errors:', failures);
+        throw new Error('Failed to update stock batches');
       }
       
       invalidateSalesCache();

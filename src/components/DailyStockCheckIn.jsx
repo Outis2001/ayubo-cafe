@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { X, Loader, Search } from './icons';
+import { createBatch } from '../utils/batchTracking';
 
 /**
  * DailyStockCheckIn Component
  * Modal for daily stock quantity updates
- * Allows bulk editing of all product stock levels
+ * Creates inventory batches for batch-level tracking and FIFO logic
  * 
  * @param {Array} products - List of all products
  * @param {Function} onSave - Callback when save is clicked
@@ -17,11 +18,11 @@ const DailyStockCheckIn = ({ products, onSave, onSkip, onClose, supabaseClient }
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Initialize stock updates with current values
+  // Initialize stock updates with zeros (for new batch creation)
   useEffect(() => {
     const initialStock = {};
     products.forEach(product => {
-      initialStock[product.product_id] = product.stock_quantity || 0;
+      initialStock[product.product_id] = 0;
     });
     setStockUpdates(initialStock);
   }, [products]);
@@ -47,43 +48,48 @@ const DailyStockCheckIn = ({ products, onSave, onSkip, onClose, supabaseClient }
 
   /**
    * Save all stock updates to database
-   * Updates stock_quantity and updated_time for each product
+   * Creates new inventory batches for batch-level tracking (FIFO)
    */
   const handleSave = async () => {
     setSaving(true);
     
     try {
-      // Prepare updates array
-      const updates = Object.entries(stockUpdates).map(([productId, quantity]) => ({
-        product_id: parseInt(productId),
-        stock_quantity: parseFloat(quantity) || 0
-      }));
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Prepare batch creation for products with quantity > 0
+      const batchesToCreate = Object.entries(stockUpdates)
+        .filter(([_, quantity]) => parseFloat(quantity) > 0)
+        .map(([productId, quantity]) => ({
+          product_id: parseInt(productId),
+          quantity: parseFloat(quantity)
+        }));
 
-      // Update each product in the database
-      const updatePromises = updates.map(update =>
-        supabaseClient
-          .from('products')
-          .update({ 
-            stock_quantity: update.stock_quantity,
-            updated_time: new Date().toISOString()
-          })
-          .eq('product_id', update.product_id)
+      if (batchesToCreate.length === 0) {
+        alert('⚠️ No stock quantities to add. Please enter quantities greater than 0.');
+        setSaving(false);
+        return;
+      }
+
+      // Create batches for each product
+      const batchPromises = batchesToCreate.map(({ product_id, quantity }) =>
+        createBatch(supabaseClient, product_id, quantity, today)
       );
 
-      const results = await Promise.all(updatePromises);
+      const results = await Promise.all(batchPromises);
 
       // Check for errors
       const errors = results.filter(result => result.error);
       if (errors.length > 0) {
-        console.error('Update errors:', errors);
-        throw new Error(`Failed to update ${errors.length} products`);
+        console.error('Batch creation errors:', errors);
+        throw new Error(`Failed to create batches for ${errors.length} products`);
       }
 
-      alert('✅ Stock quantities updated successfully!');
+      const successCount = results.filter(r => r.data).length;
+      alert(`✅ Successfully created ${successCount} inventory batch${successCount !== 1 ? 'es' : ''}!`);
       onSave(); // Trigger parent callback to reload products
     } catch (error) {
-      console.error('Error updating stock:', error);
-      alert('❌ Error updating stock. Please try again.');
+      console.error('Error creating batches:', error);
+      alert('❌ Error creating inventory batches. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -110,7 +116,7 @@ const DailyStockCheckIn = ({ products, onSave, onSkip, onClose, supabaseClient }
           <div>
             <h2 className="text-2xl font-bold text-gray-900">📦 Daily Stock Check-In</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Update inventory quantities for all products
+              Add new stock batches for today's inventory
             </p>
           </div>
           <button
@@ -159,7 +165,7 @@ const DailyStockCheckIn = ({ products, onSave, onSkip, onClose, supabaseClient }
 
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                    New Stock:
+                    Stock to Add:
                   </label>
                   <input
                     type="number"
@@ -210,7 +216,7 @@ const DailyStockCheckIn = ({ products, onSave, onSkip, onClose, supabaseClient }
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {saving && <Loader className="w-4 h-4 animate-spin" />}
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? 'Creating Batches...' : 'Create Batches'}
             </button>
           </div>
         </div>
