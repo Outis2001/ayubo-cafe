@@ -165,22 +165,22 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 5.16 Update existing products view to show both prices clearly
   - [x] 5.17 Ensure backward compatibility with products missing new fields
 
-- [ ] 6.0 Email Notifications & Integration
-  - [ ] 6.1 Create or extend `src/utils/emailTemplates.js` with return notification template
-  - [ ] 6.2 Design HTML email template for return summary
-  - [ ] 6.3 Include in email: Return date/time, Processed by (user), Total return value, Total quantity, Product breakdown
-  - [ ] 6.4 Add "Returned Log" link in email for owner to view details
-  - [ ] 6.5 Implement `sendReturnNotification()` function in `returns.js`
-  - [ ] 6.6 Integrate with existing Netlify email function (`/netlify/functions/send-email.js`)
-  - [ ] 6.7 Call email function after successful return processing
-  - [ ] 6.8 Update `returns` table: set `notification_sent = true` after email sent
-  - [ ] 6.9 Handle email failures gracefully (log error but don't block return processing)
-  - [ ] 6.10 Add retry logic for failed email notifications
-  - [ ] 6.11 Create email queue or log for tracking notification status
+- [x] 6.0 Email Notifications & Integration
+  - [x] 6.1 Create or extend `src/utils/emailTemplates.js` with return notification template
+  - [x] 6.2 Design HTML email template for return summary
+  - [x] 6.3 Include in email: Return date/time, Processed by (user), Total return value, Total quantity, Product breakdown
+  - [x] 6.4 Add "Returned Log" link in email for owner to view details
+  - [x] 6.5 Implement `sendReturnNotification()` function in `returns.js`
+  - [x] 6.6 Integrate with existing Netlify email function (`/netlify/functions/send-email.js`)
+  - [x] 6.7 Call email function after successful return processing
+  - [x] 6.8 Update `returns` table: set `notification_sent = true` after email sent
+  - [x] 6.9 Handle email failures gracefully (log error but don't block return processing)
+  - [ ] 6.10 Add retry logic for failed email notifications (ENHANCEMENT)
+  - [ ] 6.11 Create email queue or log for tracking notification status (ENHANCEMENT)
   - [ ] 6.12 Test email delivery in development and production
-  - [ ] 6.13 Ensure email contains batch-level details for transparency
-  - [ ] 6.14 Format currency values properly in email (Rs. X.XX)
-  - [ ] 6.15 Add success metric tracking: email sent within 5 minutes of return
+  - [x] 6.13 Ensure email contains batch-level details for transparency
+  - [x] 6.14 Format currency values properly in email (Rs. X.XX)
+  - [ ] 6.15 Add success metric tracking: email sent within 5 minutes of return (ENHANCEMENT)
 
 - [ ] 7.0 Testing & Quality Assurance
   - [ ] 7.1 Create `tests/unit/batchTracking.test.js`

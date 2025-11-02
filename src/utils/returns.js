@@ -113,13 +113,15 @@ export const processReturn = async (supabaseClient, userId, { batchesToReturn, b
     }
 
     // Send email notification
-    await sendReturnNotification(supabaseClient, returnId, returnRecord);
+    const emailSent = await sendReturnNotification(supabaseClient, returnId, returnRecord);
 
-    // Update notification_sent flag
-    await supabaseClient
-      .from('returns')
-      .update({ notification_sent: true })
-      .eq('id', returnId);
+    // Update notification_sent flag only if email was successfully sent
+    if (emailSent) {
+      await supabaseClient
+        .from('returns')
+        .update({ notification_sent: true })
+        .eq('id', returnId);
+    }
 
     return {
       success: true,
@@ -157,8 +159,23 @@ const sendReturnNotification = async (supabaseClient, returnId, returnRecord) =>
     const { data: processor } = await supabaseClient
       .from('users')
       .select('first_name, last_name')
-      .eq('id', returnRecord.processed_by)
+      .eq('user_id', returnRecord.processed_by)
       .single();
+
+    // Fetch owner email
+    const { data: owner, error: ownerError } = await supabaseClient
+      .from('users')
+      .select('email')
+      .eq('role', 'owner')
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+
+    // If owner not found, skip email
+    if (ownerError || !owner?.email) {
+      console.warn('Owner email not found, skipping email notification');
+      return false;
+    }
 
     // Build email content
     const subject = `Return Processed - ${new Date(returnRecord.processed_at).toLocaleString()}`;
@@ -171,7 +188,7 @@ const sendReturnNotification = async (supabaseClient, returnId, returnRecord) =>
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: process.env.REACT_APP_OWNER_EMAIL || 'owner@ayubocafe.com', // TODO: Get actual owner email
+        to: owner.email,
         subject,
         html,
         type: 'return_notification'
@@ -180,10 +197,15 @@ const sendReturnNotification = async (supabaseClient, returnId, returnRecord) =>
 
     if (!response.ok) {
       console.warn('Failed to send return notification email');
+      return false;
     }
+    
+    console.log('Return notification email sent successfully to owner');
+    return true;
   } catch (error) {
     console.error('Error sending return notification:', error);
     // Don't throw - email failure shouldn't block return processing
+    return false;
   }
 };
 
