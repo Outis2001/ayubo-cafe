@@ -15,6 +15,8 @@ import { incrementBatchAge, createBatch } from './batchTracking';
  * @returns {Promise<Object>} Result with data or error
  */
 export const processReturn = async (supabaseClient, userId, { batchesToReturn, batchesToKeep }) => {
+  const processStartTime = Date.now();
+  
   try {
     if (!batchesToReturn || batchesToReturn.length === 0) {
       throw new Error('No batches selected for return');
@@ -45,6 +47,7 @@ export const processReturn = async (supabaseClient, userId, { batchesToReturn, b
     if (returnError) throw returnError;
 
     const returnId = returnRecord.id;
+    console.log(`[Return Process] Started processing return #${returnId}`);
 
     // Create return items
     const returnItems = batchesToReturn.map(batch => {
@@ -121,6 +124,16 @@ export const processReturn = async (supabaseClient, userId, { batchesToReturn, b
         .from('returns')
         .update({ notification_sent: true })
         .eq('id', returnId);
+      
+      const totalTimeMs = Date.now() - processStartTime;
+      const totalTimeSeconds = (totalTimeMs / 1000).toFixed(2);
+      const within5Minutes = totalTimeMs <= 5 * 60 * 1000;
+      
+      console.log(`[Return Process] COMPLETE: Return #${returnId} processed in ${totalTimeSeconds}s. Email sent: ${within5Minutes ? '✓ Within 5 minutes' : '✗ Exceeded 5 minutes'}`);
+    } else {
+      const totalTimeMs = Date.now() - processStartTime;
+      const totalTimeSeconds = (totalTimeMs / 1000).toFixed(2);
+      console.log(`[Return Process] COMPLETE: Return #${returnId} processed in ${totalTimeSeconds}s. Email failed`);
     }
 
     return {
@@ -130,7 +143,7 @@ export const processReturn = async (supabaseClient, userId, { batchesToReturn, b
       error: null
     };
   } catch (error) {
-    console.error('Error processing return:', error);
+    console.error('[Return Process] ERROR:', error);
     return {
       success: false,
       error: error.message
@@ -139,13 +152,21 @@ export const processReturn = async (supabaseClient, userId, { batchesToReturn, b
 };
 
 /**
- * Send email notification to owner
+ * Helper function to sleep/delay execution
+ * @param {number} ms - Milliseconds to sleep
+ * @returns {Promise<void>}
+ */
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Send email notification to owner with retry logic
  * @param {Object} supabaseClient - Supabase client instance
  * @param {number} returnId - Return ID
  * @param {Object} returnRecord - Return record
- * @returns {Promise<void>}
+ * @param {number} maxRetries - Maximum number of retry attempts (default: 3)
+ * @returns {Promise<boolean>} Success status
  */
-const sendReturnNotification = async (supabaseClient, returnId, returnRecord) => {
+const sendReturnNotification = async (supabaseClient, returnId, returnRecord, maxRetries = 3) => {
   try {
     // Fetch return details with items
     const { data: returnDetails, error: error2 } = await supabaseClient
@@ -181,29 +202,63 @@ const sendReturnNotification = async (supabaseClient, returnId, returnRecord) =>
     const subject = `Return Processed - ${new Date(returnRecord.processed_at).toLocaleString()}`;
     const html = buildReturnEmailHTML(returnRecord, returnDetails || [], processor);
 
-    // Send email via Netlify function
-    const response = await fetch('/.netlify/functions/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        to: owner.email,
-        subject,
-        html,
-        type: 'return_notification'
-      })
-    });
+    // Log email attempt
+    const emailStartTime = Date.now();
+    console.log(`[Email] Starting notification email for return #${returnId} to ${owner.email}`);
 
-    if (!response.ok) {
-      console.warn('Failed to send return notification email');
-      return false;
+    // Retry logic with exponential backoff
+    let lastError = null;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        // Send email via Netlify function
+        const response = await fetch('/.netlify/functions/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: owner.email,
+            subject,
+            html,
+            type: 'return_notification'
+          })
+        });
+
+        if (response.ok) {
+          const emailDuration = Date.now() - emailStartTime;
+          console.log(`[Email] SUCCESS: Return notification sent to owner (attempt ${attempt + 1}/${maxRetries}, ${emailDuration}ms)`);
+          return true;
+        }
+
+        // If not the last attempt, wait before retrying
+        if (attempt < maxRetries - 1) {
+          const delayMs = Math.min(1000 * Math.pow(2, attempt), 10000); // Max 10 seconds
+          console.warn(`[Email] FAILED (attempt ${attempt + 1}/${maxRetries}): HTTP ${response.status}. Retrying in ${delayMs}ms...`);
+          await sleep(delayMs);
+        } else {
+          console.error(`[Email] FAILED: After ${maxRetries} attempts. Last status: HTTP ${response.status}`);
+        }
+
+        lastError = new Error(`HTTP ${response.status}`);
+      } catch (fetchError) {
+        lastError = fetchError;
+        
+        // If not the last attempt, wait before retrying
+        if (attempt < maxRetries - 1) {
+          const delayMs = Math.min(1000 * Math.pow(2, attempt), 10000);
+          console.warn(`[Email] ERROR (attempt ${attempt + 1}/${maxRetries}): ${fetchError.message}. Retrying in ${delayMs}ms...`);
+          await sleep(delayMs);
+        } else {
+          console.error(`[Email] FAILED: After ${maxRetries} attempts. Last error:`, fetchError.message);
+        }
+      }
     }
-    
-    console.log('Return notification email sent successfully to owner');
-    return true;
+
+    const emailDuration = Date.now() - emailStartTime;
+    console.error(`[Email] All attempts exhausted for return #${returnId} (total time: ${emailDuration}ms)`);
+    return false;
   } catch (error) {
-    console.error('Error sending return notification:', error);
+    console.error('Error in sendReturnNotification:', error);
     // Don't throw - email failure shouldn't block return processing
     return false;
   }
