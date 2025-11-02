@@ -133,11 +133,11 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.13 Add confirmation when editing past returns
   - [x] 4.14 Update inventory when editing (recreate batches if needed)
   - [x] 4.15 Preserve deleted product names in historical logs
-  - [ ] 4.16 Implement analytics section with charts/graphs
-  - [ ] 4.17 Create "Total return value trend over time" chart (line or bar chart)
-  - [ ] 4.18 Create "Most frequently returned products" chart
-  - [ ] 4.19 Calculate and display "Average batch age at return" metric
-  - [ ] 4.20 Add date range picker for filtering analytics
+  - [x] 4.16 Implement analytics section with charts/graphs
+  - [x] 4.17 Create "Total return value trend over time" chart (line or bar chart)
+  - [x] 4.18 Create "Most frequently returned products" chart
+  - [x] 4.19 Calculate and display "Average batch age at return" metric
+  - [x] 4.20 Add date range picker for filtering analytics
   - [ ] 4.21 Implement CSV export functionality for accounting
   - [ ] 4.22 Implement PDF export functionality for accounting
   - [ ] 4.23 Add filter by product name

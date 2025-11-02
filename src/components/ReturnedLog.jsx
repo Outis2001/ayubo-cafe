@@ -25,6 +25,8 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [showUndoConfirm, setShowUndoConfirm] = useState(false);
   const [undoing, setUndoing] = useState(false);
+  const [returnItems, setReturnItems] = useState([]);
+  const [activeTab, setActiveTab] = useState('history'); // 'history', 'trends', 'products'
 
   useEffect(() => {
     if (isOpen) {
@@ -59,6 +61,21 @@ const ReturnedLog = ({ isOpen, onClose }) => {
 
       if (fetchError) throw fetchError;
       setReturns(data || []);
+
+      // Also load all return items for analytics
+      const returnIds = (data || []).map(r => r.id);
+      if (returnIds.length > 0) {
+        const { data: items, error: itemsError } = await supabaseClient
+          .from('return_items')
+          .select('*')
+          .in('return_id', returnIds);
+
+        if (!itemsError) {
+          setReturnItems(items || []);
+        }
+      } else {
+        setReturnItems([]);
+      }
     } catch (err) {
       console.error('Error loading returns:', err);
       setError(err.message);
@@ -132,15 +149,74 @@ const ReturnedLog = ({ isOpen, onClose }) => {
       return {
         totalValue: 0,
         averageValue: 0,
-        totalReturns: 0
+        totalReturns: 0,
+        trends: [],
+        products: [],
+        averageAge: 0
       };
     }
 
     const totalValue = returns.reduce((sum, ret) => sum + parseFloat(ret.total_value), 0);
+
+    // Calculate trends (daily values)
+    const dailyValues = {};
+    returns.forEach(ret => {
+      const dateStr = ret.return_date;
+      if (!dailyValues[dateStr]) {
+        dailyValues[dateStr] = { value: 0, count: 0 };
+      }
+      dailyValues[dateStr].value += parseFloat(ret.total_value);
+      dailyValues[dateStr].count += 1;
+    });
+
+    const trends = Object.entries(dailyValues)
+      .map(([date, data]) => ({
+        date,
+        value: data.value,
+        count: data.count
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate most frequently returned products
+    const productStats = {};
+    returnItems.forEach(item => {
+      const productName = item.product_name || 'Unknown';
+      if (!productStats[productName]) {
+        productStats[productName] = {
+          name: productName,
+          count: 0,
+          totalQuantity: 0,
+          totalValue: 0
+        };
+      }
+      productStats[productName].count += 1;
+      productStats[productName].totalQuantity += parseFloat(item.quantity);
+      productStats[productName].totalValue += parseFloat(item.total_return_value);
+    });
+
+    const topProducts = Object.values(productStats)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Calculate average age at return
+    let totalAge = 0;
+    let ageCount = 0;
+    returnItems.forEach(item => {
+      if (item.age_at_return !== null && item.age_at_return !== undefined) {
+        totalAge += parseInt(item.age_at_return);
+        ageCount += 1;
+      }
+    });
+
+    const averageAge = ageCount > 0 ? (totalAge / ageCount).toFixed(1) : 0;
+
     return {
       totalValue,
       averageValue: totalValue / returns.length,
-      totalReturns: returns.length
+      totalReturns: returns.length,
+      trends,
+      products: topProducts,
+      averageAge: parseFloat(averageAge)
     };
   };
 
@@ -196,7 +272,7 @@ const ReturnedLog = ({ isOpen, onClose }) => {
 
         {/* Analytics */}
         <div className="p-6 border-b border-gray-200 bg-blue-50">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4 mb-4">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-700">{analytics.totalReturns}</div>
               <div className="text-sm text-gray-600">Total Returns</div>
@@ -207,16 +283,82 @@ const ReturnedLog = ({ isOpen, onClose }) => {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-700">Rs. {analytics.averageValue.toFixed(2)}</div>
-              <div className="text-sm text-gray-600">Average per Return</div>
+              <div className="text-sm text-gray-600">Avg per Return</div>
             </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-orange-700">{analytics.averageAge}</div>
+              <div className="text-sm text-gray-600">Avg Age (Days)</div>
+            </div>
+          </div>
+
+          {/* Date Range Filter */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-blue-200">
+            <input
+              type="date"
+              value={dateRange.start || ''}
+              onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+              placeholder="Start date"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+            />
+            <input
+              type="date"
+              value={dateRange.end || ''}
+              onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+              placeholder="End date"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+            />
+            <button
+              onClick={() => setDateRange({ start: null, end: null })}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium text-sm transition-colors"
+              disabled={!dateRange.start && !dateRange.end}
+            >
+              Clear Filter
+            </button>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex px-6">
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'history'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📅 History
+            </button>
+            <button
+              onClick={() => setActiveTab('trends')}
+              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'trends'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📈 Trends
+            </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === 'products'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📦 Products
+            </button>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden flex">
-          {/* Date List Sidebar */}
-          <div className="w-1/3 border-r border-gray-200 overflow-y-auto p-4">
-            <h3 className="font-bold text-gray-900 mb-4">Return Dates</h3>
+          {/* Date List Sidebar - Only show for history tab */}
+          {activeTab === 'history' && (
+            <div className="w-1/3 border-r border-gray-200 overflow-y-auto p-4">
+              <h3 className="font-bold text-gray-900 mb-4">Return Dates</h3>
             
             {loading ? (
               <div className="flex items-center justify-center py-8">
@@ -254,78 +396,178 @@ const ReturnedLog = ({ isOpen, onClose }) => {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Transaction Details */}
+          {/* Content Based on Active Tab */}
           <div className="flex-1 p-6 overflow-y-auto">
-            {selectedReturn && selectedReturn.return ? (
-              <div>
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">
-                      {new Date(selectedReturn.return.processed_at).toLocaleString()}
-                    </h3>
-                    <button
-                      onClick={() => setShowUndoConfirm(true)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors text-sm flex items-center gap-2"
-                    >
-                      <span>🗑️</span>
-                      <span>Undo Return</span>
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">Processed By</div>
-                      <div className="font-semibold">
-                        {selectedReturn.return.users?.first_name} {selectedReturn.return.users?.last_name}
+            {activeTab === 'history' && (
+              <>
+                {selectedReturn && selectedReturn.return ? (
+                  <div>
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {new Date(selectedReturn.return.processed_at).toLocaleString()}
+                        </h3>
+                        <button
+                          onClick={() => setShowUndoConfirm(true)}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors text-sm flex items-center gap-2"
+                        >
+                          <span>🗑️</span>
+                          <span>Undo Return</span>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Processed By</div>
+                          <div className="font-semibold">
+                            {selectedReturn.return.users?.first_name} {selectedReturn.return.users?.last_name}
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600">Total Value</div>
+                          <div className="font-bold text-green-700">
+                            Rs. {parseFloat(selectedReturn.return.total_value).toFixed(2)}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">Total Value</div>
-                      <div className="font-bold text-green-700">
-                        Rs. {parseFloat(selectedReturn.return.total_value).toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Return Items Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-left py-3 px-2 text-sm font-semibold">Product</th>
-                        <th className="text-center py-3 px-2 text-sm font-semibold">Quantity</th>
-                        <th className="text-center py-3 px-2 text-sm font-semibold">Age (Days)</th>
-                        <th className="text-right py-3 px-2 text-sm font-semibold">Original Price</th>
-                        <th className="text-right py-3 px-2 text-sm font-semibold">Sale Price</th>
-                        <th className="text-center py-3 px-2 text-sm font-semibold">Return %</th>
-                        <th className="text-right py-3 px-2 text-sm font-semibold">Return Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(selectedReturn.items || []).map((item, idx) => (
-                        <tr key={idx} className="border-b border-gray-200">
-                          <td className="py-3 px-2 font-medium">{item.product_name}</td>
-                          <td className="py-3 px-2 text-center">{item.quantity}</td>
-                          <td className="py-3 px-2 text-center">
-                            <BatchAgeIndicator age={item.age_at_return} />
-                          </td>
-                          <td className="py-3 px-2 text-right">Rs. {parseFloat(item.original_price).toFixed(2)}</td>
-                          <td className="py-3 px-2 text-right">Rs. {parseFloat(item.sale_price).toFixed(2)}</td>
-                          <td className="py-3 px-2 text-center">{item.return_percentage}%</td>
-                          <td className="py-3 px-2 text-right font-semibold text-green-700">
-                            Rs. {parseFloat(item.total_return_value).toFixed(2)}
-                          </td>
+                    {/* Return Items Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b-2 border-gray-200">
+                            <th className="text-left py-3 px-2 text-sm font-semibold">Product</th>
+                            <th className="text-center py-3 px-2 text-sm font-semibold">Quantity</th>
+                            <th className="text-center py-3 px-2 text-sm font-semibold">Age (Days)</th>
+                            <th className="text-right py-3 px-2 text-sm font-semibold">Original Price</th>
+                            <th className="text-right py-3 px-2 text-sm font-semibold">Sale Price</th>
+                            <th className="text-center py-3 px-2 text-sm font-semibold">Return %</th>
+                            <th className="text-right py-3 px-2 text-sm font-semibold">Return Value</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(selectedReturn.items || []).map((item, idx) => (
+                            <tr key={idx} className="border-b border-gray-200">
+                              <td className="py-3 px-2 font-medium">{item.product_name}</td>
+                              <td className="py-3 px-2 text-center">{item.quantity}</td>
+                              <td className="py-3 px-2 text-center">
+                                <BatchAgeIndicator age={item.age_at_return} />
+                              </td>
+                              <td className="py-3 px-2 text-right">Rs. {parseFloat(item.original_price).toFixed(2)}</td>
+                              <td className="py-3 px-2 text-right">Rs. {parseFloat(item.sale_price).toFixed(2)}</td>
+                              <td className="py-3 px-2 text-center">{item.return_percentage}%</td>
+                              <td className="py-3 px-2 text-right font-semibold text-green-700">
+                                Rs. {parseFloat(item.total_return_value).toFixed(2)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <p>Select a date to view return details</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === 'trends' && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">📈 Return Value Trends</h3>
+                {analytics.trends.length === 0 ? (
+                  <p className="text-center py-8 text-gray-500">No trend data available</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="text-left py-3 px-4 text-sm font-semibold">Date</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold">Returns</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold">Total Value</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold">Visual</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {analytics.trends.map((trend, idx) => {
+                          const maxValue = Math.max(...analytics.trends.map(t => t.value));
+                          const barWidth = maxValue > 0 ? (trend.value / maxValue * 100) : 0;
+                          return (
+                            <tr key={idx} className="border-b border-gray-200">
+                              <td className="py-3 px-4 font-medium">{new Date(trend.date).toLocaleDateString()}</td>
+                              <td className="py-3 px-4 text-center">{trend.count}</td>
+                              <td className="py-3 px-4 text-right font-semibold">Rs. {trend.value.toFixed(2)}</td>
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                    <div 
+                                      className="bg-blue-600 h-6 rounded-full transition-all"
+                                      style={{ width: `${barWidth}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-xs text-gray-500 w-12 text-right">{barWidth.toFixed(0)}%</span>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                <p>Select a date to view return details</p>
+            )}
+
+            {activeTab === 'products' && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">📦 Most Frequently Returned Products</h3>
+                {analytics.products.length === 0 ? (
+                  <p className="text-center py-8 text-gray-500">No product data available</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="text-left py-3 px-4 text-sm font-semibold">Product</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold">Times Returned</th>
+                          <th className="text-center py-3 px-4 text-sm font-semibold">Total Quantity</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold">Total Value</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold">Visual</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.products.map((product, idx) => {
+                          const maxCount = Math.max(...analytics.products.map(p => p.count));
+                          const barWidth = maxCount > 0 ? (product.count / maxCount * 100) : 0;
+                          return (
+                            <tr key={idx} className="border-b border-gray-200">
+                              <td className="py-3 px-4 font-medium">{product.name}</td>
+                              <td className="py-3 px-4 text-center font-semibold">{product.count}</td>
+                              <td className="py-3 px-4 text-center">{product.totalQuantity.toFixed(1)}</td>
+                              <td className="py-3 px-4 text-right font-semibold text-green-700">
+                                Rs. {product.totalValue.toFixed(2)}
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                    <div 
+                                      className="bg-green-600 h-6 rounded-full transition-all"
+                                      style={{ width: `${barWidth}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
