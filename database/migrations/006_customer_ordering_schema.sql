@@ -665,9 +665,11 @@ CREATE UNIQUE INDEX idx_one_default_address_per_customer
   WHERE is_default = true;
 
 -- Limit one active OTP per phone number (prevent OTP spam)
+-- Note: Removed expires_at > NOW() check as NOW() is not IMMUTABLE
+-- Application logic should handle expiration checks
 CREATE UNIQUE INDEX idx_one_active_otp_per_phone 
   ON customer_otp_verifications(phone_number) 
-  WHERE verified = false AND expires_at > NOW();
+  WHERE verified = false;
 
 -- ============================================================================
 -- COMPOSITE INDEXES FOR COMMON QUERY PATTERNS

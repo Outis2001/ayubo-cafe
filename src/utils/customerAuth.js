@@ -216,13 +216,13 @@ export const requestOTP = async (phoneNumber, testMode = false) => {
       };
     }
     
-    // Invalidate any existing active OTP for this phone
+    // Delete any existing unverified OTP for this phone to allow new one
+    // (Due to unique index on phone_number WHERE verified = false)
     await supabaseClient
       .from('customer_otp_verifications')
-      .update({ verified: false })
+      .delete()
       .eq('phone_number', formattedPhone)
-      .eq('verified', false)
-      .gt('expires_at', new Date().toISOString());
+      .eq('verified', false);
     
     // Generate OTP
     const otpCode = generateOTPCode();

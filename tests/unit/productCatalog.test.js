@@ -42,10 +42,10 @@ describe('Product Catalog Utilities', () => {
           is_available: true,
           is_featured: false,
           pricing: [
-            { pricing_id: 'price-1', weight: '1kg', price: 2500, servings_estimate: 8, display_order: 1 },
+            { pricing_id: 'price-1', weight: '1kg', price: 2500, servings: 8, display_order: 1 },
           ],
           categories: [
-            { category: { category_id: 'cat-1', category_name: 'Birthday' } },
+            { category: { category_id: 'cat-1', name: 'Birthday' } },
           ],
         },
       ];
@@ -81,7 +81,7 @@ describe('Product Catalog Utilities', () => {
           product_name: 'Birthday Cake',
           pricing: [],
           categories: [
-            { category: { category_id: 'cat-birthday', category_name: 'Birthday' } },
+            { category: { category_id: 'cat-birthday', name: 'Birthday' } },
           ],
         },
       ];
@@ -256,8 +256,8 @@ describe('Product Catalog Utilities', () => {
   describe('fetchCategories', () => {
     it('should fetch all categories', async () => {
       const mockCategories = [
-        { category_id: 'cat-1', category_name: 'Birthday', display_order: 1 },
-        { category_id: 'cat-2', category_name: 'Wedding', display_order: 2 },
+        { category_id: 'cat-1', name: 'Birthday', display_order: 1 },
+        { category_id: 'cat-2', name: 'Wedding', display_order: 2 },
       ];
 
       supabaseMock.from.mockReturnValue({
@@ -273,14 +273,14 @@ describe('Product Catalog Utilities', () => {
 
       expect(result).toBeDefined();
       expect(result.length).toBe(2);
-      expect(result[0].category_name).toBe('Birthday');
+      expect(result[0].name).toBe('Birthday');
     });
   });
 
   describe('createCategory', () => {
     it('should create new category', async () => {
       const newCategory = {
-        category_name: 'Custom',
+        name: 'Custom',
         display_order: 3,
       };
 
@@ -300,14 +300,14 @@ describe('Product Catalog Utilities', () => {
       const result = await productCatalog.createCategory(newCategory, 'user-1');
 
       expect(result).toBeDefined();
-      expect(result.category_name).toBe('Custom');
+      expect(result.name).toBe('Custom');
     });
   });
 
   describe('updateCategory', () => {
     it('should update category', async () => {
       const updates = {
-        category_name: 'Updated Birthday',
+        name: 'Updated Birthday',
       };
 
       const chainableMock = {
@@ -328,7 +328,7 @@ describe('Product Catalog Utilities', () => {
       const result = await productCatalog.updateCategory('cat-1', updates, 'user-1');
 
       expect(result).toBeDefined();
-      expect(result.category_name).toBe('Updated Birthday');
+      expect(result.name).toBe('Updated Birthday');
     });
   });
 
@@ -458,8 +458,8 @@ describe('Product Catalog Utilities', () => {
           product_name: 'Multi-Cat Cake',
           pricing: [],
           categories: [
-            { category: { category_id: 'cat-1', category_name: 'Birthday' } },
-            { category: { category_id: 'cat-2', category_name: 'Custom' } },
+            { category: { category_id: 'cat-1', name: 'Birthday' } },
+            { category: { category_id: 'cat-2', name: 'Custom' } },
           ],
         },
       ];

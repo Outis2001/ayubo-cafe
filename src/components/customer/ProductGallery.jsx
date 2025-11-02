@@ -65,6 +65,14 @@ const ProductGallery = ({ onProductClick }) => {
 
   const { products, loading, error, refetch } = useProductCatalog(filters);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[ProductGallery] Products:', products);
+    console.log('[ProductGallery] Loading:', loading);
+    console.log('[ProductGallery] Error:', error);
+    console.log('[ProductGallery] Products length:', products?.length);
+  }, [products, loading, error]);
+
   /**
    * Fetch product categories
    */

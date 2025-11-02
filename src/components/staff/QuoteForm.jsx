@@ -33,7 +33,7 @@ const QuoteForm = ({ request, onSuccess, onCancel }) => {
   // Quote data state
   const [quoteData, setQuoteData] = useState({
     priceOptions: [
-      { weight: '', price: '', servings_estimate: '', display_order: 1 },
+      { weight: '', price: '', servings: '', display_order: 1 },
     ],
     preparation_time_minutes: '',
     additional_notes: '',
@@ -58,7 +58,7 @@ const QuoteForm = ({ request, onSuccess, onCancel }) => {
         {
           weight: '',
           price: '',
-          servings_estimate: '',
+          servings: '',
           display_order: prev.priceOptions.length + 1,
         },
       ],
@@ -112,7 +112,7 @@ const QuoteForm = ({ request, onSuccess, onCancel }) => {
         if (!option.price || parseFloat(option.price) <= 0) {
           newErrors[`priceOption_${index}_price`] = 'Valid price is required';
         }
-        if (option.servings_estimate && (isNaN(option.servings_estimate) || parseInt(option.servings_estimate) < 1)) {
+        if (option.servings && (isNaN(option.servings) || parseInt(option.servings) < 1)) {
           newErrors[`priceOption_${index}_servings`] = 'Valid servings estimate is required';
         }
       });
@@ -174,7 +174,7 @@ const QuoteForm = ({ request, onSuccess, onCancel }) => {
         price_options: quoteData.priceOptions.map(option => ({
           weight: option.weight,
           price: parseFloat(option.price),
-          servings_estimate: option.servings_estimate ? parseInt(option.servings_estimate) : null,
+          servings: option.servings ? parseInt(option.servings) : null,
           display_order: option.display_order,
         })),
         preparation_time_minutes: parseInt(quoteData.preparation_time_minutes),
@@ -522,8 +522,8 @@ const QuoteForm = ({ request, onSuccess, onCancel }) => {
                     </label>
                     <input
                       type="number"
-                      value={option.servings_estimate}
-                      onChange={(e) => updatePriceOption(index, 'servings_estimate', e.target.value)}
+                      value={option.servings}
+                      onChange={(e) => updatePriceOption(index, 'servings', e.target.value)}
                       placeholder="e.g., 8"
                       min="1"
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${

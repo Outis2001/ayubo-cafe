@@ -388,7 +388,7 @@ const ProductCatalogManagement = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {category.category_name}
+                  {category.name}
                 </button>
               ))}
             </div>
@@ -517,7 +517,7 @@ const ProductCatalogManagement = () => {
                           key={cm.category.category_id}
                           className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
                         >
-                          {cm.category.category_name}
+                          {cm.category.name}
                         </span>
                       )
                     ))}

@@ -52,7 +52,7 @@ describe('Product Browsing Flow Integration', () => {
             { pricing_id: 'price-1', weight: '1kg', price: 2500, display_order: 1 },
           ],
           categories: [
-            { category: { category_id: 'cat-1', category_name: 'Birthday' } },
+            { category: { category_id: 'cat-1', name: 'Birthday' } },
           ],
           images: ['image1.jpg'],
         },
@@ -66,7 +66,7 @@ describe('Product Browsing Flow Integration', () => {
             { pricing_id: 'price-2', weight: '1kg', price: 2000, display_order: 1 },
           ],
           categories: [
-            { category: { category_id: 'cat-1', category_name: 'Birthday' } },
+            { category: { category_id: 'cat-1', name: 'Birthday' } },
           ],
           images: ['image2.jpg'],
         },
@@ -210,7 +210,7 @@ describe('Product Browsing Flow Integration', () => {
           product_name: 'Birthday Cake',
           pricing: [],
           categories: [
-            { category: { category_id: 'cat-birthday', category_name: 'Birthday' } },
+            { category: { category_id: 'cat-birthday', name: 'Birthday' } },
           ],
         },
         {
@@ -218,7 +218,7 @@ describe('Product Browsing Flow Integration', () => {
           product_name: 'Wedding Cake',
           pricing: [],
           categories: [
-            { category: { category_id: 'cat-wedding', category_name: 'Wedding' } },
+            { category: { category_id: 'cat-wedding', name: 'Wedding' } },
           ],
         },
       ];
@@ -264,9 +264,9 @@ describe('Product Browsing Flow Integration', () => {
       const { fetchCategories } = await import('../../src/utils/productCatalog');
 
       const mockCategories = [
-        { category_id: 'cat-1', category_name: 'Birthday', display_order: 1 },
-        { category_id: 'cat-2', category_name: 'Wedding', display_order: 2 },
-        { category_id: 'cat-3', category_name: 'Custom', display_order: 3 },
+        { category_id: 'cat-1', name: 'Birthday', display_order: 1 },
+        { category_id: 'cat-2', name: 'Wedding', display_order: 2 },
+        { category_id: 'cat-3', name: 'Custom', display_order: 3 },
       ];
 
       supabaseMock.from.mockReturnValue({
@@ -282,7 +282,7 @@ describe('Product Browsing Flow Integration', () => {
 
       expect(categories).toBeDefined();
       expect(categories.length).toBe(3);
-      expect(categories[0].category_name).toBe('Birthday');
+      expect(categories[0].name).toBe('Birthday');
     });
 
     it('should support multi-category products', async () => {
@@ -294,8 +294,8 @@ describe('Product Browsing Flow Integration', () => {
           product_name: 'Multi-Category Cake',
           pricing: [],
           categories: [
-            { category: { category_id: 'cat-birthday', category_name: 'Birthday' } },
-            { category: { category_id: 'cat-custom', category_name: 'Custom' } },
+            { category: { category_id: 'cat-birthday', name: 'Birthday' } },
+            { category: { category_id: 'cat-custom', name: 'Custom' } },
           ],
         },
       ];
@@ -462,11 +462,11 @@ describe('Product Browsing Flow Integration', () => {
         preparation_time_minutes: 60,
         is_available: true,
         pricing: [
-          { pricing_id: 'price-1', weight: '500g', price: 1500, servings_estimate: 4 },
-          { pricing_id: 'price-2', weight: '1kg', price: 2500, servings_estimate: 8 },
+          { pricing_id: 'price-1', weight: '500g', price: 1500, servings: 4 },
+          { pricing_id: 'price-2', weight: '1kg', price: 2500, servings: 8 },
         ],
         categories: [
-          { category: { category_id: 'cat-1', category_name: 'Birthday' } },
+          { category: { category_id: 'cat-1', name: 'Birthday' } },
         ],
         images: ['cake1.jpg', 'cake2.jpg'],
       };
@@ -525,9 +525,9 @@ describe('Product Browsing Flow Integration', () => {
         product_id: 'prod-1',
         product_name: 'Multi-Price Cake',
         pricing: [
-          { pricing_id: 'p1', weight: '500g', price: 1500, servings_estimate: 4 },
-          { pricing_id: 'p2', weight: '1kg', price: 2500, servings_estimate: 8 },
-          { pricing_id: 'p3', weight: '1.5kg', price: 3500, servings_estimate: 12 },
+          { pricing_id: 'p1', weight: '500g', price: 1500, servings: 4 },
+          { pricing_id: 'p2', weight: '1kg', price: 2500, servings: 8 },
+          { pricing_id: 'p3', weight: '1.5kg', price: 3500, servings: 12 },
         ],
         categories: [],
       };
@@ -680,8 +680,8 @@ describe('Product Browsing Flow Integration', () => {
         product_id: 'prod-1',
         product_name: 'Servings Cake',
         pricing: [
-          { pricing_id: 'p1', weight: '500g', price: 1500, servings_estimate: 4 },
-          { pricing_id: 'p2', weight: '1kg', price: 2500, servings_estimate: 8 },
+          { pricing_id: 'p1', weight: '500g', price: 1500, servings: 4 },
+          { pricing_id: 'p2', weight: '1kg', price: 2500, servings: 8 },
         ],
         categories: [],
       };
@@ -699,8 +699,8 @@ describe('Product Browsing Flow Integration', () => {
 
       const product = await fetchProductById('prod-1');
 
-      expect(product.pricing[0].servings_estimate).toBe(4);
-      expect(product.pricing[1].servings_estimate).toBe(8);
+      expect(product.pricing[0].servings).toBe(4);
+      expect(product.pricing[1].servings).toBe(8);
     });
   });
 

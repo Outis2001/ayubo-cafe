@@ -337,6 +337,19 @@ const LoginForm = ({ onForgotPassword, onLoginSuccess }) => {
             <strong>Security:</strong> Maximum 5 login attempts per 15 minutes
           </p>
         </div>
+
+        {/* Customer Portal Link */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className="text-center text-sm text-gray-600">
+            Are you a customer?{' '}
+            <a
+              href="/customer"
+              className="text-purple-600 hover:text-purple-700 font-semibold underline"
+            >
+              Go to Customer Portal
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

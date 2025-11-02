@@ -1,4 +1,4 @@
-import { supabase } from '../config/supabase';
+import { supabaseClient } from '../config/supabase';
 import { logAuditEvent } from './auditLog';
 
 /**
@@ -23,7 +23,7 @@ import { logAuditEvent } from './auditLog';
  */
 export async function fetchProducts(filters = {}) {
   try {
-    let query = supabase
+    let query = supabaseClient
       .from('product_catalog')
       .select(`
         *,
@@ -31,14 +31,14 @@ export async function fetchProducts(filters = {}) {
           pricing_id,
           weight,
           price,
-          servings_estimate,
+          servings,
           display_order
         ),
         categories:product_category_mappings(
           category:product_categories(
             category_id,
-            category_name,
-            category_icon,
+            name,
+            icon_url,
             display_order
           )
         )
@@ -92,7 +92,7 @@ export async function fetchProducts(filters = {}) {
  */
 export async function fetchProductById(productId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_catalog')
       .select(`
         *,
@@ -100,14 +100,14 @@ export async function fetchProductById(productId) {
           pricing_id,
           weight,
           price,
-          servings_estimate,
+          servings,
           display_order
         ),
         categories:product_category_mappings(
           category:product_categories(
             category_id,
-            category_name,
-            category_icon,
+            name,
+            icon_url,
             display_order
           )
         )
@@ -144,7 +144,7 @@ export async function fetchProductById(productId) {
  */
 export async function createProduct(productData, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_catalog')
       .insert([{
         product_name: productData.product_name,
@@ -186,13 +186,13 @@ export async function createProduct(productData, userId) {
 export async function updateProduct(productId, updates, userId) {
   try {
     // Fetch old values for audit log
-    const { data: oldProduct } = await supabase
+    const { data: oldProduct } = await supabaseClient
       .from('product_catalog')
       .select('*')
       .eq('product_id', productId)
       .single();
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_catalog')
       .update(updates)
       .eq('product_id', productId)
@@ -227,7 +227,7 @@ export async function updateProduct(productId, updates, userId) {
 export async function softDeleteProduct(productId, userId) {
   try {
     // Check if product has active orders
-    const { data: activeOrders, error: orderError } = await supabase
+    const { data: activeOrders, error: orderError } = await supabaseClient
       .from('customer_order_items')
       .select('order_id')
       .eq('product_id', productId)
@@ -239,7 +239,7 @@ export async function softDeleteProduct(productId, userId) {
       throw new Error('Cannot delete product with active orders. Mark as unavailable instead.');
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_catalog')
       .update({ is_available: false })
       .eq('product_id', productId)
@@ -269,20 +269,20 @@ export async function softDeleteProduct(productId, userId) {
  * @param {Object} pricingData - Pricing information
  * @param {string} pricingData.weight - Weight (e.g., "500g", "1kg")
  * @param {number} pricingData.price - Price in currency
- * @param {number} pricingData.servings_estimate - Estimated servings
+ * @param {string} pricingData.servings - Estimated servings (e.g., "8-10 servings")
  * @param {number} pricingData.display_order - Display order
  * @param {string} userId - ID of user adding the pricing
  * @returns {Promise<Object>} Created pricing option
  */
 export async function addProductPricing(productId, pricingData, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_pricing')
       .insert([{
         product_id: productId,
         weight: pricingData.weight,
         price: pricingData.price,
-        servings_estimate: pricingData.servings_estimate,
+        servings: pricingData.servings,
         display_order: pricingData.display_order || 0
       }])
       .select()
@@ -315,7 +315,7 @@ export async function addProductPricing(productId, pricingData, userId) {
  */
 export async function updateProductPricing(pricingId, updates, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_pricing')
       .update(updates)
       .eq('pricing_id', pricingId)
@@ -348,7 +348,7 @@ export async function updateProductPricing(pricingId, updates, userId) {
  */
 export async function deleteProductPricing(pricingId, userId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('product_pricing')
       .delete()
       .eq('pricing_id', pricingId);
@@ -377,7 +377,7 @@ export async function deleteProductPricing(pricingId, userId) {
  */
 export async function addProductCategory(productId, categoryId, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_category_mappings')
       .insert([{
         product_id: productId,
@@ -413,7 +413,7 @@ export async function addProductCategory(productId, categoryId, userId) {
  */
 export async function removeProductCategory(productId, categoryId, userId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('product_category_mappings')
       .delete()
       .eq('product_id', productId)
@@ -440,7 +440,7 @@ export async function removeProductCategory(productId, categoryId, userId) {
  */
 export async function fetchCategories() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_categories')
       .select('*')
       .order('display_order', { ascending: true });
@@ -457,15 +457,15 @@ export async function fetchCategories() {
 /**
  * Create a new category
  * @param {Object} categoryData - Category information
- * @param {string} categoryData.category_name - Category name
- * @param {string} categoryData.category_icon - Icon URL or class
+ * @param {string} categoryData.name - Category name
+ * @param {string} categoryData.icon_url - Icon URL or class
  * @param {number} categoryData.display_order - Display order
  * @param {string} userId - ID of user creating the category
  * @returns {Promise<Object>} Created category
  */
 export async function createCategory(categoryData, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_categories')
       .insert([categoryData])
       .select()
@@ -498,7 +498,7 @@ export async function createCategory(categoryData, userId) {
  */
 export async function updateCategory(categoryId, updates, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_categories')
       .update(updates)
       .eq('category_id', categoryId)
@@ -532,7 +532,7 @@ export async function updateCategory(categoryId, updates, userId) {
 export async function deleteCategory(categoryId, userId) {
   try {
     // Check if category has products
-    const { data: products, error: productError } = await supabase
+    const { data: products, error: productError } = await supabaseClient
       .from('product_category_mappings')
       .select('product_id')
       .eq('category_id', categoryId)
@@ -544,7 +544,7 @@ export async function deleteCategory(categoryId, userId) {
       throw new Error('Cannot delete category with associated products. Remove products first.');
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('product_categories')
       .delete()
       .eq('category_id', categoryId);
@@ -574,7 +574,7 @@ export async function reorderCategories(categoryOrders, userId) {
   try {
     // Update each category's display order
     const updates = categoryOrders.map(({ category_id, display_order }) => 
-      supabase
+      supabaseClient
         .from('product_categories')
         .update({ display_order })
         .eq('category_id', category_id)
@@ -604,7 +604,7 @@ export async function reorderCategories(categoryOrders, userId) {
  */
 export async function reorderProductImages(productId, newImageOrder, userId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('product_catalog')
       .update({ images: newImageOrder })
       .eq('product_id', productId)
@@ -635,13 +635,13 @@ export async function reorderProductImages(productId, newImageOrder, userId) {
  */
 export async function getProductStatistics() {
   try {
-    const { data: products, error: productError } = await supabase
+    const { data: products, error: productError } = await supabaseClient
       .from('product_catalog')
       .select('product_id, is_available, is_featured');
 
     if (productError) throw productError;
 
-    const { data: categories, error: categoryError } = await supabase
+    const { data: categories, error: categoryError } = await supabaseClient
       .from('product_categories')
       .select('category_id');
 

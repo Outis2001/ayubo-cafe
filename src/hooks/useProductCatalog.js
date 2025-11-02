@@ -102,6 +102,8 @@ export function useProductCatalog(filters = {}, options = {}) {
       // Fetch from API
       console.log('[useProductCatalog] Fetching products from API');
       const data = await fetchProducts(filters);
+      console.log('[useProductCatalog] Received data:', data);
+      console.log('[useProductCatalog] Data length:', data?.length);
 
       // Update cache
       cache.products = data;
@@ -110,8 +112,10 @@ export function useProductCatalog(filters = {}, options = {}) {
 
       // Update state if component is still mounted
       if (isMounted.current) {
+        console.log('[useProductCatalog] Setting products state with', data?.length, 'products');
         setProducts(data);
         setLoading(false);
+        console.log('[useProductCatalog] Loading set to false');
       }
 
     } catch (err) {
@@ -148,6 +152,9 @@ export function useProductCatalog(filters = {}, options = {}) {
 
   // Auto-fetch on mount or when filters change
   useEffect(() => {
+    // Reset mounted flag
+    isMounted.current = true;
+
     if (autoFetch) {
       // Check if filters have changed
       const filtersChanged = JSON.stringify(filters) !== JSON.stringify(prevFiltersRef.current);
@@ -238,6 +245,9 @@ export function useProduct(productId, options = {}) {
 
   // Auto-fetch on mount or when productId changes
   useEffect(() => {
+    // Reset mounted flag
+    isMounted.current = true;
+
     if (autoFetch && productId) {
       fetchProductData();
     }

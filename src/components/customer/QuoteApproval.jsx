@@ -103,7 +103,7 @@ const QuoteApproval = ({ request, onApprove, onReject, onClose }) => {
         quantity: 1,
         unit_price: selectedPriceOption.price,
         subtotal: selectedPriceOption.price,
-        servings_estimate: selectedPriceOption.servings_estimate || null,
+        servings: selectedPriceOption.servings || null,
       };
 
       const { error: itemError } = await supabaseClient
@@ -469,9 +469,9 @@ const QuoteApproval = ({ request, onApprove, onReject, onClose }) => {
                     <p className="text-2xl font-bold text-gray-900 mb-2">
                       {formatCurrency(option.price)}
                     </p>
-                    {option.servings_estimate && (
+                    {option.servings && (
                       <p className="text-sm text-gray-600">
-                        Serves approximately {option.servings_estimate} people
+                        Serves approximately {option.servings} people
                       </p>
                     )}
                     <div className="mt-3 pt-3 border-t border-gray-200">

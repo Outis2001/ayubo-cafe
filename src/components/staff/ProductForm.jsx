@@ -74,7 +74,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
   const [newPricing, setNewPricing] = useState({
     weight: '',
     price: '',
-    servings_estimate: '',
+    servings: '',
     display_order: 0
   });
 
@@ -297,13 +297,13 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
     const pricing = {
       weight: newPricing.weight,
       price: parseFloat(newPricing.price),
-      servings_estimate: newPricing.servings_estimate ? parseInt(newPricing.servings_estimate) : null,
+      servings: newPricing.servings ? parseInt(newPricing.servings) : null,
       display_order: pricingOptions.length,
       isNew: true // Mark as new
     };
 
     setPricingOptions(prev => [...prev, pricing]);
-    setNewPricing({ weight: '', price: '', servings_estimate: '', display_order: 0 });
+    setNewPricing({ weight: '', price: '', servings: '', display_order: 0 });
   };
 
   /**
@@ -407,7 +407,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
           await updateProductPricing(pricing.pricing_id, {
             weight: pricing.weight,
             price: pricing.price,
-            servings_estimate: pricing.servings_estimate,
+            servings: pricing.servings,
             display_order: pricing.display_order
           }, currentUser.user_id);
         }
@@ -417,7 +417,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
           await addProductPricing(product.product_id, {
             weight: pricing.weight,
             price: pricing.price,
-            servings_estimate: pricing.servings_estimate,
+            servings: pricing.servings,
             display_order: pricing.display_order
           }, currentUser.user_id);
         }
@@ -451,7 +451,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
           await addProductPricing(savedProduct.product_id, {
             weight: pricing.weight,
             price: pricing.price,
-            servings_estimate: pricing.servings_estimate,
+            servings: pricing.servings,
             display_order: pricing.display_order
           }, currentUser.user_id);
         }
@@ -668,7 +668,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      {category.category_name}
+                      {category.name}
                     </button>
                   ))}
                 </div>
@@ -694,7 +694,7 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                           <span className="font-medium">Price:</span> Rs. {parseFloat(pricing.price).toFixed(2)}
                         </div>
                         <div>
-                          <span className="font-medium">Servings:</span> {pricing.servings_estimate || 'N/A'}
+                          <span className="font-medium">Servings:</span> {pricing.servings || 'N/A'}
                         </div>
                       </div>
                       <div className="flex gap-1">
@@ -757,8 +757,8 @@ const ProductForm = ({ product, onClose, onSuccess }) => {
                   <div>
                     <input
                       type="number"
-                      value={newPricing.servings_estimate}
-                      onChange={(e) => setNewPricing(prev => ({ ...prev, servings_estimate: e.target.value }))}
+                      value={newPricing.servings}
+                      onChange={(e) => setNewPricing(prev => ({ ...prev, servings: e.target.value }))}
                       placeholder="Servings"
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"

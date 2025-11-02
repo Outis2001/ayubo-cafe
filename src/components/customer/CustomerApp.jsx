@@ -10,10 +10,12 @@
 
 import { useState, useEffect } from 'react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
+import { useCustomerOrder } from '../../context/CustomerOrderContext';
 import CustomerSignup from './CustomerSignup';
 import CustomerLogin from './CustomerLogin';
 import ProductGallery from './ProductGallery';
 import ProductDetail from './ProductDetail';
+import ShoppingCart from './ShoppingCart';
 import { Loader } from '../icons';
 
 // Icons for customer navigation
@@ -69,6 +71,7 @@ const LogOutIcon = ({ size = 24 }) => (
  */
 const CustomerApp = () => {
   const { currentCustomer, isAuthenticated, loading, logout } = useCustomerAuth();
+  const { addToCart, getCartItemCount } = useCustomerOrder();
 
   // Navigation state
   const [currentView, setCurrentView] = useState('products'); // 'products', 'cart', 'orders', 'profile', 'custom-request', 'quotes'
@@ -78,6 +81,9 @@ const CustomerApp = () => {
   // Product detail state
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductDetail, setShowProductDetail] = useState(false);
+  
+  // Get cart item count for badge
+  const cartItemCount = getCartItemCount();
 
   // Reset to products view when logging in
   useEffect(() => {
@@ -115,10 +121,23 @@ const CustomerApp = () => {
    * Handle add to cart
    */
   const handleAddToCart = async ({ product, pricing, quantity }) => {
-    console.log('Adding to cart:', { product, pricing, quantity });
-    // TODO: Implement cart context and add to cart logic
-    // For now, just log
-    alert(`Added ${quantity}x ${product.name} (${pricing.weight}) to cart!`);
+    const result = addToCart({
+      product_id: product.product_id,
+      product_name: product.name,
+      pricing_id: pricing.pricing_id,
+      weight_option: pricing.weight,
+      price: pricing.price,
+      quantity: quantity,
+      product_image: product.image_url,
+      servings: pricing.servings,
+    });
+
+    if (result.success) {
+      alert(`Added ${quantity}x ${product.name} (${pricing.weight}) to cart!`);
+      setShowProductDetail(false);
+    } else {
+      alert(result.error || 'Failed to add to cart');
+    }
   };
 
   // Loading state
@@ -196,6 +215,23 @@ const CustomerApp = () => {
               >
                 <HomeIcon size={18} />
                 <span className="text-sm font-medium">Products</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentView('cart')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition relative ${
+                  currentView === 'cart'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-700 hover:bg-purple-100'
+                }`}
+              >
+                <ShoppingBagIcon size={18} />
+                <span className="text-sm font-medium">Cart</span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
               </button>
 
               <button
@@ -279,6 +315,28 @@ const CustomerApp = () => {
 
                 <button
                   onClick={() => {
+                    setCurrentView('cart');
+                    setShowMobileMenu(false);
+                  }}
+                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition relative ${
+                    currentView === 'cart'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-gray-700 hover:bg-purple-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ShoppingBagIcon size={20} />
+                    <span className="font-medium">Shopping Cart</span>
+                  </div>
+                  {cartItemCount > 0 && (
+                    <span className="bg-pink-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
                     setCurrentView('custom-request');
                     setShowMobileMenu(false);
                   }}
@@ -351,6 +409,16 @@ const CustomerApp = () => {
               onProductClick={handleProductClick}
             />
           </div>
+        )}
+
+        {currentView === 'cart' && (
+          <ShoppingCart
+            onCheckout={() => {
+              // TODO: Implement checkout flow
+              alert('Checkout flow coming soon!');
+            }}
+            onContinueShopping={() => setCurrentView('products')}
+          />
         )}
 
         {currentView === 'custom-request' && (
@@ -440,7 +508,7 @@ const CustomerApp = () => {
         <div className="flex items-center justify-around py-2">
           <button
             onClick={() => setCurrentView('products')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition ${
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition ${
               currentView === 'products' ? 'text-purple-600' : 'text-gray-600'
             }`}
           >
@@ -449,8 +517,25 @@ const CustomerApp = () => {
           </button>
 
           <button
+            onClick={() => setCurrentView('cart')}
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition relative ${
+              currentView === 'cart' ? 'text-purple-600' : 'text-gray-600'
+            }`}
+          >
+            <div className="relative">
+              <ShoppingBagIcon size={22} />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {cartItemCount > 9 ? '9+' : cartItemCount}
+                </span>
+              )}
+            </div>
+            <span className="text-xs font-medium">Cart</span>
+          </button>
+
+          <button
             onClick={() => setCurrentView('custom-request')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition ${
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition ${
               currentView === 'custom-request' ? 'text-purple-600' : 'text-gray-600'
             }`}
           >
@@ -460,7 +545,7 @@ const CustomerApp = () => {
 
           <button
             onClick={() => setCurrentView('orders')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition ${
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition ${
               currentView === 'orders' ? 'text-purple-600' : 'text-gray-600'
             }`}
           >
@@ -470,7 +555,7 @@ const CustomerApp = () => {
 
           <button
             onClick={() => setCurrentView('profile')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition ${
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition ${
               currentView === 'profile' ? 'text-purple-600' : 'text-gray-600'
             }`}
           >

@@ -95,8 +95,8 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
   const handleEditCategory = (category) => {
     setEditingCategory(category);
     setFormData({
-      category_name: category.category_name,
-      category_icon: category.category_icon || '',
+      category_name: category.name,
+      category_icon: category.icon_url || '',
       display_order: category.display_order
     });
     setFormError('');
@@ -143,7 +143,7 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
 
     // Check for duplicate names (excluding current category when editing)
     const duplicate = categories.find(
-      c => c.category_name.toLowerCase() === formData.category_name.toLowerCase().trim() &&
+      c => c.name.toLowerCase() === formData.category_name.toLowerCase().trim() &&
            c.category_id !== editingCategory?.category_id
     );
 
@@ -170,8 +170,8 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
       setFormError('');
 
       const categoryData = {
-        category_name: formData.category_name.trim(),
-        category_icon: formData.category_icon || null,
+        name: formData.category_name.trim(),
+        icon_url: formData.category_icon || null,
         display_order: formData.display_order
       };
 
@@ -498,10 +498,10 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
                 >
                   {/* Category Icon */}
                   <div className="w-12 h-12 flex-shrink-0">
-                    {category.category_icon ? (
+                    {category.icon_url ? (
                       <img
-                        src={category.category_icon}
-                        alt={category.category_name}
+                        src={category.icon_url}
+                        alt={category.name}
                         className="w-full h-full object-cover rounded"
                       />
                     ) : (
@@ -513,7 +513,7 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
 
                   {/* Category Info */}
                   <div className="flex-1">
-                    <div className="font-medium text-gray-800">{category.category_name}</div>
+                    <div className="font-medium text-gray-800">{category.name}</div>
                     <div className="text-xs text-gray-500">Order: {category.display_order}</div>
                   </div>
 
@@ -551,7 +551,7 @@ const CategoryManagement = ({ onClose, onUpdate }) => {
 
                     {/* Delete */}
                     <button
-                      onClick={() => handleDeleteCategory(category.category_id, category.category_name)}
+                      onClick={() => handleDeleteCategory(category.category_id, category.name)}
                       disabled={deletingCategoryId === category.category_id || saving || showForm}
                       className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Delete"
