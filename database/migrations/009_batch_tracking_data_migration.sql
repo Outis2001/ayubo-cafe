@@ -25,7 +25,7 @@ WHERE stock_quantity > 0;
 
 -- Add metadata to backup
 COMMENT ON TABLE products_stock_backup_migration_009 IS 
-'Backup of stock_quantity before migration 009 - Created: ' || CURRENT_TIMESTAMP::TEXT;
+'Backup of stock_quantity before migration 009';
 
 -- ============================================================================
 -- SECTION 2: CONVERT EXISTING STOCK TO BATCHES
