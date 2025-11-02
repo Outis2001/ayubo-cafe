@@ -129,10 +129,10 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.9 For each transaction, show: Timestamp, Username who processed, List of batches returned
   - [x] 4.10 For each batch in transaction, display: Product name, Quantity, Age at return, Date added, Original price, Sale price, Return %, Return value/unit, Total value
   - [x] 4.11 Show batch age with same color-coding as Returns page
-  - [ ] 4.12 Implement edit/reprocess functionality for past returns
-  - [ ] 4.13 Add confirmation when editing past returns
-  - [ ] 4.14 Update inventory when editing (recreate batches if needed)
-  - [ ] 4.15 Preserve deleted product names in historical logs
+  - [x] 4.12 Implement edit/reprocess functionality for past returns
+  - [x] 4.13 Add confirmation when editing past returns
+  - [x] 4.14 Update inventory when editing (recreate batches if needed)
+  - [x] 4.15 Preserve deleted product names in historical logs
   - [ ] 4.16 Implement analytics section with charts/graphs
   - [ ] 4.17 Create "Total return value trend over time" chart (line or bar chart)
   - [ ] 4.18 Create "Most frequently returned products" chart

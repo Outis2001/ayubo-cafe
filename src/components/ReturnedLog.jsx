@@ -13,6 +13,7 @@ import { supabaseClient } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import { X, Loader } from './icons';
 import BatchAgeIndicator from './BatchAgeIndicator';
+import { undoReturn } from '../utils/returns';
 
 const ReturnedLog = ({ isOpen, onClose }) => {
   const { currentUser } = useAuth();
@@ -22,6 +23,8 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedReturn, setSelectedReturn] = useState(null);
   const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [showUndoConfirm, setShowUndoConfirm] = useState(false);
+  const [undoing, setUndoing] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -141,6 +144,32 @@ const ReturnedLog = ({ isOpen, onClose }) => {
     };
   };
 
+  const handleUndoReturn = async () => {
+    if (!selectedReturn || !selectedReturn.return) return;
+
+    setUndoing(true);
+    try {
+      const result = await undoReturn(supabaseClient, selectedReturn.return.id);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      alert(`✅ Return undone successfully! ${result.batchesRecreated} batches restored to inventory.`);
+      
+      // Refresh the list
+      await loadReturns();
+      setShowUndoConfirm(false);
+      setSelectedReturn(null);
+      setSelectedDate(null);
+    } catch (error) {
+      console.error('Error undoing return:', error);
+      alert(`❌ Error undoing return: ${error.message}`);
+    } finally {
+      setUndoing(false);
+    }
+  };
+
   const analytics = calculateAnalytics();
   const groupedByDate = getReturnsGroupedByDate();
 
@@ -232,9 +261,18 @@ const ReturnedLog = ({ isOpen, onClose }) => {
             {selectedReturn && selectedReturn.return ? (
               <div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {new Date(selectedReturn.return.processed_at).toLocaleString()}
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {new Date(selectedReturn.return.processed_at).toLocaleString()}
+                    </h3>
+                    <button
+                      onClick={() => setShowUndoConfirm(true)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors text-sm flex items-center gap-2"
+                    >
+                      <span>🗑️</span>
+                      <span>Undo Return</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <div className="text-sm text-gray-600">Processed By</div>
@@ -302,6 +340,53 @@ const ReturnedLog = ({ isOpen, onClose }) => {
             Close
           </button>
         </div>
+
+        {/* Undo Confirmation Dialog */}
+        {showUndoConfirm && selectedReturn && selectedReturn.return && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">⚠️ Undo Return?</h3>
+                
+                <div className="mb-6 space-y-3">
+                  <p className="text-gray-700">
+                    You are about to undo this return and restore batches to inventory:
+                  </p>
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <div className="text-sm font-semibold text-red-900 mb-2">Return Details:</div>
+                    <div className="space-y-1 text-sm text-gray-700">
+                      <div><span className="font-medium">Date:</span> {new Date(selectedReturn.return.processed_at).toLocaleString()}</div>
+                      <div><span className="font-medium">Value:</span> Rs. {parseFloat(selectedReturn.return.total_value).toFixed(2)}</div>
+                      <div><span className="font-medium">Batches:</span> {selectedReturn.return.total_batches}</div>
+                      <div><span className="font-medium">Quantity:</span> {selectedReturn.return.total_quantity}</div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-red-700 font-medium">
+                    ⚠️ This will recreate batches and restore inventory. This action cannot be easily undone.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowUndoConfirm(false)}
+                    disabled={undoing}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUndoReturn}
+                    disabled={undoing}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {undoing && <Loader className="w-4 h-4 animate-spin" />}
+                    {undoing ? 'Undoing...' : 'Confirm Undo'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

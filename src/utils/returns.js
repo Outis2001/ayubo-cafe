@@ -3,7 +3,7 @@
  * Handles return processing, batch management, and notifications
  */
 
-import { incrementBatchAge } from './batchTracking';
+import { incrementBatchAge, createBatch } from './batchTracking';
 
 /**
  * Process a return to the bakery
@@ -284,6 +284,79 @@ const buildReturnEmailHTML = (returnRecord, returnItems, processor) => {
     </body>
     </html>
   `;
+};
+
+/**
+ * Undo/Delete a return transaction
+ * Recreates batches from return_items to restore inventory
+ * @param {Object} supabaseClient - Supabase client instance
+ * @param {number} returnId - Return ID to undo
+ * @returns {Promise<Object>} Result with success status
+ */
+export const undoReturn = async (supabaseClient, returnId) => {
+  try {
+    // Fetch return items to restore
+    const { data: returnItems, error: itemsError } = await supabaseClient
+      .from('return_items')
+      .select('*')
+      .eq('return_id', returnId);
+
+    if (itemsError) throw itemsError;
+
+    if (!returnItems || returnItems.length === 0) {
+      throw new Error('No items found for this return');
+    }
+
+    // Recreate batches for each item
+    // Note: batch_id might be null if original batch was deleted
+    // In that case, create new batches with preserved data
+    const batchPromises = returnItems.map(async (item) => {
+      // Recreate batch with original data
+      const result = await createBatch(
+        supabaseClient,
+        item.product_id,
+        item.quantity,
+        item.date_batch_added // Preserve original date for age tracking
+      );
+      return result;
+    });
+
+    const batchResults = await Promise.all(batchPromises);
+    const failedBatches = batchResults.filter(r => !r.success);
+    
+    if (failedBatches.length > 0) {
+      console.error('Some batches failed to recreate:', failedBatches);
+      throw new Error(`${failedBatches.length} batches failed to recreate`);
+    }
+
+    // Delete return_items (they cascade, but explicit is better)
+    const { error: deleteItemsError } = await supabaseClient
+      .from('return_items')
+      .delete()
+      .eq('return_id', returnId);
+
+    if (deleteItemsError) throw deleteItemsError;
+
+    // Delete return record
+    const { error: deleteReturnError } = await supabaseClient
+      .from('returns')
+      .delete()
+      .eq('id', returnId);
+
+    if (deleteReturnError) throw deleteReturnError;
+
+    return {
+      success: true,
+      batchesRecreated: batchResults.length,
+      error: null
+    };
+  } catch (error) {
+    console.error('Error undoing return:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 };
 
 /**
