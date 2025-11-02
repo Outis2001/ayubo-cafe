@@ -37,7 +37,10 @@ const ProductsPage = () => {
     price: '', 
     isWeightBased: false, 
     stockQuantity: 0, 
-    lowStockThreshold: 5 
+    lowStockThreshold: 5,
+    originalPrice: '',
+    salePrice: '',
+    defaultReturnPercentage: 20
   });
 
   // Sort configuration hook
@@ -67,7 +70,7 @@ const ProductsPage = () => {
       setLoading(true);
       const { data, error } = await supabaseClient
         .from('products')
-        .select('product_id, name, price, is_weight_based, stock_quantity, low_stock_threshold, updated_time')
+        .select('product_id, name, price, is_weight_based, stock_quantity, low_stock_threshold, updated_time, original_price, sale_price, default_return_percentage')
         .order('product_id', { ascending: true });
 
       if (error) throw error;
@@ -99,6 +102,16 @@ const ProductsPage = () => {
       return;
     }
 
+    // Validate that sale_price >= original_price if both provided
+    if (newProduct.originalPrice && newProduct.salePrice) {
+      const original = parseFloat(newProduct.originalPrice);
+      const sale = parseFloat(newProduct.salePrice);
+      if (original > sale) {
+        alert('Original price must be less than or equal to sale price');
+        return;
+      }
+    }
+
     try {
       const product = {
         product_id: Date.now(),
@@ -106,7 +119,10 @@ const ProductsPage = () => {
         price: parseFloat(newProduct.price),
         is_weight_based: newProduct.isWeightBased,
         stock_quantity: parseFloat(newProduct.stockQuantity) || 0,
-        low_stock_threshold: parseFloat(newProduct.lowStockThreshold) || 5
+        low_stock_threshold: parseFloat(newProduct.lowStockThreshold) || 5,
+        original_price: newProduct.originalPrice ? parseFloat(newProduct.originalPrice) : parseFloat(newProduct.price) * 0.85,
+        sale_price: newProduct.salePrice ? parseFloat(newProduct.salePrice) : parseFloat(newProduct.price),
+        default_return_percentage: parseInt(newProduct.defaultReturnPercentage) || 20
       };
 
       const { error } = await supabaseClient
@@ -116,7 +132,7 @@ const ProductsPage = () => {
       if (error) throw error;
 
       await loadProducts();
-      setNewProduct({ name: '', price: '', isWeightBased: false, stockQuantity: 0, lowStockThreshold: 5 });
+      setNewProduct({ name: '', price: '', isWeightBased: false, stockQuantity: 0, lowStockThreshold: 5, originalPrice: '', salePrice: '', defaultReturnPercentage: 20 });
       alert('Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
@@ -149,6 +165,16 @@ const ProductsPage = () => {
 
   const saveEdit = async () => {
     try {
+      // Validate that sale_price >= original_price if both provided
+      if (editingProduct.original_price && editingProduct.sale_price) {
+        const original = parseFloat(editingProduct.original_price);
+        const sale = parseFloat(editingProduct.sale_price);
+        if (original > sale) {
+          alert('Original price must be less than or equal to sale price');
+          return;
+        }
+      }
+
       const updateData = {
         name: editingProduct.name,
         price: editingProduct.price,
@@ -158,6 +184,17 @@ const ProductsPage = () => {
       if (currentUser.role === 'owner') {
         updateData.stock_quantity = parseFloat(editingProduct.stock_quantity) || 0;
         updateData.low_stock_threshold = parseFloat(editingProduct.low_stock_threshold) || 5;
+        
+        // Add returns management fields
+        if (editingProduct.original_price !== undefined) {
+          updateData.original_price = parseFloat(editingProduct.original_price);
+        }
+        if (editingProduct.sale_price !== undefined) {
+          updateData.sale_price = parseFloat(editingProduct.sale_price);
+        }
+        if (editingProduct.default_return_percentage !== undefined) {
+          updateData.default_return_percentage = parseInt(editingProduct.default_return_percentage);
+        }
       }
 
       const { error } = await supabaseClient
@@ -277,6 +314,41 @@ const ProductsPage = () => {
                 Add Product
               </button>
             </div>
+            
+            {/* Returns Management Fields */}
+            <div className="border-t border-gray-300 pt-3 mt-3">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Returns Management (Optional)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Original Price (Rs.)"
+                  value={newProduct.originalPrice}
+                  onChange={(e) => setNewProduct({ ...newProduct, originalPrice: e.target.value })}
+                  className="px-3 py-2 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 text-sm"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Sale Price (Rs.)"
+                  value={newProduct.salePrice}
+                  onChange={(e) => setNewProduct({ ...newProduct, salePrice: e.target.value })}
+                  className="px-3 py-2 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 text-sm"
+                />
+                <select
+                  value={newProduct.defaultReturnPercentage}
+                  onChange={(e) => setNewProduct({ ...newProduct, defaultReturnPercentage: e.target.value })}
+                  className="px-3 py-2 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 text-sm"
+                >
+                  <option value="20">Default Return: 20%</option>
+                  <option value="100">Default Return: 100%</option>
+                </select>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty to auto-calculate from price (Original: 85%, Sale: 100%)
+              </p>
+            </div>
+
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -307,59 +379,101 @@ const ProductsPage = () => {
               sortedProducts.map(product => (
                 <div key={product.product_id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-3 bg-gray-50 rounded-lg border border-blue-200 hover:border-blue-400 transition text-sm">
                   {editingProduct?.product_id === product.product_id ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editingProduct.name}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                        className="flex-1 w-full px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
-                      />
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={editingProduct.price}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
-                        className="w-full sm:w-24 px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
-                      />
+                    <div className="w-full space-y-2">
+                      {/* Basic Fields Row */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <input
+                          type="text"
+                          value={editingProduct.name}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                          className="w-full px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
+                          placeholder="Product Name"
+                        />
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editingProduct.price}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
+                          className="w-full px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
+                          placeholder="Price"
+                        />
+                        <label className="flex items-center gap-1 text-xs px-2">
+                          <input
+                            type="checkbox"
+                            checked={editingProduct.is_weight_based}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, is_weight_based: e.target.checked })}
+                            className="w-3 h-3"
+                          />
+                          <span>Weight-based</span>
+                        </label>
+                      </div>
+
+                      {/* Stock Fields Row */}
                       {currentUser.role === 'owner' && (
                         <>
-                          <input
-                            type="number"
-                            min="0"
-                            step={editingProduct.is_weight_based ? "0.1" : "1"}
-                            value={editingProduct.stock_quantity}
-                            onChange={(e) => setEditingProduct({ ...editingProduct, stock_quantity: parseFloat(e.target.value) })}
-                            className="w-full sm:w-20 px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
-                            placeholder="Stock"
-                          />
-                          <input
-                            type="number"
-                            min="0"
-                            value={editingProduct.low_stock_threshold}
-                            onChange={(e) => setEditingProduct({ ...editingProduct, low_stock_threshold: parseFloat(e.target.value) })}
-                            className="w-full sm:w-20 px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
-                            placeholder="Threshold"
-                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              step={editingProduct.is_weight_based ? "0.1" : "1"}
+                              value={editingProduct.stock_quantity}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, stock_quantity: parseFloat(e.target.value) })}
+                              className="w-full px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
+                              placeholder="Stock Quantity"
+                            />
+                            <input
+                              type="number"
+                              min="0"
+                              value={editingProduct.low_stock_threshold}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, low_stock_threshold: parseFloat(e.target.value) })}
+                              className="w-full px-2 py-1 border-2 border-blue-300 rounded focus:outline-none focus:border-blue-500"
+                              placeholder="Low Stock Alert"
+                            />
+                          </div>
+
+                          {/* Returns Fields Row */}
+                          <div className="border-t border-gray-300 pt-2 mt-2">
+                            <label className="text-xs font-semibold text-purple-700 mb-1 block">Returns Management:</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={editingProduct.original_price || ''}
+                                onChange={(e) => setEditingProduct({ ...editingProduct, original_price: e.target.value })}
+                                className="w-full px-2 py-1 border-2 border-purple-300 rounded focus:outline-none focus:border-purple-500 text-xs"
+                                placeholder="Original Price"
+                              />
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={editingProduct.sale_price || ''}
+                                onChange={(e) => setEditingProduct({ ...editingProduct, sale_price: e.target.value })}
+                                className="w-full px-2 py-1 border-2 border-purple-300 rounded focus:outline-none focus:border-purple-500 text-xs"
+                                placeholder="Sale Price"
+                              />
+                              <select
+                                value={editingProduct.default_return_percentage || 20}
+                                onChange={(e) => setEditingProduct({ ...editingProduct, default_return_percentage: e.target.value })}
+                                className="w-full px-2 py-1 border-2 border-purple-300 rounded focus:outline-none focus:border-purple-500 text-xs"
+                              >
+                                <option value="20">Return: 20%</option>
+                                <option value="100">Return: 100%</option>
+                              </select>
+                            </div>
+                          </div>
                         </>
                       )}
-                      <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="checkbox"
-                          checked={editingProduct.is_weight_based}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, is_weight_based: e.target.checked })}
-                          className="w-3 h-3"
-                        />
-                        <span>Weight</span>
-                      </label>
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <button onClick={saveEdit} className="flex-1 sm:flex-none bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 font-bold">
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 pt-2">
+                        <button onClick={saveEdit} className="flex-1 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 font-bold text-sm">
                           Save
                         </button>
-                        <button onClick={() => setEditingProduct(null)} className="flex-1 sm:flex-none bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 font-bold">
+                        <button onClick={() => setEditingProduct(null)} className="flex-1 bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 font-bold text-sm">
                           Cancel
                         </button>
                       </div>
-                    </>
+                    </div>
                   ) : (
                     <>
                       <span className="flex-1 flex flex-col gap-1">
