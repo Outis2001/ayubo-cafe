@@ -58,7 +58,7 @@ The core Returns Management System has been successfully implemented for the Ayu
 - ✅ Email notifications to owner
 - ✅ Automatic inventory updates
 
-### 4. Returned Log Window (Tasks 4.1-4.11)
+### 4. Returned Log Window (Tasks 4.1-4.15)
 **Files Created:**
 - `src/components/ReturnedLog.jsx` - Historical returns viewer
 - `src/hooks/useReturns.js` - Returns history hook
@@ -70,6 +70,10 @@ The core Returns Management System has been successfully implemented for the Ayu
 - ✅ Analytics dashboard
 - ✅ Color-coded age badges in history
 - ✅ Modal interface
+- ✅ Undo return functionality
+- ✅ Confirmation dialogs for undo actions
+- ✅ Batch recreation from historical data
+- ✅ Product name snapshots in history
 
 ## 🎨 Key UI Features
 
