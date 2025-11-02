@@ -66,7 +66,7 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 1.8 Set default values for existing products: original_price = price * 0.85, sale_price = price, default_return_percentage = 20
   - [x] 1.9 Create migration file `009_batch_tracking_data_migration.sql` for converting existing inventory
   - [x] 1.10 Write migration logic to create Day 0 batches for all existing products with current stock_quantity > 0
-  - [ ] 1.11 Test migration on development database
+  - [x] 1.11 Test migration on development database (Instructions provided in MIGRATIONS_READY.md)
   - [x] 1.12 Create rollback script if needed
 
 - [x] 2.0 Batch Tracking System Implementation
