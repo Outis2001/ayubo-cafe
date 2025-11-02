@@ -175,12 +175,12 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 6.7 Call email function after successful return processing
   - [x] 6.8 Update `returns` table: set `notification_sent = true` after email sent
   - [x] 6.9 Handle email failures gracefully (log error but don't block return processing)
-  - [ ] 6.10 Add retry logic for failed email notifications (ENHANCEMENT)
-  - [ ] 6.11 Create email queue or log for tracking notification status (ENHANCEMENT)
-  - [ ] 6.12 Test email delivery in development and production
+  - [x] 6.10 Add retry logic for failed email notifications (ENHANCEMENT)
+  - [x] 6.11 Create email queue or log for tracking notification status (ENHANCEMENT)
+  - [x] 6.12 Test email delivery in development and production
   - [x] 6.13 Ensure email contains batch-level details for transparency
   - [x] 6.14 Format currency values properly in email (Rs. X.XX)
-  - [ ] 6.15 Add success metric tracking: email sent within 5 minutes of return (ENHANCEMENT)
+  - [x] 6.15 Add success metric tracking: email sent within 5 minutes of return (ENHANCEMENT)
 
 - [ ] 7.0 Testing & Quality Assurance
   - [ ] 7.1 Create `tests/unit/batchTracking.test.js`
