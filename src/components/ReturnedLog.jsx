@@ -27,6 +27,8 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   const [undoing, setUndoing] = useState(false);
   const [returnItems, setReturnItems] = useState([]);
   const [activeTab, setActiveTab] = useState('history'); // 'history', 'trends', 'products'
+  const [productFilter, setProductFilter] = useState('');
+  const [valueRangeFilter, setValueRangeFilter] = useState({ min: '', max: '' });
 
   useEffect(() => {
     if (isOpen) {
@@ -145,6 +147,34 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   };
 
   const calculateAnalytics = () => {
+    // Apply filters to items
+    let filteredItems = returnItems;
+
+    // Filter by product name
+    if (productFilter.trim()) {
+      filteredItems = filteredItems.filter(item => 
+        item.product_name?.toLowerCase().includes(productFilter.toLowerCase())
+      );
+    }
+
+    // Filter by value range
+    if (valueRangeFilter.min !== '') {
+      const minValue = parseFloat(valueRangeFilter.min);
+      if (!isNaN(minValue)) {
+        filteredItems = filteredItems.filter(item => 
+          parseFloat(item.total_return_value) >= minValue
+        );
+      }
+    }
+    if (valueRangeFilter.max !== '') {
+      const maxValue = parseFloat(valueRangeFilter.max);
+      if (!isNaN(maxValue)) {
+        filteredItems = filteredItems.filter(item => 
+          parseFloat(item.total_return_value) <= maxValue
+        );
+      }
+    }
+
     if (returns.length === 0) {
       return {
         totalValue: 0,
@@ -152,7 +182,8 @@ const ReturnedLog = ({ isOpen, onClose }) => {
         totalReturns: 0,
         trends: [],
         products: [],
-        averageAge: 0
+        averageAge: 0,
+        filteredItems: []
       };
     }
 
@@ -177,9 +208,9 @@ const ReturnedLog = ({ isOpen, onClose }) => {
       }))
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Calculate most frequently returned products
+    // Calculate most frequently returned products (use filtered items)
     const productStats = {};
-    returnItems.forEach(item => {
+    filteredItems.forEach(item => {
       const productName = item.product_name || 'Unknown';
       if (!productStats[productName]) {
         productStats[productName] = {
@@ -198,10 +229,10 @@ const ReturnedLog = ({ isOpen, onClose }) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Calculate average age at return
+    // Calculate average age at return (use filtered items)
     let totalAge = 0;
     let ageCount = 0;
-    returnItems.forEach(item => {
+    filteredItems.forEach(item => {
       if (item.age_at_return !== null && item.age_at_return !== undefined) {
         totalAge += parseInt(item.age_at_return);
         ageCount += 1;
@@ -312,8 +343,45 @@ const ReturnedLog = ({ isOpen, onClose }) => {
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium text-sm transition-colors"
               disabled={!dateRange.start && !dateRange.end}
             >
-              Clear Filter
+              Clear Date Filter
             </button>
+          </div>
+
+          {/* Product Name & Value Range Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-blue-200">
+            <input
+              type="text"
+              value={productFilter}
+              onChange={(e) => setProductFilter(e.target.value)}
+              placeholder="Filter by product name..."
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+            />
+            <input
+              type="number"
+              value={valueRangeFilter.min}
+              onChange={(e) => setValueRangeFilter({ ...valueRangeFilter, min: e.target.value })}
+              placeholder="Min value (Rs.)"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+            />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={valueRangeFilter.max}
+                onChange={(e) => setValueRangeFilter({ ...valueRangeFilter, max: e.target.value })}
+                placeholder="Max value (Rs.)"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+              />
+              <button
+                onClick={() => {
+                  setProductFilter('');
+                  setValueRangeFilter({ min: '', max: '' });
+                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium text-sm transition-colors"
+                disabled={!productFilter && !valueRangeFilter.min && !valueRangeFilter.max}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 

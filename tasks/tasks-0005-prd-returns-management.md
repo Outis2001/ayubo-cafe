@@ -140,11 +140,11 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.20 Add date range picker for filtering analytics
   - [ ] 4.21 Implement CSV export functionality for accounting
   - [ ] 4.22 Implement PDF export functionality for accounting
-  - [ ] 4.23 Add filter by product name
-  - [ ] 4.24 Add filter by return value range
+  - [x] 4.23 Add filter by product name
+  - [x] 4.24 Add filter by return value range
   - [ ] 4.25 Implement one-month archiving: show archived returns differently or hide them
   - [ ] 4.26 Add pagination if return history is large
-  - [ ] 4.27 Optimize queries with proper indexing
+  - [x] 4.27 Optimize queries with proper indexing
 
 - [ ] 5.0 Product Catalog Enhancements
   - [ ] 5.1 Modify `src/components/staff/ProductForm.jsx` to add new fields
