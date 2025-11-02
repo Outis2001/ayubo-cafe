@@ -29,12 +29,20 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('history'); // 'history', 'trends', 'products'
   const [productFilter, setProductFilter] = useState('');
   const [valueRangeFilter, setValueRangeFilter] = useState({ min: '', max: '' });
+  const [showArchived, setShowArchived] = useState(false); // Show returns older than 1 month
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     if (isOpen) {
       loadReturns();
     }
   }, [isOpen, dateRange]);
+
+  // Reset to page 1 when filters or archived toggle changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showArchived, productFilter, valueRangeFilter]);
 
   const loadReturns = async () => {
     try {
@@ -89,7 +97,19 @@ const ReturnedLog = ({ isOpen, onClose }) => {
   const getReturnsGroupedByDate = () => {
     const grouped = {};
     
+    // Calculate the date 30 days ago for archiving
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
     returns.forEach(ret => {
+      // Filter archived returns based on showArchived flag
+      const returnDate = new Date(ret.return_date);
+      const isArchived = returnDate < thirtyDaysAgo;
+      
+      if (!showArchived && isArchived) {
+        return; // Skip archived returns if not showing archived
+      }
+      
       const dateStr = ret.return_date;
       if (!grouped[dateStr]) {
         grouped[dateStr] = {
@@ -97,7 +117,8 @@ const ReturnedLog = ({ isOpen, onClose }) => {
           transactions: [],
           totalValue: 0,
           totalQuantity: 0,
-          totalBatches: 0
+          totalBatches: 0,
+          isArchived
         };
       }
       grouped[dateStr].transactions.push(ret);
@@ -341,8 +362,200 @@ const ReturnedLog = ({ isOpen, onClose }) => {
     alert('✅ CSV export started successfully!');
   };
 
+  const handleExportPDF = () => {
+    // Create a printable HTML window (print to PDF)
+    const printWindow = window.open('', '_blank');
+    
+    const dateStr = dateRange.start || dateRange.end 
+      ? `${dateRange.start || 'all'} to ${dateRange.end || 'all'}`
+      : 'All Returns';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Returns Report - ${dateStr}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 3px solid #2563eb;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              color: #2563eb;
+              margin: 0;
+              font-size: 28px;
+            }
+            .header p {
+              color: #666;
+              margin: 5px 0;
+            }
+            .summary {
+              display: flex;
+              justify-content: space-around;
+              margin-bottom: 30px;
+              padding: 20px;
+              background-color: #eff6ff;
+              border-radius: 8px;
+            }
+            .summary-item {
+              text-align: center;
+            }
+            .summary-item-label {
+              font-size: 12px;
+              color: #666;
+              margin-bottom: 5px;
+            }
+            .summary-item-value {
+              font-size: 24px;
+              font-weight: bold;
+              color: #2563eb;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 30px;
+            }
+            th {
+              background-color: #2563eb;
+              color: white;
+              padding: 12px;
+              text-align: left;
+              font-weight: bold;
+            }
+            td {
+              border: 1px solid #ddd;
+              padding: 10px;
+            }
+            tr:nth-child(even) {
+              background-color: #f9fafb;
+            }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .footer {
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 2px solid #ddd;
+              text-align: center;
+              color: #666;
+              font-size: 12px;
+            }
+            @media print {
+              body { margin: 0; }
+              .header { page-break-after: avoid; }
+              table { page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>📋 Returns Report</h1>
+            <p>Date Range: ${dateStr}</p>
+            <p>Generated: ${new Date().toLocaleString()}</p>
+          </div>
+
+          <div class="summary">
+            <div class="summary-item">
+              <div class="summary-item-label">Total Returns</div>
+              <div class="summary-item-value">${analytics.totalReturns}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Total Value</div>
+              <div class="summary-item-value">Rs. ${analytics.totalValue.toFixed(2)}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Avg per Return</div>
+              <div class="summary-item-value">Rs. ${analytics.averageValue.toFixed(2)}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">Avg Age</div>
+              <div class="summary-item-value">${analytics.averageAge} days</div>
+            </div>
+          </div>
+
+          <h2>Return Details</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Return Date</th>
+                <th>Return Time</th>
+                <th>Processed By</th>
+                <th>Product Name</th>
+                <th class="text-center">Quantity</th>
+                <th class="text-center">Age (Days)</th>
+                <th class="text-right">Original Price</th>
+                <th class="text-right">Sale Price</th>
+                <th class="text-center">Return %</th>
+                <th class="text-right">Total Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${returnItems.map(item => {
+                const returnRecord = returns.find(r => r.id === item.return_id);
+                const processedBy = returnRecord?.users 
+                  ? `${returnRecord.users.first_name} ${returnRecord.users.last_name}`
+                  : 'Unknown';
+                
+                return `
+                  <tr>
+                    <td>${new Date(returnRecord?.return_date || '').toLocaleDateString()}</td>
+                    <td>${returnRecord?.processed_at ? new Date(returnRecord.processed_at).toLocaleTimeString() : ''}</td>
+                    <td>${processedBy}</td>
+                    <td>${item.product_name || 'Unknown'}</td>
+                    <td class="text-center">${item.quantity}</td>
+                    <td class="text-center">${item.age_at_return}</td>
+                    <td class="text-right">Rs. ${parseFloat(item.original_price).toFixed(2)}</td>
+                    <td class="text-right">Rs. ${parseFloat(item.sale_price).toFixed(2)}</td>
+                    <td class="text-center">${item.return_percentage}%</td>
+                    <td class="text-right">Rs. ${parseFloat(item.total_return_value).toFixed(2)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Ayubo Cafe - Returns Management System</p>
+            <p>This is an automated report generated on ${new Date().toLocaleString()}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Wait for content to load, then trigger print
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
   const analytics = calculateAnalytics();
   const groupedByDate = getReturnsGroupedByDate();
+
+  // Pagination logic
+  const totalPages = Math.ceil(groupedByDate.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedDates = groupedByDate.slice(startIndex, endIndex);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    // Scroll to top of sidebar
+    const sidebar = document.querySelector('.overflow-y-auto');
+    if (sidebar) {
+      sidebar.scrollTop = 0;
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -447,6 +660,21 @@ const ReturnedLog = ({ isOpen, onClose }) => {
               </button>
             </div>
           </div>
+
+          {/* Show Archived Toggle */}
+          <div className="pt-3 border-t border-blue-200">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showArchived}
+                onChange={(e) => setShowArchived(e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">
+                📦 Show archived returns (older than 30 days)
+              </span>
+            </label>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -499,34 +727,63 @@ const ReturnedLog = ({ isOpen, onClose }) => {
             ) : groupedByDate.length === 0 ? (
               <p className="text-center py-8 text-gray-500">No returns found</p>
             ) : (
-              <div className="space-y-2">
-                {groupedByDate.map((dateData) => (
-                  <button
-                    key={dateData.date}
-                    onClick={() => handleDateSelect(dateData)}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
-                      selectedDate === dateData.date 
-                        ? 'bg-blue-100 border-blue-500' 
-                        : 'bg-white border-gray-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <div className="font-semibold text-gray-900">
-                      {new Date(dateData.date).toLocaleDateString()}
+              <>
+                <div className="space-y-2 mb-4">
+                  {paginatedDates.map((dateData) => (
+                    <button
+                      key={dateData.date}
+                      onClick={() => handleDateSelect(dateData)}
+                      className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
+                        selectedDate === dateData.date 
+                          ? 'bg-blue-100 border-blue-500' 
+                          : 'bg-white border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="font-semibold text-gray-900">
+                        {new Date(dateData.date).toLocaleDateString()}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {dateData.transactions.length} transaction{dateData.transactions.length !== 1 ? 's' : ''}
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-gray-500">
+                          {dateData.totalBatches} batches, {dateData.totalQuantity} units
+                        </span>
+                        <span className="font-bold text-green-700">
+                          Rs. {dateData.totalValue.toFixed(2)}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="text-gray-600">
+                        Page {currentPage} of {totalPages} ({groupedByDate.length} total)
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ‹ Prev
+                        </button>
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next ›
+                        </button>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {dateData.transactions.length} transaction{dateData.transactions.length !== 1 ? 's' : ''}
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-gray-500">
-                        {dateData.totalBatches} batches, {dateData.totalQuantity} units
-                      </span>
-                      <span className="font-bold text-green-700">
-                        Rs. {dateData.totalValue.toFixed(2)}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                )}
+              </>
             )}
             </div>
           )}
@@ -707,14 +964,24 @@ const ReturnedLog = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 flex items-center justify-between">
-          <button
-            onClick={handleExportCSV}
-            disabled={returnItems.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <span>📥</span>
-            <span>Export CSV</span>
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExportCSV}
+              disabled={returnItems.length === 0}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <span>📥</span>
+              <span>Export CSV</span>
+            </button>
+            <button
+              onClick={handleExportPDF}
+              disabled={returnItems.length === 0}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <span>📄</span>
+              <span>Print PDF</span>
+            </button>
+          </div>
           <button
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"

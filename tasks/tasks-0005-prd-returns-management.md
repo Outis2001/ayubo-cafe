@@ -117,7 +117,7 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 3.27 Implement loading states during data fetching and processing
   - [x] 3.28 Style visual distinction for batches marked "keep for tomorrow" (grayed out or special styling)
 
-- [ ] 4.0 Returned Log Window & Analytics
+- [x] 4.0 Returned Log Window & Analytics
   - [x] 4.1 Create `src/components/ReturnedLog.jsx` modal/window component
   - [x] 4.2 Implement modal open/close functionality from Returns page
   - [x] 4.3 Create `src/hooks/useReturns.js` hook for fetching return history
@@ -139,11 +139,11 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.19 Calculate and display "Average batch age at return" metric
   - [x] 4.20 Add date range picker for filtering analytics
   - [x] 4.21 Implement CSV export functionality for accounting
-  - [ ] 4.22 Implement PDF export functionality for accounting
+  - [x] 4.22 Implement PDF export functionality for accounting
   - [x] 4.23 Add filter by product name
   - [x] 4.24 Add filter by return value range
-  - [ ] 4.25 Implement one-month archiving: show archived returns differently or hide them
-  - [ ] 4.26 Add pagination if return history is large
+  - [x] 4.25 Implement one-month archiving: show archived returns differently or hide them
+  - [x] 4.26 Add pagination if return history is large
   - [x] 4.27 Optimize queries with proper indexing
 
 - [ ] 5.0 Product Catalog Enhancements
