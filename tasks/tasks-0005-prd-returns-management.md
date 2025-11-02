@@ -183,17 +183,17 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 6.15 Add success metric tracking: email sent within 5 minutes of return (ENHANCEMENT)
 
 - [ ] 7.0 Testing & Quality Assurance
-  - [ ] 7.1 Create `tests/unit/batchTracking.test.js`
-  - [ ] 7.2 Test `calculateBatchAge()` with various dates
-  - [ ] 7.3 Test `getBatchAgeCategory()` for all age ranges
-  - [ ] 7.4 Test `sortBatchesByAge()` with mixed-age batches
-  - [ ] 7.5 Test `deductFromOldestBatches()` FIFO logic
-  - [ ] 7.6 Test edge cases: deducting more than available, zero quantity batches
-  - [ ] 7.7 Create `tests/unit/returns.test.js`
-  - [ ] 7.8 Test return value calculations with different percentages
-  - [ ] 7.9 Test `processReturn()` function
-  - [ ] 7.10 Test batch age increment for kept items
-  - [ ] 7.11 Test return processing with multiple batches
+  - [x] 7.1 Create `tests/unit/batchTracking.test.js`
+  - [x] 7.2 Test `calculateBatchAge()` with various dates
+  - [x] 7.3 Test `getBatchAgeCategory()` for all age ranges
+  - [x] 7.4 Test `sortBatchesByAge()` with mixed-age batches
+  - [x] 7.5 Test `deductFromOldestBatches()` FIFO logic
+  - [x] 7.6 Test edge cases: deducting more than available, zero quantity batches
+  - [x] 7.7 Create `tests/unit/returns.test.js`
+  - [x] 7.8 Test return value calculations with different percentages
+  - [x] 7.9 Test `processReturn()` function
+  - [x] 7.10 Test batch age increment for kept items
+  - [x] 7.11 Test return processing with multiple batches
   - [ ] 7.12 Create `tests/integration/returns-flow.test.js`
   - [ ] 7.13 Test end-to-end return processing flow
   - [ ] 7.14 Test "Keep for tomorrow" functionality
