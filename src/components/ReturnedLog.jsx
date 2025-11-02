@@ -277,6 +277,70 @@ const ReturnedLog = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleExportCSV = () => {
+    // Create CSV content with all return items
+    const headers = [
+      'Return Date',
+      'Return Time',
+      'Processed By',
+      'Product Name',
+      'Quantity',
+      'Age (Days)',
+      'Original Price',
+      'Sale Price',
+      'Return %',
+      'Return Value per Unit',
+      'Total Return Value'
+    ];
+
+    // Map return items to CSV rows with return metadata
+    const rows = returnItems.map(item => {
+      const returnRecord = returns.find(r => r.id === item.return_id);
+      const processedBy = returnRecord?.users 
+        ? `${returnRecord.users.first_name} ${returnRecord.users.last_name}`
+        : 'Unknown';
+      
+      return [
+        new Date(returnRecord?.return_date || '').toLocaleDateString(),
+        returnRecord?.processed_at ? new Date(returnRecord.processed_at).toLocaleTimeString() : '',
+        processedBy,
+        item.product_name || 'Unknown',
+        item.quantity,
+        item.age_at_return,
+        parseFloat(item.original_price).toFixed(2),
+        parseFloat(item.sale_price).toFixed(2),
+        item.return_percentage,
+        parseFloat(item.return_value_per_unit).toFixed(2),
+        parseFloat(item.total_return_value).toFixed(2)
+      ];
+    });
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    // Generate filename with date range
+    const dateStr = dateRange.start || dateRange.end 
+      ? `${dateRange.start || 'all'}_to_${dateRange.end || 'all'}`
+      : 'all_returns';
+    link.setAttribute('download', `returns_export_${dateStr}_${new Date().toISOString().split('T')[0]}.csv`);
+    
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert('✅ CSV export started successfully!');
+  };
+
   const analytics = calculateAnalytics();
   const groupedByDate = getReturnsGroupedByDate();
 
@@ -643,6 +707,14 @@ const ReturnedLog = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 flex items-center justify-between">
+          <button
+            onClick={handleExportCSV}
+            disabled={returnItems.length === 0}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <span>📥</span>
+            <span>Export CSV</span>
+          </button>
           <button
             onClick={onClose}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"

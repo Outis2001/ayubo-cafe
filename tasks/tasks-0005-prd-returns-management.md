@@ -138,7 +138,7 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.18 Create "Most frequently returned products" chart
   - [x] 4.19 Calculate and display "Average batch age at return" metric
   - [x] 4.20 Add date range picker for filtering analytics
-  - [ ] 4.21 Implement CSV export functionality for accounting
+  - [x] 4.21 Implement CSV export functionality for accounting
   - [ ] 4.22 Implement PDF export functionality for accounting
   - [x] 4.23 Add filter by product name
   - [x] 4.24 Add filter by return value range
