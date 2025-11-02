@@ -55,7 +55,7 @@ Based on PRD: `0005-prd-returns-management.md`
 
 ## Tasks
 
-- [ ] 1.0 Database Schema & Migration Setup
+- [x] 1.0 Database Schema & Migration Setup
   - [x] 1.1 Create migration file `008_returns_management_schema.sql`
   - [x] 1.2 Add new columns to `products` table: `original_price`, `sale_price`, `default_return_percentage`
   - [x] 1.3 Create `inventory_batches` table with fields: id, product_id, quantity, date_added, created_at, updated_at
