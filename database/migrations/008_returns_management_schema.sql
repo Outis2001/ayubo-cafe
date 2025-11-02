@@ -98,7 +98,7 @@ CREATE TRIGGER update_inventory_batches_timestamp
 CREATE TABLE IF NOT EXISTS returns (
     id BIGSERIAL PRIMARY KEY,
     return_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    processed_by INTEGER NOT NULL,
+    processed_by UUID NOT NULL,
     processed_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     total_value DECIMAL(10, 2) NOT NULL CHECK (total_value >= 0),
     total_quantity DECIMAL(10, 2) NOT NULL CHECK (total_quantity >= 0),
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS returns (
     -- Foreign key to users table (who processed the return)
     CONSTRAINT fk_returns_processed_by
         FOREIGN KEY (processed_by) 
-        REFERENCES users(id)
+        REFERENCES users(user_id)
         ON DELETE RESTRICT
 );
 
