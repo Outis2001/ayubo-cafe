@@ -146,24 +146,24 @@ Based on PRD: `0005-prd-returns-management.md`
   - [x] 4.26 Add pagination if return history is large
   - [x] 4.27 Optimize queries with proper indexing
 
-- [ ] 5.0 Product Catalog Enhancements
-  - [ ] 5.1 Modify `src/components/staff/ProductForm.jsx` to add new fields
-  - [ ] 5.2 Add "Original Price" input field (cost from bakery)
-  - [ ] 5.3 Add "Sale Price" input field (retail price to customers)
-  - [ ] 5.4 Implement auto-calculation: Original Price = Sale Price * 0.85 (as default)
-  - [ ] 5.5 Allow manual override of original price
-  - [ ] 5.6 Add "Default Return Percentage" dropdown (20% or 100%)
-  - [ ] 5.7 Update product creation logic to save new fields
-  - [ ] 5.8 Update product edit logic to allow editing new fields
-  - [ ] 5.9 Modify `ProductsPage.jsx` to display new fields in product list
-  - [ ] 5.10 Update product table/cards to show original price and sale price
-  - [ ] 5.11 Show return percentage badge/indicator
-  - [ ] 5.12 Update `addProduct()` function to include new fields
-  - [ ] 5.13 Update `saveEdit()` function to save new fields
-  - [ ] 5.14 Add validation: sale_price must be greater than original_price
-  - [ ] 5.15 Add validation: return_percentage must be 20 or 100
-  - [ ] 5.16 Update existing products view to show both prices clearly
-  - [ ] 5.17 Ensure backward compatibility with products missing new fields
+- [x] 5.0 Product Catalog Enhancements
+  - [x] 5.1 Modify `src/components/staff/ProductForm.jsx` to add new fields
+  - [x] 5.2 Add "Original Price" input field (cost from bakery)
+  - [x] 5.3 Add "Sale Price" input field (retail price to customers)
+  - [x] 5.4 Implement auto-calculation: Original Price = Sale Price * 0.85 (as default)
+  - [x] 5.5 Allow manual override of original price
+  - [x] 5.6 Add "Default Return Percentage" dropdown (20% or 100%)
+  - [x] 5.7 Update product creation logic to save new fields
+  - [x] 5.8 Update product edit logic to allow editing new fields
+  - [x] 5.9 Modify `ProductsPage.jsx` to display new fields in product list
+  - [x] 5.10 Update product table/cards to show original price and sale price
+  - [x] 5.11 Show return percentage badge/indicator
+  - [x] 5.12 Update `addProduct()` function to include new fields
+  - [x] 5.13 Update `saveEdit()` function to save new fields
+  - [x] 5.14 Add validation: sale_price must be greater than original_price
+  - [x] 5.15 Add validation: return_percentage must be 20 or 100
+  - [x] 5.16 Update existing products view to show both prices clearly
+  - [x] 5.17 Ensure backward compatibility with products missing new fields
 
 - [ ] 6.0 Email Notifications & Integration
   - [ ] 6.1 Create or extend `src/utils/emailTemplates.js` with return notification template
